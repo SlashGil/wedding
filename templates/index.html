@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carito & Chava Wedding</title>
+    <style>
+        :root {
+            --brand: #008C8D;
+            --secondary: #f7f2ea;
+            --charcoal: #2d2d2d;
+            --white: #ffffff;
+            --gold: #c6a15b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            text-align: center;
+            background-color: var(--secondary);
+            color: var(--charcoal);
+            margin: 0;
+            padding: 0;
+            font-weight: 300;
+        }
+
+        .hero {
+            position: relative;
+            background-image: url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(16, 20, 18, 0.45);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            padding: 2rem;
+        }
+
+        .hero h1 {
+            font-size: 4em;
+            margin: 0;
+            font-weight: 300;
+            letter-spacing: 5px;
+        }
+
+        .hero p {
+            font-size: 1.2em;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-top: 10px;
+        }
+
+        .lang-switch {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 20px;
+            display: flex;
+            gap: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        .lang-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 12px;
+            transition: background 0.3s;
+        }
+
+        .lang-btn.active {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .lang-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .section {
+            padding: 5em 1.2em;
+        }
+
+        .section h2 {
+            font-size: 2.3em;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 1em;
+            text-transform: uppercase;
+        }
+
+        .section-light {
+            background: var(--secondary);
+            color: var(--charcoal);
+        }
+
+        .section-dark {
+            background: var(--brand);
+            color: var(--white);
+        }
+
+
+        .icon-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .venue-grid {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            text-align: left;
+        }
+
+        .venue-card {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .section-light .venue-card,
+        .section-accent .venue-card {
+            background: rgba(255,255,255,0.7);
+            border: 1px solid rgba(47,93,80,0.25);
+        }
+
+        .venue-card p {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        .map-link {
+            margin-top: 10px;
+            display: inline-block;
+            color: inherit;
+            font-weight: 500;
+        }
+
+        .dress-grid {
+            max-width: 880px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            text-align: left;
+        }
+
+        .dress-card {
+            background: #ffffff;
+            color: var(--charcoal);
+            border: 1px solid #e8dfd2;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .dress-card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .dress-card ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .dress-card li {
+            font-size: 1.02em;
+            line-height: 1.65;
+            margin: 6px 0;
+        }
+
+        .countdown-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin: 2em 0;
+        }
+
+        .countdown-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 95px;
+        }
+
+        .countdown-box .number {
+            font-size: 2.7em;
+            font-weight: 400;
+        }
+
+        .countdown-box .label {
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        .photos {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .photos img {
+            width: 300px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            opacity: 0.92;
+            transition: opacity 0.3s;
+        }
+
+        .photos img:hover {
+            opacity: 1;
+        }
+
+        .gift-table a {
+            display: inline-block;
+            margin: 10px;
+            padding: 12px 24px;
+            background-color: var(--secondary);
+            color: var(--brand);
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: opacity 0.3s;
+        }
+
+        .gift-table a:hover {
+            opacity: 0.88;
+        }
+
+        .rsvp-form {
+            background-color: var(--white);
+            color: #333;
+            padding: 35px;
+            border-radius: 12px;
+            max-width: 480px;
+            margin: 0 auto;
+            text-align: left;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .rsvp-form label {
+            display: block;
+            margin-top: 15px;
+            font-weight: 500;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #555;
+        }
+
+        .rsvp-form input,
+        .rsvp-form select,
+        .rsvp-form textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            background-color: #fdfdfd;
+        }
+
+        .rsvp-form button {
+            margin-top: 25px;
+            padding: 14px;
+            width: 100%;
+            background-color: var(--brand);
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 1.02em;
+            letter-spacing: 1px;
+            transition: opacity 0.3s;
+        }
+
+        .rsvp-form button:hover {
+            opacity: 0.9;
+        }
+
+        .rsvp-helper {
+            margin-top: 8px;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .flash-message {
+            background-color: #fff8e9;
+            color: #6b4f1d;
+            padding: 15px;
+            margin: 20px auto;
+            max-width: 500px;
+            border-radius: 6px;
+            border: 1px solid #f1dfb6;
+        }
+
+        .rsvp-response {
+            max-width: 650px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.96);
+            color: var(--charcoal);
+            padding: 28px;
+            border-radius: 12px;
+            text-align: left;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.16);
+        }
+
+        .music-player {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 10px 15px;
+            border-radius: 30px;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+
+        .music-player:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .music-player.playing {
+            background: rgba(0, 140, 141, 0.2);
+            border: 1px solid rgba(0, 140, 141, 0.5);
+        }
+
+        audio {
+            display: none; /* Hide default controls, we will use a custom button */
+        }
+
+        #music-toggle {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--charcoal);
+            font-family: inherit;
+        }
+
+        .hotels-grid {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 2.8em;
+            }
+
+            .rsvp-form {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="music-player" id="music-container" onclick="toggleMusic()">
+    <button id="music-toggle">
+        <span id="music-icon">🔇</span>
+        <span id="music-text" style="font-size: 0.9rem; font-weight: 500;" data-i18n="music_play">Play Music</span>
+    </button>
+    <audio id="bg-music" loop preload="auto">
+        <!-- Direct MP3 link hosted on archive.org, utilizing a well-known public upload to avoid CORS/hotlinking issues -->
+        <source src="https://archive.org/download/elvis-presley-cant-help-falling-in-love/Elvis%20Presley%20-%20Can%27t%20Help%20Falling%20In%20Love.mp3" type="audio/mpeg">
+    </audio>
+</div>
+
+<header class="hero">
+    <div class="lang-switch">
+        <button class="lang-btn active" onclick="setLang('en', this)">EN</button>
+        <button class="lang-btn" onclick="setLang('es', this)">ES</button>
+        <button class="lang-btn" onclick="setLang('fr', this)">FR</button>
+    </div>
+
+    <div class="hero-content">
+        <h1>Carito & Chava</h1>
+        <p data-i18n="subtitle">Are getting married!</p>
+        {% if guest and guest.guest_name %}
+            <h2 style="margin-top: 1em; font-weight: 300;"><span data-i18n="welcome">Welcome</span>, {{ guest.guest_name }}!</h2>
+            <p style="font-size: 1em; margin-top: 0;"><span data-i18n="reserved">We've reserved</span> {{ guest.max_guests }} <span data-i18n="seats">seat(s) in your honor.</span></p>
+        {% endif %}
+    </div>
+</header>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="flash-message">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="section section-dark">
+    <h2 data-i18n="when_where">When & Where</h2>
+    <div class="venue-grid">
+        <div class="venue-card">
+            <div class="icon-title"><span>💒</span><strong data-i18n="ceremony">Church Ceremony</strong></div>
+            <p>Parroquia El Carmen</p>
+            <p>Tehuacán, Puebla</p>
+            <p>July 11, 2026 at 2:00 PM</p>
+            <a class="map-link" href="https://maps.google.com/?q=Parroquia+El+Carmen+Tehuacan+Puebla" target="_blank" rel="noopener noreferrer"><span data-i18n="map">Open church in Google Maps</span> ↗</a>
+        </div>
+        <div class="venue-card">
+            <div class="icon-title"><span>🏨</span><strong data-i18n="reception">Reception Venue</strong></div>
+            <p>Rancho El Molino</p>
+            <p>Tehuacán, Puebla</p>
+            <p><span data-i18n="cocktails">Cocktails start at</span> 3:30 PM</p>
+            <a class="map-link" href="https://maps.google.com/?q=Rancho+El+Molino+Tehuacan+Puebla" target="_blank" rel="noopener noreferrer"><span data-i18n="map_venue">Open venue in Google Maps</span> ↗</a>
+        </div>
+    </div>
+</div>
+
+<div class="section section-light">
+    <h2 data-i18n="countdown">The Countdown</h2>
+    <div class="countdown-container" id="countdown">
+        <div class="countdown-box">
+            <span class="number" id="days">00</span>
+            <span class="label" data-i18n="days">Days</span>
+        </div>
+        <div class="countdown-box">
+            <span class="number" id="hours">00</span>
+            <span class="label" data-i18n="hours">Hours</span>
+        </div>
+        <div class="countdown-box">
+            <span class="number" id="minutes">00</span>
+            <span class="label" data-i18n="minutes">Minutes</span>
+        </div>
+        <div class="countdown-box">
+            <span class="number" id="seconds">00</span>
+            <span class="label" data-i18n="seconds">Seconds</span>
+        </div>
+    </div>
+</div>
+
+<div class="section section-dark">
+    <h2 data-i18n="dress_code">Dress Code</h2>
+    <div class="icon-title"><span>🕊️</span><strong data-i18n="formal">Formal / Black-Tie Optional</strong></div>
+    <div class="dress-grid">
+        <div class="dress-card">
+            <h3 data-i18n="women">👗 Women</h3>
+            <ul>
+                <li data-i18n="w_rule1">Long evening gowns, elegant midi dresses, or elevated cocktail dresses.</li>
+                <li data-i18n="w_rule2">Recommended palette: champagne, dusty rose, muted gold, and soft green.</li>
+                <li data-i18n="w_rule3">Please avoid white or ivory tones reserved for the bride.</li>
+            </ul>
+        </div>
+        <div class="dress-card">
+            <h3 data-i18n="men">🤵 Men</h3>
+            <ul>
+                <li data-i18n="m_rule1">Dark suit with tie or bow tie, or a tuxedo for a more formal look.</li>
+                <li data-i18n="m_rule2">Recommended colors: black, navy, charcoal, and deep green.</li>
+                <li data-i18n="m_rule3">Polished dress shoes are preferred for the ceremony and reception.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="section section-light">
+    <h2 data-i18n="hotels">Suggested Hotels</h2>
+    <div class="hotels-grid">
+        <div class="venue-card">
+            <div class="icon-title"><span>🛏️</span><strong>Hotel Mexico</strong></div>
+            <p>Independencia Ote. 101, Centro, Tehuacán</p>
+            <a class="map-link" href="https://maps.google.com/?q=Hotel+Mexico+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
+        </div>
+        <div class="venue-card">
+            <div class="icon-title"><span>🛏️</span><strong>Hotel Villablanca</strong></div>
+            <p>1 Poniente 206, Centro, Tehuacán</p>
+            <a class="map-link" href="https://maps.google.com/?q=Hotel+Villablanca+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
+        </div>
+        <div class="venue-card">
+            <div class="icon-title"><span>🛏️</span><strong>City Express Tehuacán</strong></div>
+            <p>Blvd. Socorro Romero Sanchez 2101</p>
+            <a class="map-link" href="https://maps.google.com/?q=City+Express+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
+        </div>
+    </div>
+</div>
+
+<div class="section section-dark">
+    <h2 data-i18n="photos">Our Photos</h2>
+    <div class="photos">
+        <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=400&q=80" alt="Wedding Photo 1">
+        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=400&q=80" alt="Wedding Photo 2">
+        <img src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=400&q=80" alt="Wedding Photo 3">
+    </div>
+</div>
+
+<div class="section section-light">
+    <h2 data-i18n="registry">Gift Registry</h2>
+    <p style="font-size: 1.1em; max-width: 650px; margin: 0 auto 20px auto;" data-i18n="gift_msg">Your presence is the greatest gift of all. However, if you wish to honor us with a gift, we are registered at the following stores.</p>
+    <div class="gift-table">
+        <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51743882" target="_blank" rel="noopener noreferrer">Liverpool</a>
+        <a href="https://www.amazon.com/wedding/" target="_blank" rel="noopener noreferrer">Amazon</a>
+    </div>
+</div>
+
+<div class="section section-dark" id="rsvp">
+    <h2>RSVP</h2>
+
+    {% if rsvp_submitted and submitted_data %}
+        <div class="rsvp-response">
+            <h3 style="margin-top: 0;"><span data-i18n="thank_you">Thank you,</span> {{ submitted_data.name }} 💛</h3>
+            {% if submitted_data.attending %}
+                <p data-i18n="rsvp_yes">We are so happy you will celebrate with us!</p>
+                <p><strong data-i18n="rsvp_adults">Reserved adults:</strong> {{ submitted_data.guests }}</p>
+                {% if submitted_data.kids_allowed %}
+                    <p><strong data-i18n="rsvp_kids">Kids attending:</strong> {{ submitted_data.kids }}</p>
+                {% endif %}
+            {% else %}
+                <p data-i18n="rsvp_no">Thank you for letting us know. We will miss you on our special day.</p>
+            {% endif %}
+            <p style="margin-bottom: 0;" data-i18n="rsvp_update">If you need to update your response, please use your invitation link again.</p>
+        </div>
+    {% else %}
+        <form class="rsvp-form" action="/rsvp" method="POST">
+            <input type="hidden" name="guest_token" value="{{ guest.token if guest else '' }}">
+
+            <label for="name" data-i18n="form_name">Name</label>
+            <input type="text" id="name" name="name" value="{{ guest.guest_name if guest else '' }}" required>
+
+            <label for="attending" data-i18n="form_attend">Will you attend?</label>
+            <select id="attending" name="attending" required>
+                <option value="yes" data-i18n="form_yes">Joyfully accept</option>
+                <option value="no" data-i18n="form_no">Regretfully decline</option>
+            </select>
+
+            <label for="guests" data-i18n="form_adults">Number of Adults</label>
+            <input type="number" id="guests" name="guests" min="1" max="{{ guest.max_guests if guest else 10 }}" value="1" required>
+            <div class="rsvp-helper"><span data-i18n="form_max_adults">Maximum allowed for this invite:</span> {{ guest.max_guests if guest else 10 }}</div>
+
+            {% if guest and guest.kids_allowed %}
+                <label for="kids" data-i18n="form_kids">Number of Kids</label>
+                <input type="number" id="kids" name="kids" min="0" max="{{ guest.max_kids }}" value="0">
+                <div class="rsvp-helper"><span data-i18n="form_max_kids">Kids allowed on this invite:</span> {{ guest.max_kids }}</div>
+            {% else %}
+                <input type="hidden" name="kids" value="0">
+            {% endif %}
+
+            <label for="dietary_restrictions" data-i18n="form_diet">Dietary Restrictions</label>
+            <textarea id="dietary_restrictions" name="dietary_restrictions" rows="3" placeholder="E.g., Vegetarian, allergy to peanuts"></textarea>
+
+            <button type="submit" data-i18n="form_submit">Submit RSVP</button>
+        </form>
+    {% endif %}
+</div>
+
+<script>
+    // --- Internationalization (i18n) ---
+    const translations = {
+        en: {
+            subtitle: "Are getting married!",
+            welcome: "Welcome",
+            reserved: "We've reserved",
+            seats: "seat(s) in your honor.",
+            when_where: "When & Where",
+            ceremony: "Church Ceremony",
+            map: "Open church in Google Maps",
+            reception: "Reception Venue",
+            cocktails: "Cocktails start at",
+            map_venue: "Open venue in Google Maps",
+            countdown: "The Countdown",
+            days: "Days", hours: "Hours", minutes: "Minutes", seconds: "Seconds",
+            dress_code: "Dress Code",
+            formal: "Formal / Black-Tie Optional",
+            women: "👗 Women", men: "🤵 Men",
+            w_rule1: "Long evening gowns, elegant midi dresses, or elevated cocktail dresses.",
+            w_rule2: "Recommended palette: champagne, dusty rose, muted gold, and soft green.",
+            w_rule3: "Please avoid white or ivory tones reserved for the bride.",
+            hotels: "Suggested Hotels",
+            view_map: "View on Map",
+            photos: "Our Photos",
+            registry: "Gift Registry",
+            gift_msg: "Your presence is the greatest gift of all. However, if you wish to honor us with a gift, we are registered at the following stores.",
+            thank_you: "Thank you,",
+            rsvp_yes: "We are so happy you will celebrate with us!",
+            rsvp_adults: "Reserved adults:",
+            rsvp_kids: "Kids attending:",
+            rsvp_no: "Thank you for letting us know. We will miss you on our special day.",
+            rsvp_update: "If you need to update your response, please use your invitation link again.",
+            form_name: "Name",
+            form_attend: "Will you attend?",
+            form_yes: "Joyfully accept",
+            form_no: "Regretfully decline",
+            form_adults: "Number of Adults",
+            form_max_adults: "Maximum allowed for this invite:",
+            form_kids: "Number of Kids",
+            form_max_kids: "Kids allowed on this invite:",
+            form_diet: "Dietary Restrictions",
+            form_submit: "Submit RSVP",
+            m_rule1: "Dark suit with tie or bow tie, or a tuxedo for a more formal look.",
+            m_rule2: "Recommended colors: black, navy, charcoal, and deep green.",
+            m_rule3: "Polished dress shoes are preferred for the ceremony and reception.",
+            music_play: "Play Music",
+            music_pause: "Pause Music"
+        },
+        es: {
+            subtitle: "¡Nos casamos!",
+            welcome: "¡Bienvenido/a",
+            reserved: "Hemos reservado",
+            seats: "lugar(es) en tu honor.",
+            when_where: "Cuándo y Dónde",
+            ceremony: "Ceremonia Religiosa",
+            map: "Ver iglesia en Google Maps",
+            reception: "Recepción",
+            cocktails: "Cócteles a partir de las",
+            map_venue: "Ver lugar en Google Maps",
+            countdown: "La Cuenta Regresiva",
+            days: "Días", hours: "Horas", minutes: "Minutos", seconds: "Segundos",
+            dress_code: "Código de Vestimenta",
+            formal: "Formal / Etiqueta Opcional",
+            women: "👗 Mujeres", men: "🤵 Hombres",
+            w_rule1: "Vestidos largos de noche, vestidos midi elegantes o de cóctel de gala.",
+            w_rule2: "Colores recomendados: champagne, rosa viejo, dorado opaco y verde suave.",
+            w_rule3: "Por favor evitar colores blancos o marfil reservados para la novia.",
+            m_rule1: "Traje oscuro con corbata o moño, o esmoquin para un look más formal.",
+            m_rule2: "Colores recomendados: negro, azul marino, carbón y verde oscuro.",
+            m_rule3: "Se prefieren zapatos de vestir lustrados para ceremonia y recepción.",
+            hotels: "Hoteles Sugeridos",
+            view_map: "Ver en el mapa",
+            photos: "Nuestras Fotos",
+            registry: "Mesa de Regalos",
+            gift_msg: "Su presencia es nuestro mayor regalo. Sin embargo, si desean obsequiarnos algo, estamos registrados en las siguientes tiendas.",
+            thank_you: "Gracias,",
+            rsvp_yes: "¡Estamos muy felices de que celebres con nosotros!",
+            rsvp_adults: "Adultos reservados:",
+            rsvp_kids: "Niños que asisten:",
+            rsvp_no: "Gracias por avisarnos. Te extrañaremos en nuestro día especial.",
+            rsvp_update: "Si necesitas actualizar tu respuesta, vuelve a utilizar tu enlace de invitación.",
+            form_name: "Nombre",
+            form_attend: "¿Asistirás?",
+            form_yes: "Acepto con gusto",
+            form_no: "No podré asistir",
+            form_adults: "Número de Adultos",
+            form_max_adults: "Máximo permitido para esta invitación:",
+            form_kids: "Número de Niños",
+            form_max_kids: "Niños permitidos en esta invitación:",
+            form_diet: "Restricciones Alimenticias",
+            form_submit: "Enviar RSVP",
+            music_play: "Reproducir Música",
+            music_pause: "Pausar Música"
+        },
+        fr: {
+            subtitle: "Nous nous marions !",
+            welcome: "Bienvenue",
+            reserved: "Nous avons réservé",
+            seats: "place(s) en votre honneur.",
+            when_where: "Quand et Où",
+            ceremony: "Cérémonie Religieuse",
+            map: "Voir l'église sur Google Maps",
+            reception: "Lieu de Réception",
+            cocktails: "Cocktails à partir de",
+            map_venue: "Voir le lieu sur Google Maps",
+            countdown: "Le Compte à Rebours",
+            days: "Jours", hours: "Heures", minutes: "Minutes", seconds: "Secondes",
+            dress_code: "Code Vestimentaire",
+            formal: "Tenue de Soirée / Cravate Noire Optionnelle",
+            women: "👗 Femmes", men: "🤵 Hommes",
+            w_rule1: "Robes longues de soirée, robes midi élégantes ou robes de cocktail habillées.",
+            w_rule2: "Palette recommandée : champagne, vieux rose, or mat et vert doux.",
+            w_rule3: "Merci d'éviter les tons blancs ou ivoire réservés à la mariée.",
+            m_rule1: "Costume sombre avec cravate ou nœud papillon, ou smoking pour un look plus formel.",
+            m_rule2: "Couleurs recommandées : noir, bleu marine, anthracite et vert foncé.",
+            m_rule3: "Chaussures de ville cirées recommandées pour la cérémonie et la réception.",
+            hotels: "Hôtels Suggérés",
+            view_map: "Voir sur la carte",
+            photos: "Nos Photos",
+            registry: "Liste de Mariage",
+            gift_msg: "Votre présence est le plus beau des cadeaux. Toutefois, si vous souhaitez nous faire un présent, nous avons déposé une liste dans ces magasins.",
+            thank_you: "Merci,",
+            rsvp_yes: "Nous sommes si heureux que vous célébriez avec nous !",
+            rsvp_adults: "Adultes réservés :",
+            rsvp_kids: "Enfants présents :",
+            rsvp_no: "Merci de nous avoir prévenus. Vous nous manquerez lors de notre journée spéciale.",
+            rsvp_update: "Si vous devez mettre à jour votre réponse, veuillez utiliser à nouveau votre lien d'invitation.",
+            form_name: "Nom",
+            form_attend: "Serez-vous présent(e) ?",
+            form_yes: "J'accepte avec joie",
+            form_no: "Je décline avec regret",
+            form_adults: "Nombre d'Adultes",
+            form_max_adults: "Maximum autorisé pour cette invitation :",
+            form_kids: "Nombre d'Enfants",
+            form_max_kids: "Enfants autorisés sur cette invitation :",
+            form_diet: "Restrictions Alimentaires",
+            form_submit: "Envoyer RSVP",
+            music_play: "Jouer la musique",
+            music_pause: "Mettre en pause"
+        }
+    };
+
+    let currentLang = 'en';
+
+    function setLang(lang, buttonElement) {
+        currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        buttonElement.classList.add('active');
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (translations[lang][key]) {
+                if(el.tagName === 'OPTION') {
+                    el.textContent = translations[lang][key];
+                } else {
+                    el.innerHTML = translations[lang][key];
+                }
+            }
+        });
+
+        // Ensure placeholders are updated too for dietary restrictions
+        const dietaryEl = document.getElementById('dietary_restrictions');
+        if (dietaryEl) {
+            if (lang === 'es') {
+                dietaryEl.placeholder = "Ej. Vegetariano, alergia a los cacahuates";
+            } else if (lang === 'fr') {
+                dietaryEl.placeholder = "Ex. Végétarien, allergie aux arachides";
+            } else {
+                dietaryEl.placeholder = "E.g., Vegetarian, allergy to peanuts";
+            }
+        }
+
+        // Update music button text
+        updateMusicButtonText();
+    }
+
+    // --- Audio Control ---
+    const audio = document.getElementById('bg-music');
+    const musicIcon = document.getElementById('music-icon');
+    const musicText = document.getElementById('music-text');
+    const musicContainer = document.getElementById('music-container');
+
+    // Set a reliable volume
+    audio.volume = 0.4;
+
+    function updateMusicButtonText() {
+        if (!audio.paused) {
+            musicText.innerText = translations[currentLang]['music_pause'];
+            musicIcon.innerText = "🔊";
+            musicContainer.classList.add('playing');
+        } else {
+            musicText.innerText = translations[currentLang]['music_play'];
+            musicIcon.innerText = "🔇";
+            musicContainer.classList.remove('playing');
+        }
+    }
+
+    function toggleMusic() {
+        if (audio.paused) {
+            let playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // Playback started
+                    updateMusicButtonText();
+                }).catch(error => {
+                    console.log("Audio playback failed: ", error);
+                    alert("Unable to play music. This is usually due to browser autoplay policies or the music file link being blocked.");
+                });
+            }
+        } else {
+            audio.pause();
+            updateMusicButtonText();
+        }
+    }
+
+    // --- Countdown Timer ---
+    const weddingDate = new Date("July 11, 2026 14:00:00").getTime();
+
+    const timer = setInterval(function () {
+        const now = new Date().getTime();
+        const distance = weddingDate - now;
+
+        if (distance < 0) {
+            clearInterval(timer);
+            document.getElementById("countdown").innerHTML = "<h3>Happily Married!</h3>";
+            return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        document.getElementById("days").innerText = days.toString().padStart(2, '0');
+        document.getElementById("hours").innerText = hours.toString().padStart(2, '0');
+        document.getElementById("minutes").innerText = minutes.toString().padStart(2, '0');
+        document.getElementById("seconds").innerText = seconds.toString().padStart(2, '0');
+    }, 1000);
+</script>
+</body>
+</html>
