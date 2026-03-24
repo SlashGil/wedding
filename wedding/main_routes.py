@@ -28,7 +28,7 @@ def index():
     }
     
     current_hero_filename = get_setting('hero_image_filename')
-    hero_image_url = url_for('static', filename='uploads/' + current_hero_filename) if current_hero_filename else url_for('static', filename='img/default_hero.jpg')
+    hero_image_url = url_for('static', filename='uploads/' + current_hero_filename) if current_hero_filename else 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1920&q=80'
 
     return render_template('index.html', guest=guest, rsvp_submitted=False, submitted_data=None, dress_code_es=dress_code_es, dress_code_en=dress_code_en, pinterest_links=pinterest_links, hero_image_url=hero_image_url)
 
@@ -51,7 +51,7 @@ def invite(token):
     }
     
     current_hero_filename = get_setting('hero_image_filename')
-    hero_image_url = url_for('static', filename='uploads/' + current_hero_filename) if current_hero_filename else url_for('static', filename='img/default_hero.jpg')
+    hero_image_url = url_for('static', filename='uploads/' + current_hero_filename) if current_hero_filename else 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1920&q=80'
 
     return render_template('index.html', guest=guest, rsvp_submitted=False, submitted_data=None, dress_code_es=dress_code_es, dress_code_en=dress_code_en, pinterest_links=pinterest_links, hero_image_url=hero_image_url)
 
@@ -112,7 +112,7 @@ def rsvp():
         }
         
         current_hero_filename = get_setting('hero_image_filename')
-        hero_image_url = url_for('static', filename='uploads/' + current_hero_filename) if current_hero_filename else url_for('static', filename='img/default_hero.jpg')
+        hero_image_url = url_for('static', filename='uploads/' + current_hero_filename) if current_hero_filename else 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1920&q=80'
 
         return render_template('index.html', guest=guest, rsvp_submitted=True, submitted_data=submitted_data, dress_code_es=dress_code_es, dress_code_en=dress_code_en, pinterest_links=pinterest_links, hero_image_url=hero_image_url)
 
