@@ -51,14 +51,14 @@ body {
 }
 
 .hero h1 {
-    font-size: 4em;
+    font-size: 4rem;
     margin: 0;
     font-weight: 300;
     letter-spacing: 5px;
 }
 
 .hero p {
-    font-size: 1.2em;
+    font-size: 1.3rem;
     font-weight: 300;
     letter-spacing: 2px;
     margin-top: 10px;
@@ -98,11 +98,11 @@ body {
 }
 
 .section {
-    padding: 5em 1.2em;
+    padding: 4rem 1.2rem;
 }
 
 .section h2 {
-    font-size: 2.3em;
+    font-size: 2.5rem;
     font-weight: 300;
     letter-spacing: 2px;
     margin-bottom: 1em;
@@ -126,7 +126,7 @@ body {
     justify-content: center;
     gap: 10px;
     margin-bottom: 1rem;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
 }
 
 .venue-grid {
@@ -143,6 +143,7 @@ body {
     border: 1px solid rgba(255,255,255,0.35);
     border-radius: 14px;
     padding: 20px;
+    font-size: 1rem;
 }
 
 .section-light .venue-card,
@@ -185,6 +186,7 @@ body {
     margin-top: 0;
     margin-bottom: 10px;
     font-weight: 600;
+    font-size: 1.2rem;
 }
 
 .dress-card ul {
@@ -193,7 +195,7 @@ body {
 }
 
 .dress-card li {
-    font-size: 1.02em;
+    font-size: 1rem;
     line-height: 1.65;
     margin: 6px 0;
 }
@@ -217,12 +219,12 @@ body {
 }
 
 .countdown-box .number {
-    font-size: 2.7em;
+    font-size: 3rem;
     font-weight: 400;
 }
 
 .countdown-box .label {
-    font-size: 0.9em;
+    font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-top: 5px;
@@ -252,7 +254,7 @@ body {
     color: var(--brand);
     text-decoration: none;
     border-radius: 4px;
-    font-size: 1em;
+    font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 1px;
     transition: opacity 0.3s;
@@ -277,7 +279,7 @@ body {
     display: block;
     margin-top: 15px;
     font-weight: 500;
-    font-size: 0.9em;
+    font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: #555;
@@ -293,6 +295,7 @@ body {
     border-radius: 6px;
     font-family: inherit;
     background-color: #fdfdfd;
+    font-size: 1rem;
 }
 
 .rsvp-form button {
@@ -304,7 +307,7 @@ body {
     border: none;
     cursor: pointer;
     border-radius: 6px;
-    font-size: 1.02em;
+    font-size: 1.1rem;
     letter-spacing: 1px;
     transition: opacity 0.3s;
 }
@@ -316,7 +319,7 @@ body {
 .rsvp-helper {
     margin-top: 8px;
     color: #666;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
 }
 
 .flash-message {
@@ -327,6 +330,7 @@ body {
     max-width: 500px;
     border-radius: 6px;
     border: 1px solid #f1dfb6;
+    font-size: 1rem;
 }
 
 .rsvp-response {
@@ -338,6 +342,7 @@ body {
     border-radius: 12px;
     text-align: left;
     box-shadow: 0 6px 18px rgba(0,0,0,0.16);
+    font-size: 1rem;
 }
 
 .music-player {
@@ -366,7 +371,7 @@ body {
 }
 
 audio {
-    display: none; /* Hide default controls, we will use a custom button */
+    display: none;
 }
 
 #music-toggle {
@@ -388,6 +393,144 @@ audio {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 20px;
+}
+
+/* Desktop font sizes */
+@media (min-width: 769px) {
+    .hero h1 {
+        font-size: 5em;
+    }
+
+    .hero p {
+        font-size: 1.5em;
+    }
+
+    .section h2 {
+        font-size: 2.8em;
+    }
+
+    .icon-title {
+        font-size: 1.4rem;
+    }
+
+    .venue-card {
+        font-size: 1.1em;
+    }
+
+    .dress-card h3 {
+        font-size: 1.3em;
+    }
+
+    .dress-card li {
+        font-size: 1.1em;
+    }
+
+    .countdown-box .number {
+        font-size: 3.5em;
+    }
+
+    .countdown-box .label {
+        font-size: 1.1em;
+    }
+
+    .gift-table a {
+        font-size: 1.1em;
+    }
+
+    .rsvp-form label {
+        font-size: 1.1em;
+    }
+
+    .rsvp-form input,
+    .rsvp-form select,
+    .rsvp-form textarea {
+        font-size: 1em;
+    }
+
+    .rsvp-form button {
+        font-size: 1.1em;
+    }
+
+    .rsvp-helper {
+        font-size: 0.95rem;
+    }
+
+    .flash-message {
+        font-size: 1.1em;
+    }
+
+    .rsvp-response {
+        font-size: 1.1em;
+    }
+}
+
+/* Mobile responsive font sizing */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 3em;
+    }
+
+    .hero p {
+        font-size: 1.2em;
+    }
+
+    .section h2 {
+        font-size: 2.3em;
+    }
+
+    .icon-title {
+        font-size: 1.2rem;
+    }
+
+    .venue-card {
+        font-size: 1em;
+    }
+
+    .dress-card h3 {
+        font-size: 1.1em;
+    }
+
+    .dress-card li {
+        font-size: 1.02em;
+    }
+
+    .countdown-box .number {
+        font-size: 2.7em;
+    }
+
+    .countdown-box .label {
+        font-size: 0.9em;
+    }
+
+    .gift-table a {
+        font-size: 1em;
+    }
+
+    .rsvp-form label {
+        font-size: 0.9em;
+    }
+
+    .rsvp-form input,
+    .rsvp-form select,
+    .rsvp-form textarea {
+        font-size: 0.95em;
+    }
+
+    .rsvp-form button {
+        font-size: 1.02em;
+    }
+
+    .rsvp-helper {
+        font-size: 0.85rem;
+    }
+
+    .flash-message {
+        font-size: 1em;
+    }
+
+    .rsvp-response {
+        font-size: 1em;
+    }
 }
 
 @media (max-width: 600px) {

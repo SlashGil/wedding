@@ -9,14 +9,13 @@
 </head>
 <body>
 
-<div class="music-player" id="music-container" onclick="toggleMusic()">
+<div class="music-player" id="music-container">
     <button id="music-toggle">
         <span id="music-icon">🔇</span>
         <span id="music-text" style="font-size: 0.9rem; font-weight: 500;" data-i18n="music_play">Play Music</span>
     </button>
     <audio id="bg-music" loop preload="auto">
-        <!-- Using a direct URL for Elvis Presley's "Can't Help Falling In Love" from an open source -->
-        <source src="https://ia800403.us.archive.org/21/items/elvis-presley-cant-help-falling-in-love/Elvis%20Presley%20-%20Can%27t%20Help%20Falling%20In%20Love.mp3" type="audio/mpeg">
+        <source src="{{ url_for('static', filename='audio/cant-help-falling-in-love.mp3') }}" type="audio/mpeg">
     </audio>
 </div>
 
@@ -49,50 +48,18 @@
     <div class="venue-grid">
         <div class="venue-card">
             <div class="icon-title"><span>💒</span><strong data-i18n="ceremony">Church Ceremony</strong></div>
-            <p>Parroquia El Carmen</p>
-            <p>Tehuacán, Puebla</p>
+            <p>Parroquia Nuestra Señora del Carmen</p>
+            <p>Av. Reforma Nte. 200, Centro de la Ciudad, 75700 Tehuacán, Pue.</p>
             <p data-i18n="ceremony_date">July 11, 2026 at 2:00 PM</p>
-            <a class="map-link" href="https://maps.google.com/?q=Parroquia+El+Carmen+Tehuacan+Puebla" target="_blank" rel="noopener noreferrer"><span data-i18n="map">Open church in Google Maps</span> ↗</a>
+            <a class="map-link" href="https://maps.app.goo.gl/Be3seHVDAtp6nLEs7" target="_blank" rel="noopener noreferrer"><span data-i18n="map">Open church in Google Maps</span> ↗</a>
         </div>
         <div class="venue-card">
             <div class="icon-title"><span>🏨</span><strong data-i18n="reception">Reception Venue</strong></div>
             <p>Rancho El Molino</p>
-            <p>Tehuacán, Puebla</p>
+            <p>P.º Miguel de Cervantes Saavedra 101, El Molino, 75780 Tehuacán, Pue.</p>
             <p><span data-i18n="cocktails">Cocktails start at</span> <span data-i18n="cocktails_time">3:30 PM</span></p>
-            <a class="map-link" href="https://maps.google.com/?q=Rancho+El+Molino+Tehuacan+Puebla" target="_blank" rel="noopener noreferrer"><span data-i18n="map_venue">Open venue in Google Maps</span> ↗</a>
+            <a class="map-link" href="https://maps.app.goo.gl/yQG2cTohP3Vdb738A" target="_blank" rel="noopener noreferrer"><span data-i18n="map_venue">Open venue in Google Maps</span> ↗</a>
         </div>
-    </div>
-</div>
-
-<div class="section section-light">
-    <h2 data-i18n="dress_code">Dress Code</h2>
-    <div class="icon-title"><span>🕊️</span><strong data-i18n="formal">Formal / Black-Tie Optional</strong></div>
-    <div class="dress-grid">
-        <div class="dress-card">
-            <h3 data-i18n="women">👗 Women</h3>
-            <ul>
-                <li data-i18n="w_rule1">Long evening gowns, elegant midi dresses, or elevated cocktail dresses.</li>
-                <li data-i18n="w_rule2">Recommended palette: champagne, dusty rose, muted gold, and soft green.</li>
-                <li data-i18n="w_rule3">Please avoid white or ivory tones reserved for the bride.</li>
-            </ul>
-        </div>
-        <div class="dress-card">
-            <h3 data-i18n="men">🤵 Men</h3>
-            <ul>
-                <li data-i18n="m_rule1">Dark suit with tie or bow tie, or a tuxedo for a more formal look.</li>
-                <li data-i18n="m_rule2">Recommended colors: black, navy, charcoal, and deep green.</li>
-                <li data-i18n="m_rule3">Polished dress shoes are preferred for the ceremony and reception.</li>
-            </ul>
-        </div>
-    </div>
-</div>
-
-<div class="section section-dark">
-    <h2 data-i18n="registry">Gift Registry</h2>
-    <p style="font-size: 1.1em; max-width: 650px; margin: 0 auto 20px auto;" data-i18n="gift_msg">Your presence is the greatest gift of all. However, if you wish to honor us with a gift, we are registered at the following stores.</p>
-    <div class="gift-table">
-        <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51743882" target="_blank" rel="noopener noreferrer">Liverpool</a>
-        <a href="https://www.amazon.com/wedding/" target="_blank" rel="noopener noreferrer">Amazon</a>
     </div>
 </div>
 
@@ -119,6 +86,56 @@
 </div>
 
 <div class="section section-dark">
+    <h2 data-i18n="dress_code">Dress Code</h2>
+    <div class="icon-title"><span>🕊️</span><strong data-i18n="formal">Formal / Black-Tie Optional</strong></div>
+    <div class="dress-grid">
+        <div class="dress-card">
+            <h3 data-i18n="women">👗 Women</h3>
+            <ul>
+                <li data-i18n="w_rule1">Long evening gowns, elegant midi dresses, or elevated cocktail dresses.</li>
+                <li data-i18n="w_rule2">Recommended palette: champagne, dusty rose, muted gold, and soft green.</li>
+                <li data-i18n="w_rule3">Please avoid white or ivory tones reserved for the bride.</li>
+            </ul>
+            {% if pinterest_links.women %}
+                <a class="map-link" href="{{ pinterest_links.women }}" target="_blank" rel="noopener noreferrer" style="margin-top: 15px;">Inspiration Board 📌</a>
+            {% endif %}
+        </div>
+        <div class="dress-card">
+            <h3 data-i18n="men">🤵 Men</h3>
+            <ul>
+                <li data-i18n="m_rule1">Dark suit with tie or bow tie, or a tuxedo for a more formal look.</li>
+                <li data-i18n="m_rule2">Recommended colors: black, navy, charcoal, and deep green.</li>
+                <li data-i18n="m_rule3">Polished dress shoes are preferred for the ceremony and reception.</li>
+            </ul>
+            {% if pinterest_links.men %}
+                <a class="map-link" href="{{ pinterest_links.men }}" target="_blank" rel="noopener noreferrer" style="margin-top: 15px;">Inspiration Board 📌</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="section section-light">
+    <h2 data-i18n="hotels">Suggested Hotels</h2>
+    <div class="hotels-grid">
+        <div class="venue-card">
+            <div class="icon-title"><span>🛏️</span><strong>Hotel Mexico</strong></div>
+            <p>Independencia Ote. 101, Centro, Tehuacán</p>
+            <a class="map-link" href="https://maps.google.com/?q=Hotel+Mexico+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
+        </div>
+        <div class="venue-card">
+            <div class="icon-title"><span>🛏️</span><strong>Hotel Villablanca</strong></div>
+            <p>1 Poniente 206, Centro, Tehuacán</p>
+            <a class="map-link" href="https://maps.google.com/?q=Hotel+Villablanca+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
+        </div>
+        <div class="venue-card">
+            <div class="icon-title"><span>🛏️</span><strong>City Express Tehuacán</strong></div>
+            <p>Blvd. Socorro Romero Sanchez 2101</p>
+            <a class="map-link" href="https://maps.google.com/?q=City+Express+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
+        </div>
+    </div>
+</div>
+
+<div class="section section-dark">
     <h2 data-i18n="photos">Our Photos</h2>
     <div class="photos">
         {% if photos and photos|length > 0 %}
@@ -134,7 +151,16 @@
     </div>
 </div>
 
-<div class="section section-light" id="rsvp">
+<div class="section section-light">
+    <h2 data-i18n="registry">Gift Registry</h2>
+    <p style="font-size: 1.1em; max-width: 650px; margin: 0 auto 20px auto;" data-i18n="gift_msg">Your presence is the greatest gift of all. However, if you wish to honor us with a gift, we are registered at the following stores.</p>
+    <div class="gift-table">
+        <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51743882" target="_blank" rel="noopener noreferrer">Liverpool</a>
+        <a href="https://www.amazon.com/wedding/" target="_blank" rel="noopener noreferrer">Amazon</a>
+    </div>
+</div>
+
+<div class="section section-dark" id="rsvp">
     <h2 data-i18n="rsvp_title">RSVP</h2>
 
     {% if rsvp_submitted and submitted_data %}
@@ -182,27 +208,6 @@
             <button type="submit" data-i18n="form_submit">Submit RSVP</button>
         </form>
     {% endif %}
-</div>
-
-<div class="section section-dark">
-    <h2 data-i18n="hotels">Suggested Hotels</h2>
-    <div class="hotels-grid">
-        <div class="venue-card">
-            <div class="icon-title"><span>🛏️</span><strong>Hotel Mexico</strong></div>
-            <p>Independencia Ote. 101, Centro, Tehuacán</p>
-            <a class="map-link" href="https://maps.google.com/?q=Hotel+Mexico+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
-        </div>
-        <div class="venue-card">
-            <div class="icon-title"><span>🛏️</span><strong>Hotel Villablanca</strong></div>
-            <p>1 Poniente 206, Centro, Tehuacán</p>
-            <a class="map-link" href="https://maps.google.com/?q=Hotel+Villablanca+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
-        </div>
-        <div class="venue-card">
-            <div class="icon-title"><span>🛏️</span><strong>City Express Tehuacán</strong></div>
-            <p>Blvd. Socorro Romero Sanchez 2101</p>
-            <a class="map-link" href="https://maps.google.com/?q=City+Express+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -291,7 +296,7 @@
             rsvp_adults: "Adultos reservados:",
             rsvp_kids: "Niños que asisten:",
             rsvp_no: "Gracias por avisarnos. Te extrañaremos en nuestro día especial.",
-            rsvp_update: "Si necesitas actualizar tu respuesta, vuelve a utilizar tu enlace de invitación.",
+            rsvp_update: "Si necesitas actualizar tu respuesta, vuelve a utilizar tu enlace de invitation.",
             rsvp_title: "Confirmar Asistencia",
             form_name: "Nombre",
             form_attend: "¿Nos acompañarás?",
@@ -308,7 +313,7 @@
         }
     };
 
-    let currentLang = 'es';
+    let currentLang = 'en';
 
     function setLang(lang, buttonElement) {
         currentLang = lang;
@@ -326,7 +331,6 @@
             }
         });
 
-        // Ensure placeholders are updated too for dietary restrictions
         const dietaryEl = document.getElementById('dietary_restrictions');
         if (dietaryEl) {
             if (lang === 'es') {
@@ -336,22 +340,45 @@
             }
         }
 
-        // Update music button text
         updateMusicButtonText();
     }
 
-    // Initialize with ES
     document.addEventListener('DOMContentLoaded', function() {
         setLang('es', document.querySelector('.lang-btn[onclick*="es"]'));
+
+        const audio = document.getElementById('bg-music');
+        const musicContainer = document.getElementById('music-container');
+
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(_ => {
+                updateMusicButtonText();
+            }).catch(error => {
+                console.log("Autoplay was prevented.", error);
+
+                const initialPlay = () => {
+                    audio.play().then(() => {
+                        updateMusicButtonText();
+                        document.body.removeEventListener('click', initialPlay);
+                        document.body.removeEventListener('touchstart', initialPlay);
+                    }).catch(err => {
+                        console.log("Manual play failed:", err);
+                    });
+                };
+
+                document.body.addEventListener('click', initialPlay);
+                document.body.addEventListener('touchstart', initialPlay);
+            });
+        }
+
+        musicContainer.addEventListener('click', toggleMusic);
     });
 
-    // --- Audio Control ---
     const audio = document.getElementById('bg-music');
     const musicIcon = document.getElementById('music-icon');
     const musicText = document.getElementById('music-text');
     const musicContainer = document.getElementById('music-container');
 
-    // Set a reliable volume
     audio.volume = 0.4;
 
     function updateMusicButtonText() {
@@ -368,23 +395,13 @@
 
     function toggleMusic() {
         if (audio.paused) {
-            let playPromise = audio.play();
-            if (playPromise !== undefined) {
-                playPromise.then(_ => {
-                    // Playback started
-                    updateMusicButtonText();
-                }).catch(error => {
-                    console.log("Audio playback failed: ", error);
-                    alert("Unable to play music. This is usually due to browser autoplay policies or the music file link being blocked.");
-                });
-            }
+            audio.play().then(updateMusicButtonText).catch(error => console.log("Audio playback failed: ", error));
         } else {
             audio.pause();
             updateMusicButtonText();
         }
     }
 
-    // --- Countdown Timer ---
     const weddingDate = new Date("July 11, 2026 14:00:00").getTime();
 
     const timer = setInterval(function () {
@@ -408,14 +425,12 @@
         document.getElementById("seconds").innerText = seconds.toString().padStart(2, '0');
     }, 1000);
 
-    // --- Admin Trigger ---
     let clickCount = 0;
     document.getElementById('admin-trigger').addEventListener('click', function() {
         clickCount++;
         if (clickCount === 4) {
             window.location.href = "{{ url_for('admin.index') }}";
         }
-        // Reset count after 2 seconds of inactivity
         setTimeout(() => { clickCount = 0; }, 2000);
     });
 </script>

@@ -21,8 +21,16 @@ def index():
 
     dress_code_es = get_setting('dress_code_es', 'Formal / Etiqueta Opcional')
     dress_code_en = get_setting('dress_code_en', 'Formal / Black-Tie Optional')
+    
+    pinterest_links = {
+        'women': get_setting('pinterest_women', ''),
+        'men': get_setting('pinterest_men', '')
+    }
+    
+    current_hero_filename = get_setting('hero_image_filename')
+    hero_image_url = url_for('static', filename='uploads/' + current_hero_filename) if current_hero_filename else url_for('static', filename='img/default_hero.jpg')
 
-    return render_template('index.html', guest=guest, rsvp_submitted=False, submitted_data=None, dress_code_es=dress_code_es, dress_code_en=dress_code_en)
+    return render_template('index.html', guest=guest, rsvp_submitted=False, submitted_data=None, dress_code_es=dress_code_es, dress_code_en=dress_code_en, pinterest_links=pinterest_links, hero_image_url=hero_image_url)
 
 
 @bp.route('/invite/<token>')
@@ -36,8 +44,16 @@ def invite(token):
 
     dress_code_es = get_setting('dress_code_es', 'Formal / Etiqueta Opcional')
     dress_code_en = get_setting('dress_code_en', 'Formal / Black-Tie Optional')
+    
+    pinterest_links = {
+        'women': get_setting('pinterest_women', ''),
+        'men': get_setting('pinterest_men', '')
+    }
+    
+    current_hero_filename = get_setting('hero_image_filename')
+    hero_image_url = url_for('static', filename='uploads/' + current_hero_filename) if current_hero_filename else url_for('static', filename='img/default_hero.jpg')
 
-    return render_template('index.html', guest=guest, rsvp_submitted=False, submitted_data=None, dress_code_es=dress_code_es, dress_code_en=dress_code_en)
+    return render_template('index.html', guest=guest, rsvp_submitted=False, submitted_data=None, dress_code_es=dress_code_es, dress_code_en=dress_code_en, pinterest_links=pinterest_links, hero_image_url=hero_image_url)
 
 
 @bp.route('/rsvp', methods=['POST'])
@@ -89,8 +105,16 @@ def rsvp():
         }
         dress_code_es = get_setting('dress_code_es', 'Formal / Etiqueta Opcional')
         dress_code_en = get_setting('dress_code_en', 'Formal / Black-Tie Optional')
+        
+        pinterest_links = {
+            'women': get_setting('pinterest_women', ''),
+            'men': get_setting('pinterest_men', '')
+        }
+        
+        current_hero_filename = get_setting('hero_image_filename')
+        hero_image_url = url_for('static', filename='uploads/' + current_hero_filename) if current_hero_filename else url_for('static', filename='img/default_hero.jpg')
 
-        return render_template('index.html', guest=guest, rsvp_submitted=True, submitted_data=submitted_data, dress_code_es=dress_code_es, dress_code_en=dress_code_en)
+        return render_template('index.html', guest=guest, rsvp_submitted=True, submitted_data=submitted_data, dress_code_es=dress_code_es, dress_code_en=dress_code_en, pinterest_links=pinterest_links, hero_image_url=hero_image_url)
 
     flash('Thank you for your RSVP!')
     return redirect(url_for('main.index', name=name, guests=guests))

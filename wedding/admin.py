@@ -27,6 +27,14 @@ def index():
             set_setting('dress_code_en', dress_code_en)
             flash('Dress code updated.')
             return redirect(url_for('admin.index'))
+        
+        if 'update_pinterest_links' in request.form:
+            pinterest_women = request.form.get('pinterest_women', '').strip()
+            pinterest_men = request.form.get('pinterest_men', '').strip()
+            set_setting('pinterest_women', pinterest_women)
+            set_setting('pinterest_men', pinterest_men)
+            flash('Pinterest links updated.')
+            return redirect(url_for('admin.index'))
 
         guest_name = request.form.get('guest_name', '').strip()
         max_guests = request.form.get('max_guests', '1').strip()
@@ -65,8 +73,13 @@ def index():
 
     dress_code_es = get_setting('dress_code_es', 'Formal / Etiqueta Opcional')
     dress_code_en = get_setting('dress_code_en', 'Formal / Black-Tie Optional')
+    
+    pinterest_links = {
+        'women': get_setting('pinterest_women', ''),
+        'men': get_setting('pinterest_men', '')
+    }
 
-    return render_template('admin.html', generated_link=generated_link, guest_links=guest_links, rsvp_answers=rsvp_answers, uploaded_photos=uploaded_photos, current_hero_url=current_hero_url, dress_code_es=dress_code_es, dress_code_en=dress_code_en)
+    return render_template('admin.html', generated_link=generated_link, guest_links=guest_links, rsvp_answers=rsvp_answers, uploaded_photos=uploaded_photos, current_hero_url=current_hero_url, dress_code_es=dress_code_es, dress_code_en=dress_code_en, pinterest_links=pinterest_links)
 
 
 @bp.route('/upload_excel', methods=['POST'])

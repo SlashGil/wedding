@@ -78,6 +78,23 @@
             <button class="btn" type="submit">Update Dress Code</button>
         </form>
 
+        <hr>
+
+        <h2>Pinterest Boards</h2>
+        <p style="font-size: 0.9em; opacity: 0.9;">Add links to your Pinterest boards for dress code inspiration.</p>
+        <form action="{{ url_for('admin.index') }}" method="post" class="inline-upload-form">
+            <input type="hidden" name="update_pinterest_links" value="1">
+            <div class="field" style="flex: 1;">
+                <label for="pinterest_women">Women's Board URL</label>
+                <input type="url" name="pinterest_women" id="pinterest_women" value="{{ pinterest_links.get('women', '') }}" placeholder="https://pinterest.com/...">
+            </div>
+            <div class="field" style="flex: 1;">
+                <label for="pinterest_men">Men's Board URL</label>
+                <input type="url" name="pinterest_men" id="pinterest_men" value="{{ pinterest_links.get('men', '') }}" placeholder="https://pinterest.com/...">
+            </div>
+            <button class="btn" type="submit">Save Links</button>
+        </form>
+
         <script>
             function updateEnglishDressCode(esValue) {
                 const enInput = document.getElementById('dress_code_en');
