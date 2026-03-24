@@ -3,13 +3,11 @@ services:
     name: wedding-rsvp
     env: python
     plan: free # Note: free plans have ephemeral filesystems
-    buildCommand: "pip install -r requirements.txt && flask init-db"
-    startCommand: "gunicorn 'wedding:create_app()'"
+    buildCommand: "pip install -r requirements.txt && flask --app app init-db"
+    startCommand: "gunicorn app:app"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.4
-      - key: FLASK_APP
-        value: wedding
       - key: FLASK_SECRET_KEY
         generateValue: true # Let Render generate a secure secret key
       - key: WEDDING_ADMIN_USERNAME

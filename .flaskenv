@@ -1,4 +1,4 @@
-FLASK_APP=wedding
+FLASK_APP=app
 FLASK_ENV=development
 FLASK_SECRET_KEY='a-super-secret-key-for-dev-only'
 WEDDING_ADMIN_USERNAME=admin
