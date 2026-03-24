@@ -454,7 +454,7 @@
     document.getElementById('admin-trigger').addEventListener('click', function() {
         clickCount++;
         if (clickCount === 4) {
-            window.location.href = "{{ url_for('admin.admin_panel') }}";
+            window.location.href = "{{ url_for('admin.index') }}";
         }
         // Reset count after 2 seconds of inactivity
         setTimeout(() => { clickCount = 0; }, 2000);
