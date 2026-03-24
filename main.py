@@ -6,8 +6,8 @@ from functools import wraps
 import pandas as pd
 
 app = Flask(__name__)
-# A secret key is required to use Flask's session and flash messages
-app.secret_key = 'super_secret_wedding_key'
+# Use an environment variable for the secret key in production for security
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'a-super-secret-key-for-dev-only')
 
 DATABASE = 'rsvp.db'
 ADMIN_USERNAME = os.environ.get('WEDDING_ADMIN_USERNAME', 'admin')
@@ -362,5 +362,8 @@ def delete_guest(guest_id):
 if __name__ == '__main__':
     # Initialize the database and create the table if it doesn't exist
     init_db()
-    # Run the application
-    app.run(debug=True, port=5000)
+    # This block is for local development.
+    # In production, a WSGI server like Gunicorn runs the app.
+    # The 'PORT' env var is used by hosting providers like Render.
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)

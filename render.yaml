@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: wedding-rsvp
+    env: python
+    plan: free # Note: free plans have ephemeral filesystems
+    buildCommand: "pip install -r requirements.txt && python -c 'from main import init_db; init_db()'"
+    startCommand: "gunicorn main:app"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.4
+      - key: FLASK_SECRET_KEY
+        generateValue: true # Let Render generate a secure secret key
+      - key: WEDDING_ADMIN_USERNAME
+        value: admin # IMPORTANT: Change this in the Render dashboard for security
+      - key: WEDDING_ADMIN_PASSWORD
+        value: wedding2026 # IMPORTANT: Change this in the Render dashboard for security
