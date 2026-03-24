@@ -25,6 +25,8 @@ def index():
         phone = request.form.get('phone', '').strip()
         kids_allowed = request.form.get('kids_allowed') == 'on'
         max_kids = request.form.get('max_kids', '0').strip()
+        preferred_lang = request.form.get('preferred_lang', 'es')
+        whatsapp_message = request.form.get('whatsapp_message', '').strip()
 
         if not guest_name:
             flash('Guest name is required.')
@@ -42,8 +44,8 @@ def index():
 
         with get_db() as conn:
             conn.execute(
-                'INSERT INTO guests (guest_name, max_guests, kids_allowed, max_kids, token, phone) VALUES (?, ?, ?, ?, ?, ?)',
-                (guest_name, max_guests_int, kids_allowed, max_kids_int, token, phone)
+                'INSERT INTO guests (guest_name, max_guests, kids_allowed, max_kids, token, phone, preferred_lang, whatsapp_message) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                (guest_name, max_guests_int, kids_allowed, max_kids_int, token, phone, preferred_lang, whatsapp_message)
             )
         generated_link = url_for('main.invite', token=token, _external=True)
         flash(f'Invite created for {guest_name}.')
@@ -88,13 +90,17 @@ def upload_excel():
                     except (ValueError, TypeError): max_guests = 1
                     phone = str(row.get('Phone', '')).strip()
                     if phone == 'nan': phone = ''
+                    preferred_lang = str(row.get('Language', 'es')).strip().lower()
+                    if preferred_lang not in ['en', 'es']: preferred_lang = 'es'
+                    whatsapp_message = str(row.get('Message', '')).strip()
+                    if whatsapp_message == 'nan': whatsapp_message = ''
                     kids_allowed = str(row.get('Kids Allowed', 'no')).strip().lower() in ['yes', 'true', '1', 'y']
                     max_kids = 0
                     if kids_allowed:
                         try: max_kids = max(0, int(row.get('Max Kids', 0)))
                         except (ValueError, TypeError): max_kids = 0
                     token = secrets.token_urlsafe(10)
-                    conn.execute('INSERT INTO guests (guest_name, max_guests, kids_allowed, max_kids, token, phone) VALUES (?, ?, ?, ?, ?, ?)', (guest_name, max_guests, kids_allowed, max_kids, token, phone))
+                    conn.execute('INSERT INTO guests (guest_name, max_guests, kids_allowed, max_kids, token, phone, preferred_lang, whatsapp_message) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', (guest_name, max_guests, kids_allowed, max_kids, token, phone, preferred_lang, whatsapp_message))
                     count += 1
             flash(f'Successfully imported {count} guests from {file.filename}.')
         except Exception as e:
@@ -112,6 +118,8 @@ def update_guest(guest_id):
     phone = request.form.get('phone', '').strip()
     kids_allowed = request.form.get('kids_allowed') == 'on'
     max_kids = request.form.get('max_kids', '0').strip()
+    preferred_lang = request.form.get('preferred_lang', 'es')
+    whatsapp_message = request.form.get('whatsapp_message', '').strip()
 
     if not guest_name:
         flash('Guest name is required to update an invite.')
@@ -127,7 +135,7 @@ def update_guest(guest_id):
     if not kids_allowed: max_kids_int = 0
 
     with get_db() as conn:
-        conn.execute('UPDATE guests SET guest_name = ?, max_guests = ?, kids_allowed = ?, max_kids = ?, phone = ? WHERE id = ?', (guest_name, max_guests_int, kids_allowed, max_kids_int, phone, guest_id))
+        conn.execute('UPDATE guests SET guest_name = ?, max_guests = ?, kids_allowed = ?, max_kids = ?, phone = ?, preferred_lang = ?, whatsapp_message = ? WHERE id = ?', (guest_name, max_guests_int, kids_allowed, max_kids_int, phone, preferred_lang, whatsapp_message, guest_id))
     flash(f'Invite updated for {guest_name}.')
     return redirect(url_for('admin.index'))
 

@@ -30,7 +30,7 @@ def ensure_column(conn, table_name, column_name, definition):
 def init_db():
     db = get_db()
     # This is a non-destructive init, it only creates tables if they don't exist
-    db.execute('CREATE TABLE IF NOT EXISTS guests (id INTEGER PRIMARY KEY, guest_name TEXT NOT NULL, max_guests INTEGER NOT NULL DEFAULT 1, kids_allowed BOOLEAN NOT NULL DEFAULT 0, max_kids INTEGER NOT NULL DEFAULT 0, token TEXT NOT NULL UNIQUE, phone TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)')
+    db.execute('CREATE TABLE IF NOT EXISTS guests (id INTEGER PRIMARY KEY, guest_name TEXT NOT NULL, max_guests INTEGER NOT NULL DEFAULT 1, kids_allowed BOOLEAN NOT NULL DEFAULT 0, max_kids INTEGER NOT NULL DEFAULT 0, token TEXT NOT NULL UNIQUE, phone TEXT, preferred_lang TEXT DEFAULT "es", whatsapp_message TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)')
     db.execute('CREATE TABLE IF NOT EXISTS rsvps (id INTEGER PRIMARY KEY, name TEXT NOT NULL, attending BOOLEAN NOT NULL, guests INTEGER NOT NULL, kids INTEGER NOT NULL DEFAULT 0, dietary_restrictions TEXT, guest_token TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)')
     db.execute('CREATE TABLE IF NOT EXISTS photos (id INTEGER PRIMARY KEY, filename TEXT NOT NULL UNIQUE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)')
     db.execute('CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)')
@@ -40,6 +40,8 @@ def init_db():
     ensure_column(db, 'rsvps', 'guest_token', 'TEXT')
     ensure_column(db, 'rsvps', 'created_at', 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
     ensure_column(db, 'guests', 'phone', 'TEXT')
+    ensure_column(db, 'guests', 'preferred_lang', 'TEXT DEFAULT "es"')
+    ensure_column(db, 'guests', 'whatsapp_message', 'TEXT')
 
 
 def get_setting(key, default=None):

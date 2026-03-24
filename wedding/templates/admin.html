@@ -43,6 +43,19 @@
             </div>
 
             <div class="field">
+                <label for="preferred_lang">Message Language</label>
+                <select id="preferred_lang" name="preferred_lang">
+                    <option value="es">Spanish</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+
+            <div class="field" style="grid-column: span 2;">
+                <label for="whatsapp_message">Personalized WhatsApp Message (Optional)</label>
+                <textarea id="whatsapp_message" name="whatsapp_message" placeholder="Leave blank to use default message" rows="2" style="width: 100%; border-radius: 8px; padding: 10px; border: 1px solid #ddd;"></textarea>
+            </div>
+
+            <div class="field">
                 <label for="max_kids">Max kids</label>
                 <input type="number" id="max_kids" name="max_kids" min="0" value="0" required>
             </div>
@@ -69,7 +82,7 @@
         <hr>
 
         <h3>Bulk Import Guests</h3>
-        <p style="font-size: 0.9em; opacity: 0.9;">Upload an Excel (.xlsx) file with columns: <strong>Name</strong>, <strong>Max Guests</strong>, and optionally <strong>Phone</strong>, <strong>Kids Allowed</strong> (Yes/No), <strong>Max Kids</strong>.</p>
+        <p style="font-size: 0.9em; opacity: 0.9;">Upload an Excel (.xlsx) file with columns: <strong>Name</strong>, <strong>Max Guests</strong>, and optionally <strong>Phone</strong>, <strong>Language</strong> (en/es), <strong>Message</strong>, <strong>Kids Allowed</strong> (Yes/No), <strong>Max Kids</strong>.</p>
         <form action="{{ url_for('admin.upload_excel') }}" method="POST" enctype="multipart/form-data" class="inline-upload-form">
             <div class="field" style="flex: 1;">
                 <label for="file">Excel File</label>
@@ -155,6 +168,17 @@
                                     <span class="small">Phone</span>
                                     <input type="text" name="phone" value="{{ item.phone or '' }}" placeholder="WhatsApp number">
                                 </label>
+                                <label>
+                                    <span class="small">Language</span>
+                                    <select name="preferred_lang" style="height: 42px; padding: 10px; border-radius: 8px;">
+                                        <option value="es" {{ 'selected' if item.preferred_lang == 'es' else '' }}>ES</option>
+                                        <option value="en" {{ 'selected' if item.preferred_lang == 'en' else '' }}>EN</option>
+                                    </select>
+                                </label>
+                                <label style="grid-column: span 2;">
+                                    <span class="small">Personalized WhatsApp Message</span>
+                                    <textarea name="whatsapp_message" placeholder="Leave blank for default" rows="1" style="width: 100%; border-radius: 8px; padding: 10px; border: 1px solid #ddd;">{{ item.whatsapp_message or '' }}</textarea>
+                                </label>
                                 <label class="checkbox">
                                     <input type="checkbox" name="kids_allowed" {% if item.kids_allowed %}checked{% endif %}>
                                     Kids
@@ -174,7 +198,10 @@
                         <div class="small">{{ url_for('main.invite', token=item.token, _external=True) }}</div>
                         {% if item.phone %}
                         <div style="margin-top: 5px;">
-                            <a href="https://wa.me/{{ item.phone }}?text=Hola%20{{ item.guest_name | urlencode }},%20te%20invitamos%20a%20nuestra%20boda!%20Confirma%20aquí:%20{{ url_for('main.invite', token=item.token, _external=True) | urlencode }}" 
+                            {% set default_msg_es = "Hola " ~ item.guest_name ~ ", te invitamos a nuestra boda! Confirma aquí: " ~ url_for('main.invite', token=item.token, _external=True) %}
+                            {% set default_msg_en = "Hello " ~ item.guest_name ~ ", you are invited to our wedding! Confirm here: " ~ url_for('main.invite', token=item.token, _external=True) %}
+                            {% set final_msg = item.whatsapp_message if item.whatsapp_message else (default_msg_en if item.preferred_lang == 'en' else default_msg_es) %}
+                            <a href="https://wa.me/{{ item.phone }}?text={{ final_msg | urlencode }}" 
                                target="_blank" class="btn" style="background-color: #25D366; color: white; border: none; padding: 5px 10px; font-size: 0.9rem; text-decoration: none; display: inline-block;">
                                Send WhatsApp
                             </a>

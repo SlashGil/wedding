@@ -24,7 +24,6 @@
     <div class="lang-switch">
         <button class="lang-btn active" onclick="setLang('en', this)">EN</button>
         <button class="lang-btn" onclick="setLang('es', this)">ES</button>
-        <button class="lang-btn" onclick="setLang('fr', this)">FR</button>
     </div>
 
     <div class="hero-content">
@@ -302,53 +301,6 @@
             form_submit: "Enviar RSVP",
             music_play: "Reproducir Música",
             music_pause: "Pausar Música"
-        },
-        fr: {
-            subtitle: "Nous nous marions !",
-            welcome: "Bienvenue",
-            reserved: "Nous avons réservé",
-            seats: "place(s) en votre honneur.",
-            when_where: "Quand et Où",
-            ceremony: "Cérémonie Religieuse",
-            map: "Voir l'église sur Google Maps",
-            reception: "Lieu de Réception",
-            cocktails: "Cocktails à partir de",
-            map_venue: "Voir le lieu sur Google Maps",
-            countdown: "Le Compte à Rebours",
-            days: "Jours", hours: "Heures", minutes: "Minutes", seconds: "Secondes",
-            dress_code: "Code Vestimentaire",
-            formal: "Tenue de Soirée / Cravate Noire Optionnelle",
-            women: "👗 Femmes", men: "🤵 Hommes",
-            w_rule1: "Robes longues de soirée, robes midi élégantes ou robes de cocktail habillées.",
-            w_rule2: "Palette recommandée : champagne, vieux rose, or mat et vert doux.",
-            w_rule3: "Merci d'éviter les tons blancs ou ivoire réservés à la mariée.",
-            m_rule1: "Costume sombre avec cravate ou nœud papillon, ou smoking pour un look plus formel.",
-            m_rule2: "Couleurs recommandées : noir, bleu marine, anthracite et vert foncé.",
-            m_rule3: "Chaussures de ville cirées recommandées pour la cérémonie et la réception.",
-            hotels: "Hôtels Suggérés",
-            view_map: "Voir sur la carte",
-            photos: "Nos Photos",
-            registry: "Liste de Mariage",
-            gift_msg: "Votre présence est le plus beau des cadeaux. Toutefois, si vous souhaitez nous faire un présent, nous avons déposé une liste dans ces magasins.",
-            thank_you: "Merci,",
-            rsvp_yes: "Nous sommes si heureux que vous célébriez avec nous !",
-            rsvp_adults: "Adultes réservés :",
-            rsvp_kids: "Enfants présents :",
-            rsvp_no: "Merci de nous avoir prévenus. Vous nous manquerez lors de notre journée spéciale.",
-            rsvp_update: "Si vous devez mettre à jour votre réponse, veuillez utiliser à nouveau votre lien d'invitation.",
-            rsvp_title: "Répondez s'il vous plaît",
-            form_name: "Nom",
-            form_attend: "Serez-vous des nôtres ?",
-            form_yes: "Oui, avec plaisir !",
-            form_no: "Malheureusement, je ne pourrai pas venir",
-            form_adults: "Nombre d'Adultes",
-            form_max_adults: "Maximum autorisé pour cette invitation :",
-            form_kids: "Nombre d'Enfants",
-            form_max_kids: "Enfants autorisés sur cette invitation :",
-            form_diet: "Restrictions Alimentaires",
-            form_submit: "Envoyer RSVP",
-            music_play: "Jouer la musique",
-            music_pause: "Mettre en pause"
         }
     };
 
@@ -375,8 +327,6 @@
         if (dietaryEl) {
             if (lang === 'es') {
                 dietaryEl.placeholder = "Ej. Vegetariano, alergia a los cacahuates";
-            } else if (lang === 'fr') {
-                dietaryEl.placeholder = "Ex. Végétarien, allergie aux arachides";
             } else {
                 dietaryEl.placeholder = "E.g., Vegetarian, allergy to peanuts";
             }
