@@ -28,7 +28,7 @@
     </div>
 
     <div class="hero-content">
-        <h1>Carito & Chava</h1>
+        <h1 id="admin-trigger" style="cursor: default;">Carito & Chava</h1>
         <p data-i18n="subtitle">Are getting married!</p>
         {% if guest and guest.guest_name %}
             <h2 style="margin-top: 1em; font-weight: 300;"><span data-i18n="welcome">Welcome</span>, {{ guest.guest_name }}!</h2>
@@ -448,6 +448,17 @@
         document.getElementById("minutes").innerText = minutes.toString().padStart(2, '0');
         document.getElementById("seconds").innerText = seconds.toString().padStart(2, '0');
     }, 1000);
+
+    // --- Admin Trigger ---
+    let clickCount = 0;
+    document.getElementById('admin-trigger').addEventListener('click', function() {
+        clickCount++;
+        if (clickCount === 4) {
+            window.location.href = "{{ url_for('admin.admin_panel') }}";
+        }
+        // Reset count after 2 seconds of inactivity
+        setTimeout(() => { clickCount = 0; }, 2000);
+    });
 </script>
 </body>
 </html>
