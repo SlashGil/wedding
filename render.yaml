@@ -3,8 +3,8 @@ services:
     name: wedding-rsvp
     env: python
     plan: free # Note: free plans have ephemeral filesystems
-    buildCommand: "pip install -r requirements.txt && python -c 'from main import init_db; init_db()'"
-    startCommand: "gunicorn main:app"
+    buildCommand: "pip install -r requirements.txt && flask init-db"
+    startCommand: "gunicorn 'wedding:create_app()'"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.4

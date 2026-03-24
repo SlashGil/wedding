@@ -4,6 +4,7 @@ import secrets
 import os
 from functools import wraps
 import pandas as pd
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 # Use an environment variable for the secret key in production for security
@@ -12,6 +13,14 @@ app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'a-super-secret-key-for-dev-
 DATABASE = 'rsvp.db'
 ADMIN_USERNAME = os.environ.get('WEDDING_ADMIN_USERNAME', 'admin')
 ADMIN_PASSWORD = os.environ.get('WEDDING_ADMIN_PASSWORD', 'wedding2026')
+
+UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'photos')
+HERO_UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def login_required(view_func):
@@ -29,6 +38,17 @@ def get_db():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def get_setting(key, default=None):
+    with get_db() as conn:
+        row = conn.execute('SELECT value FROM settings WHERE key = ?', (key,)).fetchone()
+        return row['value'] if row else default
+
+
+def set_setting(key, value):
+    with get_db() as conn:
+        conn.execute('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', (key, value))
 
 
 def ensure_column(conn, table_name, column_name, definition):
@@ -65,6 +85,21 @@ def init_db():
             )
         ''')
 
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS photos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                filename TEXT NOT NULL UNIQUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT
+            )
+        ''')
+
         # Lightweight migration for old database versions
         ensure_column(conn, 'rsvps', 'kids', 'INTEGER NOT NULL DEFAULT 0')
         ensure_column(conn, 'rsvps', 'guest_token', 'TEXT')
@@ -84,19 +119,31 @@ def index():
         'max_kids': 0,
     }
 
-    return render_template('index.html', guest=guest, rsvp_submitted=False, submitted_data=None)
+    hero_filename = get_setting('hero_image_filename')
+    hero_image_url = url_for('static', filename='uploads/' + hero_filename) if hero_filename else 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1920&q=80'
+
+    with get_db() as conn:
+        photos = conn.execute('SELECT filename FROM photos ORDER BY created_at DESC').fetchall()
+
+    return render_template('index.html', guest=guest, rsvp_submitted=False, submitted_data=None, photos=photos, hero_image_url=hero_image_url)
 
 
 @app.route('/invite/<token>')
 def invite(token):
     with get_db() as conn:
         guest = conn.execute('SELECT * FROM guests WHERE token = ?', (token,)).fetchone()
+        photos = conn.execute('SELECT filename FROM photos ORDER BY created_at DESC').fetchall()
 
     if not guest:
         flash('This invite link is invalid. Please contact the couple.')
         return redirect(url_for('index'))
 
-    return render_template('index.html', guest=guest, rsvp_submitted=False, submitted_data=None)
+    hero_filename = get_setting('hero_image_filename')
+    hero_image_url = url_for('static', filename='uploads/' + hero_filename) if hero_filename else 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1920&q=80'
+
+    return render_template(
+        'index.html', guest=guest, rsvp_submitted=False, submitted_data=None, photos=photos, hero_image_url=hero_image_url
+    )
 
 
 @app.route('/rsvp', methods=['POST'])
@@ -150,7 +197,13 @@ def rsvp():
             'kids': kids,
             'kids_allowed': kids_allowed,
         }
-        return render_template('index.html', guest=guest, rsvp_submitted=True, submitted_data=submitted_data)
+        hero_filename = get_setting('hero_image_filename')
+        hero_image_url = url_for('static', filename='uploads/' + hero_filename) if hero_filename else 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1920&q=80'
+
+        with get_db() as conn:
+            photos = conn.execute('SELECT filename FROM photos ORDER BY created_at DESC').fetchall()
+
+        return render_template('index.html', guest=guest, rsvp_submitted=True, submitted_data=submitted_data, photos=photos, hero_image_url=hero_image_url)
 
     flash('Thank you for your RSVP!')
     return redirect(url_for('index', name=name, guests=guests))
@@ -236,12 +289,18 @@ def admin():
             LEFT JOIN guests g ON r.guest_token = g.token
             ORDER BY r.id DESC
         ''').fetchall()
+        uploaded_photos = conn.execute('SELECT id, filename FROM photos ORDER BY id DESC').fetchall()
+
+    current_hero_filename = get_setting('hero_image_filename')
+    current_hero_url = url_for('static', filename='uploads/' + current_hero_filename) if current_hero_filename else None
 
     return render_template(
         'admin.html',
         generated_link=generated_link,
         guest_links=guest_links,
-        rsvp_answers=rsvp_answers
+        rsvp_answers=rsvp_answers,
+        uploaded_photos=uploaded_photos,
+        current_hero_url=current_hero_url
     )
 
 
@@ -356,6 +415,92 @@ def delete_guest(guest_id):
         conn.execute('DELETE FROM rsvps WHERE guest_token = ?', (guest['token'],))
 
     flash(f"Invite deleted for {guest['guest_name']}.")
+    return redirect(url_for('admin'))
+
+
+@app.route('/admin/upload_photo', methods=['POST'])
+@login_required
+def admin_upload_photo():
+    if 'photo' not in request.files:
+        flash('No file part')
+        return redirect(url_for('admin'))
+
+    file = request.files['photo']
+    if file.filename == '':
+        flash('No selected file')
+        return redirect(url_for('admin'))
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+
+        if os.path.exists(file_path):
+            flash(f'A photo named "{filename}" already exists. Please rename your file and try again.')
+            return redirect(url_for('admin'))
+
+        try:
+            file.save(file_path)
+            with get_db() as conn:
+                conn.execute('INSERT INTO photos (filename) VALUES (?)', (filename,))
+            flash(f'Photo "{filename}" uploaded successfully.')
+        except Exception as e:
+            flash(f'An error occurred: {str(e)}')
+    else:
+        flash(f'Invalid file type. Allowed types are: {", ".join(ALLOWED_EXTENSIONS)}.')
+
+    return redirect(url_for('admin'))
+
+
+@app.route('/admin/photo/<int:photo_id>/delete', methods=['POST'])
+@login_required
+def delete_photo(photo_id):
+    with get_db() as conn:
+        photo = conn.execute('SELECT filename FROM photos WHERE id = ?', (photo_id,)).fetchone()
+        if not photo:
+            flash('Photo not found.')
+            return redirect(url_for('admin'))
+        try:
+            file_path = os.path.join(UPLOAD_FOLDER, photo['filename'])
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            conn.execute('DELETE FROM photos WHERE id = ?', (photo_id,))
+            flash(f"Photo '{photo['filename']}' deleted successfully.")
+        except Exception as e:
+            flash(f"Error deleting photo: {str(e)}")
+    return redirect(url_for('admin'))
+
+
+@app.route('/admin/upload_hero', methods=['POST'])
+@login_required
+def admin_upload_hero():
+    if 'hero_image' not in request.files:
+        flash('No file part for hero image.')
+        return redirect(url_for('admin'))
+
+    file = request.files['hero_image']
+    if file.filename == '':
+        flash('No file selected for hero image.')
+        return redirect(url_for('admin'))
+
+    if file and allowed_file(file.filename):
+        ext = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"hero_{secrets.token_hex(8)}.{ext}"
+        os.makedirs(HERO_UPLOAD_FOLDER, exist_ok=True)
+        file_path = os.path.join(HERO_UPLOAD_FOLDER, filename)
+        old_filename = get_setting('hero_image_filename')
+        try:
+            file.save(file_path)
+            set_setting('hero_image_filename', filename)
+            flash('Hero image updated successfully.')
+            if old_filename:
+                old_file_path = os.path.join(HERO_UPLOAD_FOLDER, old_filename)
+                if os.path.exists(old_file_path):
+                    os.remove(old_file_path)
+        except Exception as e:
+            flash(f'An error occurred while updating hero image: {str(e)}')
+    else:
+        flash(f'Invalid file type for hero image. Allowed: {", ".join(ALLOWED_EXTENSIONS)}.')
     return redirect(url_for('admin'))
 
 
