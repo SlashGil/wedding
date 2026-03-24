@@ -22,6 +22,7 @@ def index():
     if request.method == 'POST':
         guest_name = request.form.get('guest_name', '').strip()
         max_guests = request.form.get('max_guests', '1').strip()
+        phone = request.form.get('phone', '').strip()
         kids_allowed = request.form.get('kids_allowed') == 'on'
         max_kids = request.form.get('max_kids', '0').strip()
 
@@ -41,8 +42,8 @@ def index():
 
         with get_db() as conn:
             conn.execute(
-                'INSERT INTO guests (guest_name, max_guests, kids_allowed, max_kids, token) VALUES (?, ?, ?, ?, ?)',
-                (guest_name, max_guests_int, kids_allowed, max_kids_int, token)
+                'INSERT INTO guests (guest_name, max_guests, kids_allowed, max_kids, token, phone) VALUES (?, ?, ?, ?, ?, ?)',
+                (guest_name, max_guests_int, kids_allowed, max_kids_int, token, phone)
             )
         generated_link = url_for('main.invite', token=token, _external=True)
         flash(f'Invite created for {guest_name}.')
@@ -85,13 +86,15 @@ def upload_excel():
                     if not guest_name or guest_name == 'nan': continue
                     try: max_guests = max(1, int(row['Max Guests']))
                     except (ValueError, TypeError): max_guests = 1
+                    phone = str(row.get('Phone', '')).strip()
+                    if phone == 'nan': phone = ''
                     kids_allowed = str(row.get('Kids Allowed', 'no')).strip().lower() in ['yes', 'true', '1', 'y']
                     max_kids = 0
                     if kids_allowed:
                         try: max_kids = max(0, int(row.get('Max Kids', 0)))
                         except (ValueError, TypeError): max_kids = 0
                     token = secrets.token_urlsafe(10)
-                    conn.execute('INSERT INTO guests (guest_name, max_guests, kids_allowed, max_kids, token) VALUES (?, ?, ?, ?, ?)', (guest_name, max_guests, kids_allowed, max_kids, token))
+                    conn.execute('INSERT INTO guests (guest_name, max_guests, kids_allowed, max_kids, token, phone) VALUES (?, ?, ?, ?, ?, ?)', (guest_name, max_guests, kids_allowed, max_kids, token, phone))
                     count += 1
             flash(f'Successfully imported {count} guests from {file.filename}.')
         except Exception as e:
@@ -106,6 +109,7 @@ def upload_excel():
 def update_guest(guest_id):
     guest_name = request.form.get('guest_name', '').strip()
     max_guests = request.form.get('max_guests', '1').strip()
+    phone = request.form.get('phone', '').strip()
     kids_allowed = request.form.get('kids_allowed') == 'on'
     max_kids = request.form.get('max_kids', '0').strip()
 
@@ -123,7 +127,7 @@ def update_guest(guest_id):
     if not kids_allowed: max_kids_int = 0
 
     with get_db() as conn:
-        conn.execute('UPDATE guests SET guest_name = ?, max_guests = ?, kids_allowed = ?, max_kids = ? WHERE id = ?', (guest_name, max_guests_int, kids_allowed, max_kids_int, guest_id))
+        conn.execute('UPDATE guests SET guest_name = ?, max_guests = ?, kids_allowed = ?, max_kids = ?, phone = ? WHERE id = ?', (guest_name, max_guests_int, kids_allowed, max_kids_int, phone, guest_id))
     flash(f'Invite updated for {guest_name}.')
     return redirect(url_for('admin.index'))
 

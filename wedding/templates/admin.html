@@ -38,6 +38,11 @@
             </div>
 
             <div class="field">
+                <label for="phone">Phone (WhatsApp)</label>
+                <input type="text" id="phone" name="phone" placeholder="e.g. 521234567890">
+            </div>
+
+            <div class="field">
                 <label for="max_kids">Max kids</label>
                 <input type="number" id="max_kids" name="max_kids" min="0" value="0" required>
             </div>
@@ -64,7 +69,7 @@
         <hr>
 
         <h3>Bulk Import Guests</h3>
-        <p style="font-size: 0.9em; opacity: 0.9;">Upload an Excel (.xlsx) file with columns: <strong>Name</strong>, <strong>Max Guests</strong>, and optionally <strong>Kids Allowed</strong> (Yes/No), <strong>Max Kids</strong>.</p>
+        <p style="font-size: 0.9em; opacity: 0.9;">Upload an Excel (.xlsx) file with columns: <strong>Name</strong>, <strong>Max Guests</strong>, and optionally <strong>Phone</strong>, <strong>Kids Allowed</strong> (Yes/No), <strong>Max Kids</strong>.</p>
         <form action="{{ url_for('admin.upload_excel') }}" method="POST" enctype="multipart/form-data" class="inline-upload-form">
             <div class="field" style="flex: 1;">
                 <label for="file">Excel File</label>
@@ -146,6 +151,10 @@
                                     <span class="small">Adults</span>
                                     <input type="number" name="max_guests" min="1" value="{{ item.max_guests }}" required>
                                 </label>
+                                <label>
+                                    <span class="small">Phone</span>
+                                    <input type="text" name="phone" value="{{ item.phone or '' }}" placeholder="WhatsApp number">
+                                </label>
                                 <label class="checkbox">
                                     <input type="checkbox" name="kids_allowed" {% if item.kids_allowed %}checked{% endif %}>
                                     Kids
@@ -163,6 +172,14 @@
                     <td>
                         <a href="{{ url_for('main.invite', token=item.token, _external=True) }}" target="_blank" rel="noopener noreferrer">Open invite link</a>
                         <div class="small">{{ url_for('main.invite', token=item.token, _external=True) }}</div>
+                        {% if item.phone %}
+                        <div style="margin-top: 5px;">
+                            <a href="https://wa.me/{{ item.phone }}?text=Hola%20{{ item.guest_name | urlencode }},%20te%20invitamos%20a%20nuestra%20boda!%20Confirma%20aquí:%20{{ url_for('main.invite', token=item.token, _external=True) | urlencode }}" 
+                               target="_blank" class="btn" style="background-color: #25D366; color: white; border: none; padding: 5px 10px; font-size: 0.9rem; text-decoration: none; display: inline-block;">
+                               Send WhatsApp
+                            </a>
+                        </div>
+                        {% endif %}
                         <form action="{{ url_for('admin.delete_guest', guest_id=item.id) }}" method="POST" onsubmit="return confirm('Delete this invite and related RSVP answers?');" style="margin-top: 10px;">
                             <button class="btn btn-danger" type="submit">Delete Invite</button>
                         </form>
