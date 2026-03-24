@@ -1,7 +1,7 @@
 from flask import (
     Blueprint, flash, redirect, render_template, request, url_for
 )
-from .db import get_db
+from .db import get_db, get_setting
 
 bp = Blueprint('main', __name__)
 
@@ -19,7 +19,10 @@ def index():
         'max_kids': 0,
     }
 
-    return render_template('index.html', guest=guest, rsvp_submitted=False, submitted_data=None)
+    dress_code_es = get_setting('dress_code_es', 'Formal / Etiqueta Opcional')
+    dress_code_en = get_setting('dress_code_en', 'Formal / Black-Tie Optional')
+
+    return render_template('index.html', guest=guest, rsvp_submitted=False, submitted_data=None, dress_code_es=dress_code_es, dress_code_en=dress_code_en)
 
 
 @bp.route('/invite/<token>')
@@ -31,7 +34,10 @@ def invite(token):
         flash('This invite link is invalid. Please contact the couple.')
         return redirect(url_for('main.index'))
 
-    return render_template('index.html', guest=guest, rsvp_submitted=False, submitted_data=None)
+    dress_code_es = get_setting('dress_code_es', 'Formal / Etiqueta Opcional')
+    dress_code_en = get_setting('dress_code_en', 'Formal / Black-Tie Optional')
+
+    return render_template('index.html', guest=guest, rsvp_submitted=False, submitted_data=None, dress_code_es=dress_code_es, dress_code_en=dress_code_en)
 
 
 @bp.route('/rsvp', methods=['POST'])
@@ -81,7 +87,10 @@ def rsvp():
             'kids': kids,
             'kids_allowed': kids_allowed,
         }
-        return render_template('index.html', guest=guest, rsvp_submitted=True, submitted_data=submitted_data)
+        dress_code_es = get_setting('dress_code_es', 'Formal / Etiqueta Opcional')
+        dress_code_en = get_setting('dress_code_en', 'Formal / Black-Tie Optional')
+
+        return render_template('index.html', guest=guest, rsvp_submitted=True, submitted_data=submitted_data, dress_code_es=dress_code_es, dress_code_en=dress_code_en)
 
     flash('Thank you for your RSVP!')
     return redirect(url_for('main.index', name=name, guests=guests))

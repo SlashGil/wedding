@@ -20,6 +20,14 @@ def allowed_file(filename):
 def index():
     generated_link = None
     if request.method == 'POST':
+        if 'update_dress_code' in request.form:
+            dress_code_es = request.form.get('dress_code_es', '').strip()
+            dress_code_en = request.form.get('dress_code_en', '').strip()
+            set_setting('dress_code_es', dress_code_es)
+            set_setting('dress_code_en', dress_code_en)
+            flash('Dress code updated.')
+            return redirect(url_for('admin.index'))
+
         guest_name = request.form.get('guest_name', '').strip()
         max_guests = request.form.get('max_guests', '1').strip()
         phone = request.form.get('phone', '').strip()
@@ -58,7 +66,10 @@ def index():
     current_hero_filename = get_setting('hero_image_filename')
     current_hero_url = url_for('static', filename='uploads/' + current_hero_filename) if current_hero_filename else None
 
-    return render_template('admin.html', generated_link=generated_link, guest_links=guest_links, rsvp_answers=rsvp_answers, uploaded_photos=uploaded_photos, current_hero_url=current_hero_url)
+    dress_code_es = get_setting('dress_code_es', 'Formal / Etiqueta Opcional')
+    dress_code_en = get_setting('dress_code_en', 'Formal / Black-Tie Optional')
+
+    return render_template('admin.html', generated_link=generated_link, guest_links=guest_links, rsvp_answers=rsvp_answers, uploaded_photos=uploaded_photos, current_hero_url=current_hero_url, dress_code_es=dress_code_es, dress_code_en=dress_code_en)
 
 
 @bp.route('/upload_excel', methods=['POST'])
