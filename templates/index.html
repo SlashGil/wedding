@@ -174,7 +174,6 @@
             <p style="margin-bottom: 0;" data-i18n="rsvp_update">If you need to update your response, please use your invitation link again.</p>
         </div>
     {% else %}
-        <form class="rsvp-form" action="/rsvp" method="POST">
         <form class="rsvp-form" action="{{ url_for('main.rsvp') }}" method="POST">
             <input type="hidden" name="guest_token" value="{{ guest.token if guest else '' }}">
 

@@ -8,6 +8,8 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.4
+      - key: FLASK_APP
+        value: wedding
       - key: FLASK_SECRET_KEY
         generateValue: true # Let Render generate a secure secret key
       - key: WEDDING_ADMIN_USERNAME
