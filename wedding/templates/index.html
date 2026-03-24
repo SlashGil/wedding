@@ -22,9 +22,8 @@
 
 <header class="hero" style="background-image: url('{{ hero_image_url }}');">
     <div class="lang-switch">
-        <button class="lang-btn active" onclick="setLang('en', this)">EN</button>
-        <button class="lang-btn" onclick="setLang('es', this)">ES</button>
-        <button class="lang-btn" onclick="setLang('fr', this)">FR</button>
+        <button class="lang-btn" onclick="setLang('en', this)">EN</button>
+        <button class="lang-btn active" onclick="setLang('es', this)">ES</button>
     </div>
 
     <div class="hero-content">
@@ -52,37 +51,15 @@
             <div class="icon-title"><span>💒</span><strong data-i18n="ceremony">Church Ceremony</strong></div>
             <p>Parroquia El Carmen</p>
             <p>Tehuacán, Puebla</p>
-            <p>July 11, 2026 at 2:00 PM</p>
+            <p data-i18n="ceremony_date">July 11, 2026 at 2:00 PM</p>
             <a class="map-link" href="https://maps.google.com/?q=Parroquia+El+Carmen+Tehuacan+Puebla" target="_blank" rel="noopener noreferrer"><span data-i18n="map">Open church in Google Maps</span> ↗</a>
         </div>
         <div class="venue-card">
             <div class="icon-title"><span>🏨</span><strong data-i18n="reception">Reception Venue</strong></div>
             <p>Rancho El Molino</p>
             <p>Tehuacán, Puebla</p>
-            <p><span data-i18n="cocktails">Cocktails start at</span> 3:30 PM</p>
+            <p><span data-i18n="cocktails">Cocktails start at</span> <span data-i18n="cocktails_time">3:30 PM</span></p>
             <a class="map-link" href="https://maps.google.com/?q=Rancho+El+Molino+Tehuacan+Puebla" target="_blank" rel="noopener noreferrer"><span data-i18n="map_venue">Open venue in Google Maps</span> ↗</a>
-        </div>
-    </div>
-</div>
-
-<div class="section section-light">
-    <h2 data-i18n="countdown">The Countdown</h2>
-    <div class="countdown-container" id="countdown">
-        <div class="countdown-box">
-            <span class="number" id="days">00</span>
-            <span class="label" data-i18n="days">Days</span>
-        </div>
-        <div class="countdown-box">
-            <span class="number" id="hours">00</span>
-            <span class="label" data-i18n="hours">Hours</span>
-        </div>
-        <div class="countdown-box">
-            <span class="number" id="minutes">00</span>
-            <span class="label" data-i18n="minutes">Minutes</span>
-        </div>
-        <div class="countdown-box">
-            <span class="number" id="seconds">00</span>
-            <span class="label" data-i18n="seconds">Seconds</span>
         </div>
     </div>
 </div>
@@ -111,27 +88,37 @@
 </div>
 
 <div class="section section-light">
-    <h2 data-i18n="hotels">Suggested Hotels</h2>
-    <div class="hotels-grid">
-        <div class="venue-card">
-            <div class="icon-title"><span>🛏️</span><strong>Hotel Mexico</strong></div>
-            <p>Independencia Ote. 101, Centro, Tehuacán</p>
-            <a class="map-link" href="https://maps.google.com/?q=Hotel+Mexico+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
-        </div>
-        <div class="venue-card">
-            <div class="icon-title"><span>🛏️</span><strong>Hotel Villablanca</strong></div>
-            <p>1 Poniente 206, Centro, Tehuacán</p>
-            <a class="map-link" href="https://maps.google.com/?q=Hotel+Villablanca+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
-        </div>
-        <div class="venue-card">
-            <div class="icon-title"><span>🛏️</span><strong>City Express Tehuacán</strong></div>
-            <p>Blvd. Socorro Romero Sanchez 2101</p>
-            <a class="map-link" href="https://maps.google.com/?q=City+Express+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
-        </div>
+    <h2 data-i18n="registry">Gift Registry</h2>
+    <p style="font-size: 1.1em; max-width: 650px; margin: 0 auto 20px auto;" data-i18n="gift_msg">Your presence is the greatest gift of all. However, if you wish to honor us with a gift, we are registered at the following stores.</p>
+    <div class="gift-table">
+        <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51743882" target="_blank" rel="noopener noreferrer">Liverpool</a>
+        <a href="https://www.amazon.com/wedding/" target="_blank" rel="noopener noreferrer">Amazon</a>
     </div>
 </div>
 
 <div class="section section-dark">
+    <h2 data-i18n="countdown">The Countdown</h2>
+    <div class="countdown-container" id="countdown">
+        <div class="countdown-box">
+            <span class="number" id="days">00</span>
+            <span class="label" data-i18n="days">Days</span>
+        </div>
+        <div class="countdown-box">
+            <span class="number" id="hours">00</span>
+            <span class="label" data-i18n="hours">Hours</span>
+        </div>
+        <div class="countdown-box">
+            <span class="number" id="minutes">00</span>
+            <span class="label" data-i18n="minutes">Minutes</span>
+        </div>
+        <div class="countdown-box">
+            <span class="number" id="seconds">00</span>
+            <span class="label" data-i18n="seconds">Seconds</span>
+        </div>
+    </div>
+</div>
+
+<div class="section section-light">
     <h2 data-i18n="photos">Our Photos</h2>
     <div class="photos">
         {% if photos and photos|length > 0 %}
@@ -144,15 +131,6 @@
             <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=400&q=80" alt="Wedding Photo 2">
             <img src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=400&q=80" alt="Wedding Photo 3">
         {% endif %}
-    </div>
-</div>
-
-<div class="section section-light">
-    <h2 data-i18n="registry">Gift Registry</h2>
-    <p style="font-size: 1.1em; max-width: 650px; margin: 0 auto 20px auto;" data-i18n="gift_msg">Your presence is the greatest gift of all. However, if you wish to honor us with a gift, we are registered at the following stores.</p>
-    <div class="gift-table">
-        <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51743882" target="_blank" rel="noopener noreferrer">Liverpool</a>
-        <a href="https://www.amazon.com/wedding/" target="_blank" rel="noopener noreferrer">Amazon</a>
     </div>
 </div>
 
@@ -206,6 +184,27 @@
     {% endif %}
 </div>
 
+<div class="section section-light">
+    <h2 data-i18n="hotels">Suggested Hotels</h2>
+    <div class="hotels-grid">
+        <div class="venue-card">
+            <div class="icon-title"><span>🛏️</span><strong>Hotel Mexico</strong></div>
+            <p>Independencia Ote. 101, Centro, Tehuacán</p>
+            <a class="map-link" href="https://maps.google.com/?q=Hotel+Mexico+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
+        </div>
+        <div class="venue-card">
+            <div class="icon-title"><span>🛏️</span><strong>Hotel Villablanca</strong></div>
+            <p>1 Poniente 206, Centro, Tehuacán</p>
+            <a class="map-link" href="https://maps.google.com/?q=Hotel+Villablanca+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
+        </div>
+        <div class="venue-card">
+            <div class="icon-title"><span>🛏️</span><strong>City Express Tehuacán</strong></div>
+            <p>Blvd. Socorro Romero Sanchez 2101</p>
+            <a class="map-link" href="https://maps.google.com/?q=City+Express+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
+        </div>
+    </div>
+</div>
+
 <script>
     // --- Internationalization (i18n) ---
     const translations = {
@@ -216,14 +215,16 @@
             seats: "seat(s) in your honor.",
             when_where: "When & Where",
             ceremony: "Church Ceremony",
+            ceremony_date: "July 11, 2026 at 2:00 PM",
             map: "Open church in Google Maps",
             reception: "Reception Venue",
             cocktails: "Cocktails start at",
+            cocktails_time: "3:30 PM",
             map_venue: "Open venue in Google Maps",
             countdown: "The Countdown",
             days: "Days", hours: "Hours", minutes: "Minutes", seconds: "Seconds",
             dress_code: "Dress Code",
-            formal: "Formal / Black-Tie Optional",
+            formal: "{{ dress_code_en }}",
             women: "👗 Women", men: "🤵 Men",
             w_rule1: "Long evening gowns, elegant midi dresses, or elevated cocktail dresses.",
             w_rule2: "Recommended palette: champagne, dusty rose, muted gold, and soft green.",
@@ -263,14 +264,16 @@
             seats: "lugar(es) en tu honor.",
             when_where: "Cuándo y Dónde",
             ceremony: "Ceremonia Religiosa",
+            ceremony_date: "11 de Julio de 2026 a las 2:00 PM",
             map: "Ver iglesia en Google Maps",
             reception: "Recepción",
             cocktails: "Cócteles a partir de las",
+            cocktails_time: "3:30 PM",
             map_venue: "Ver lugar en Google Maps",
             countdown: "La Cuenta Regresiva",
             days: "Días", hours: "Horas", minutes: "Minutos", seconds: "Segundos",
             dress_code: "Código de Vestimenta",
-            formal: "Formal / Etiqueta Opcional",
+            formal: "{{ dress_code_es }}",
             women: "👗 Mujeres", men: "🤵 Hombres",
             w_rule1: "Vestidos largos de noche, vestidos midi elegantes o de cóctel de gala.",
             w_rule2: "Colores recomendados: champagne, rosa viejo, dorado opaco y verde suave.",
@@ -302,57 +305,10 @@
             form_submit: "Enviar RSVP",
             music_play: "Reproducir Música",
             music_pause: "Pausar Música"
-        },
-        fr: {
-            subtitle: "Nous nous marions !",
-            welcome: "Bienvenue",
-            reserved: "Nous avons réservé",
-            seats: "place(s) en votre honneur.",
-            when_where: "Quand et Où",
-            ceremony: "Cérémonie Religieuse",
-            map: "Voir l'église sur Google Maps",
-            reception: "Lieu de Réception",
-            cocktails: "Cocktails à partir de",
-            map_venue: "Voir le lieu sur Google Maps",
-            countdown: "Le Compte à Rebours",
-            days: "Jours", hours: "Heures", minutes: "Minutes", seconds: "Secondes",
-            dress_code: "Code Vestimentaire",
-            formal: "Tenue de Soirée / Cravate Noire Optionnelle",
-            women: "👗 Femmes", men: "🤵 Hommes",
-            w_rule1: "Robes longues de soirée, robes midi élégantes ou robes de cocktail habillées.",
-            w_rule2: "Palette recommandée : champagne, vieux rose, or mat et vert doux.",
-            w_rule3: "Merci d'éviter les tons blancs ou ivoire réservés à la mariée.",
-            m_rule1: "Costume sombre avec cravate ou nœud papillon, ou smoking pour un look plus formel.",
-            m_rule2: "Couleurs recommandées : noir, bleu marine, anthracite et vert foncé.",
-            m_rule3: "Chaussures de ville cirées recommandées pour la cérémonie et la réception.",
-            hotels: "Hôtels Suggérés",
-            view_map: "Voir sur la carte",
-            photos: "Nos Photos",
-            registry: "Liste de Mariage",
-            gift_msg: "Votre présence est le plus beau des cadeaux. Toutefois, si vous souhaitez nous faire un présent, nous avons déposé une liste dans ces magasins.",
-            thank_you: "Merci,",
-            rsvp_yes: "Nous sommes si heureux que vous célébriez avec nous !",
-            rsvp_adults: "Adultes réservés :",
-            rsvp_kids: "Enfants présents :",
-            rsvp_no: "Merci de nous avoir prévenus. Vous nous manquerez lors de notre journée spéciale.",
-            rsvp_update: "Si vous devez mettre à jour votre réponse, veuillez utiliser à nouveau votre lien d'invitation.",
-            rsvp_title: "Répondez s'il vous plaît",
-            form_name: "Nom",
-            form_attend: "Serez-vous des nôtres ?",
-            form_yes: "Oui, avec plaisir !",
-            form_no: "Malheureusement, je ne pourrai pas venir",
-            form_adults: "Nombre d'Adultes",
-            form_max_adults: "Maximum autorisé pour cette invitation :",
-            form_kids: "Nombre d'Enfants",
-            form_max_kids: "Enfants autorisés sur cette invitation :",
-            form_diet: "Restrictions Alimentaires",
-            form_submit: "Envoyer RSVP",
-            music_play: "Jouer la musique",
-            music_pause: "Mettre en pause"
         }
     };
 
-    let currentLang = 'en';
+    let currentLang = 'es';
 
     function setLang(lang, buttonElement) {
         currentLang = lang;
@@ -361,7 +317,7 @@
 
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
-            if (translations[lang][key]) {
+            if (translations[lang] && translations[lang][key]) {
                 if(el.tagName === 'OPTION') {
                     el.textContent = translations[lang][key];
                 } else {
@@ -375,8 +331,6 @@
         if (dietaryEl) {
             if (lang === 'es') {
                 dietaryEl.placeholder = "Ej. Vegetariano, alergia a los cacahuates";
-            } else if (lang === 'fr') {
-                dietaryEl.placeholder = "Ex. Végétarien, allergie aux arachides";
             } else {
                 dietaryEl.placeholder = "E.g., Vegetarian, allergy to peanuts";
             }
@@ -385,6 +339,11 @@
         // Update music button text
         updateMusicButtonText();
     }
+
+    // Initialize with ES
+    document.addEventListener('DOMContentLoaded', function() {
+        setLang('es', document.querySelector('.lang-btn[onclick*="es"]'));
+    });
 
     // --- Audio Control ---
     const audio = document.getElementById('bg-music');

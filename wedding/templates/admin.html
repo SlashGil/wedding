@@ -63,6 +63,44 @@
 
         <hr>
 
+        <h2>Manage Dress Code</h2>
+        <p style="font-size: 0.9em; opacity: 0.9;">Update the dress code in Spanish. The English version will be automatically updated (you can adjust it below).</p>
+        <form action="{{ url_for('admin.index') }}" method="post" class="inline-upload-form">
+            <input type="hidden" name="update_dress_code" value="1">
+            <div class="field" style="flex: 1;">
+                <label for="dress_code_es">Dress Code (Spanish)</label>
+                <input type="text" name="dress_code_es" id="dress_code_es" value="{{ dress_code_es }}" required oninput="updateEnglishDressCode(this.value)">
+            </div>
+            <div class="field" style="flex: 1;">
+                <label for="dress_code_en">Dress Code (English)</label>
+                <input type="text" name="dress_code_en" id="dress_code_en" value="{{ dress_code_en }}" required>
+            </div>
+            <button class="btn" type="submit">Update Dress Code</button>
+        </form>
+
+        <script>
+            function updateEnglishDressCode(esValue) {
+                const enInput = document.getElementById('dress_code_en');
+                const translations = {
+                    'Formal / Etiqueta Opcional': 'Formal / Black-Tie Optional',
+                    'Etiqueta': 'Black-Tie',
+                    'Formal': 'Formal',
+                    'Semi-formal': 'Semi-formal',
+                    'Casual': 'Casual',
+                    'Guayabera / Formal de Playa': 'Guayabera / Beach Formal'
+                };
+                if (translations[esValue]) {
+                    enInput.value = translations[esValue];
+                } else {
+                    // Default mapping if not in list
+                    if (esValue.toLowerCase().includes('formal')) enInput.value = 'Formal';
+                    else if (esValue.toLowerCase().includes('etiqueta')) enInput.value = 'Black-Tie';
+                }
+            }
+        </script>
+
+        <hr>
+
         <h3>Bulk Import Guests</h3>
         <p style="font-size: 0.9em; opacity: 0.9;">Upload an Excel (.xlsx) file with columns: <strong>Name</strong>, <strong>Max Guests</strong>, and optionally <strong>Kids Allowed</strong> (Yes/No), <strong>Max Kids</strong>.</p>
         <form action="{{ url_for('admin.upload_excel') }}" method="POST" enctype="multipart/form-data" class="inline-upload-form">
