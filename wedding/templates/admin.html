@@ -42,7 +42,7 @@
                 <input type="text" id="phone" name="phone" placeholder="e.g. 521234567890">
             </div>
 
-            <div class="field">
+            <div class="field" style="grid-column: span 1;">
                 <label for="preferred_lang">Message Language</label>
                 <select id="preferred_lang" name="preferred_lang">
                     <option value="es">Spanish</option>
@@ -52,7 +52,7 @@
 
             <div class="field" style="grid-column: span 2;">
                 <label for="whatsapp_message">Personalized WhatsApp Message (Optional)</label>
-                <textarea id="whatsapp_message" name="whatsapp_message" placeholder="Leave blank to use default message" rows="2" style="width: 100%; border-radius: 8px; padding: 10px; border: 1px solid #ddd;"></textarea>
+                <textarea id="whatsapp_message" name="whatsapp_message" placeholder="Leave blank to use default message" rows="2"></textarea>
             </div>
 
             <div class="field">
@@ -208,14 +208,14 @@
                                 </label>
                                 <label>
                                     <span class="small">Language</span>
-                                    <select name="preferred_lang" style="height: 42px; padding: 10px; border-radius: 8px;">
+                                    <select name="preferred_lang">
                                         <option value="es" {{ 'selected' if item.preferred_lang == 'es' else '' }}>ES</option>
                                         <option value="en" {{ 'selected' if item.preferred_lang == 'en' else '' }}>EN</option>
                                     </select>
                                 </label>
-                                <label style="grid-column: span 2;">
+                                <label style="grid-column: span 4;">
                                     <span class="small">Personalized WhatsApp Message</span>
-                                    <textarea name="whatsapp_message" placeholder="Leave blank for default" rows="1" style="width: 100%; border-radius: 8px; padding: 10px; border: 1px solid #ddd;">{{ item.whatsapp_message or '' }}</textarea>
+                                    <textarea name="whatsapp_message" placeholder="Leave blank for default" rows="1">{{ item.whatsapp_message or '' }}</textarea>
                                 </label>
                                 <label class="checkbox">
                                     <input type="checkbox" name="kids_allowed" {% if item.kids_allowed %}checked{% endif %}>
