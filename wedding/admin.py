@@ -195,7 +195,7 @@ def upload_photo():
 
 @bp.route('/photo/<int:photo_id>/delete', methods=['POST'])
 @login_required
-def delete_photo(photo_.id):
+def delete_photo(photo_id):
     with get_db() as conn:
         photo = conn.execute('SELECT filename FROM photos WHERE id = ?', (photo_id,)).fetchone()
         if not photo:
