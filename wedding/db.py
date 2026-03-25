@@ -39,6 +39,7 @@ def init_db():
     ensure_column(db, 'rsvps', 'kids', 'INTEGER NOT NULL DEFAULT 0')
     ensure_column(db, 'rsvps', 'guest_token', 'TEXT')
     ensure_column(db, 'rsvps', 'created_at', 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
+    ensure_column(db, 'guests', 'is_attending', 'BOOLEAN DEFAULT FALSE')
 
 
 def get_setting(key, default=None):

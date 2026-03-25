@@ -132,6 +132,7 @@ def update_guest(guest_id):
     max_guests = request.form.get('max_guests', '1').strip()
     kids_allowed = request.form.get('kids_allowed') == 'on'
     max_kids = request.form.get('max_kids', '0').strip()
+    is_attending = request.form.get('is_attending') == 'on'
 
     if not guest_name:
         flash('Guest name is required to update an invite.')
@@ -147,7 +148,7 @@ def update_guest(guest_id):
     if not kids_allowed: max_kids_int = 0
 
     with get_db() as conn:
-        conn.execute('UPDATE guests SET guest_name = ?, max_guests = ?, kids_allowed = ?, max_kids = ? WHERE id = ?', (guest_name, max_guests_int, kids_allowed, max_kids_int, guest_id))
+        conn.execute('UPDATE guests SET guest_name = ?, max_guests = ?, kids_allowed = ?, max_kids = ?, is_attending = ? WHERE id = ?', (guest_name, max_guests_int, kids_allowed, max_kids_int, is_attending, guest_id))
     flash(f'Invite updated for {guest_name}.')
     return redirect(url_for('admin.index'))
 
@@ -194,7 +195,7 @@ def upload_photo():
 
 @bp.route('/photo/<int:photo_id>/delete', methods=['POST'])
 @login_required
-def delete_photo(photo_id):
+def delete_photo(photo_.id):
     with get_db() as conn:
         photo = conn.execute('SELECT filename FROM photos WHERE id = ?', (photo_id,)).fetchone()
         if not photo:

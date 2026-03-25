@@ -11,19 +11,19 @@
 <div class="container">
     <div class="card card-dark">
         <div class="top-bar">
-            <h1 style="margin: 0;">Wedding Admin Panel</h1>
+            <h1>Wedding Admin Panel</h1>
             <form action="{{ url_for('auth.logout') }}" method="POST">
                 <button class="btn" type="submit">Logout</button>
             </form>
         </div>
         <p>Create personalized RSVP links for each guest and define if they can bring kids.</p>
 
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
         {% endwith %}
 
         <form class="create-form" action="{{ url_for('admin.index') }}" method="POST">
@@ -64,7 +64,7 @@
         <hr>
 
         <h2>Manage Dress Code</h2>
-        <p style="font-size: 0.9em; opacity: 0.9;">Update the dress code in Spanish. The English version will be automatically updated (you can adjust it below).</p>
+        <p>Update the dress code in Spanish. The English version will be automatically updated (you can adjust it below).</p>
         <form action="{{ url_for('admin.index') }}" method="post" class="inline-upload-form">
             <input type="hidden" name="update_dress_code" value="1">
             <div class="field" style="flex: 1;">
@@ -81,7 +81,7 @@
         <hr>
 
         <h2>Pinterest Boards</h2>
-        <p style="font-size: 0.9em; opacity: 0.9;">Add links to your Pinterest boards for dress code inspiration.</p>
+        <p>Add links to your Pinterest boards for dress code inspiration.</p>
         <form action="{{ url_for('admin.index') }}" method="post" class="inline-upload-form">
             <input type="hidden" name="update_pinterest_links" value="1">
             <div class="field" style="flex: 1;">
@@ -106,20 +106,14 @@
                     'Casual': 'Casual',
                     'Guayabera / Formal de Playa': 'Guayabera / Beach Formal'
                 };
-                if (translations[esValue]) {
-                    enInput.value = translations[esValue];
-                } else {
-                    // Default mapping if not in list
-                    if (esValue.toLowerCase().includes('formal')) enInput.value = 'Formal';
-                    else if (esValue.toLowerCase().includes('etiqueta')) enInput.value = 'Black-Tie';
-                }
+                enInput.value = translations[esValue] || '';
             }
         </script>
 
         <hr>
 
-        <h3>Bulk Import Guests</h3>
-        <p style="font-size: 0.9em; opacity: 0.9;">Upload an Excel (.xlsx) file with columns: <strong>Name</strong>, <strong>Max Guests</strong>, and optionally <strong>Kids Allowed</strong> (Yes/No), <strong>Max Kids</strong>.</p>
+        <h2>Bulk Import Guests</h2>
+        <p>Upload an Excel (.xlsx) file with columns: <strong>Name</strong>, <strong>Max Guests</strong>, and optionally <strong>Kids Allowed</strong> (Yes/No), <strong>Max Kids</strong>.</p>
         <form action="{{ url_for('admin.upload_excel') }}" method="POST" enctype="multipart/form-data" class="inline-upload-form">
             <div class="field" style="flex: 1;">
                 <label for="file">Excel File</label>
@@ -131,7 +125,7 @@
         <hr>
 
         <h2>Manage Hero Image</h2>
-        <p style="font-size: 0.9em; opacity: 0.9;">Upload a new hero image. This will replace the main background image on the homepage.</p>
+        <p>Upload a new hero image. This will replace the main background image on the homepage.</p>
         <form action="{{ url_for('admin.upload_hero') }}" method="post" enctype="multipart/form-data" class="inline-upload-form">
             <div class="field" style="flex: 1;">
                 <label for="hero_image">Hero Image File</label>
@@ -141,7 +135,7 @@
         </form>
         {% if current_hero_url %}
             <div class="current-hero" style="margin-top: 20px;">
-                <h4 style="margin-bottom: 10px;">Current Hero Image:</h4>
+                <h4>Current Hero Image:</h4>
                 <img src="{{ current_hero_url }}" alt="Current Hero Image">
             </div>
         {% endif %}
@@ -149,7 +143,7 @@
         <hr>
 
         <h2>Manage Photos</h2>
-        <p style="font-size: 0.9em; opacity: 0.9;">Upload photos for the gallery section on the main page.</p>
+        <p>Upload photos for the gallery section on the main page.</p>
         <form action="{{ url_for('admin.upload_photo') }}" method="post" enctype="multipart/form-data" class="inline-upload-form">
             <div class="field" style="flex: 1;">
                 <label for="photo">Gallery Photo</label>
@@ -163,11 +157,11 @@
             {% if uploaded_photos %}
             <div class="photo-grid">
                 {% for photo in uploaded_photos %}
-                <div class="photo-card" style="background: var(--secondary); border-color: rgba(0,140,141,0.2);">
+                <div class="photo-card">
                     <img src="{{ url_for('static', filename='photos/' + photo.filename) }}" alt="{{ photo.filename }}">
-                    <p style="color: var(--charcoal);">{{ photo.filename }}</p>
+                    <p class="small">{{ photo.filename }}</p>
                     <form action="{{ url_for('admin.delete_photo', photo_id=photo.id) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this photo?');">
-                        <button class="btn btn-danger" type="submit" style="padding: 4px 8px; font-size: 0.8rem;">Delete</button>
+                        <button class="btn btn-danger" type="submit">Delete</button>
                     </form>
                 </div>
                 {% endfor %}
@@ -183,8 +177,8 @@
         <table>
             <thead>
             <tr>
-                <th style="width: 60%;">Invite Settings</th>
-                <th style="width: 40%;">Link & Actions</th>
+                <th>Invite Settings</th>
+                <th>Link & Actions</th>
             </tr>
             </thead>
             <tbody>
@@ -208,6 +202,10 @@
                                 <label>
                                     <span class="small">Max kids</span>
                                     <input type="number" name="max_kids" min="0" value="{{ item.max_kids }}" required>
+                                </label>
+                                <label class="checkbox">
+                                    <input type="checkbox" name="is_attending" {% if item.is_attending %}checked{% endif %}>
+                                    Attending
                                 </label>
                             </div>
                             <div class="row-actions">
@@ -261,7 +259,7 @@
                     <td>{{ rsvp.guests }}</td>
                     <td>{{ rsvp.kids }}</td>
                     <td>{{ rsvp.dietary_restrictions or '-' }}</td>
-                    <td class="small">{{ rsvp.created_at }}</td>
+                    <td class="small">{{ rsvp.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
                 </tr>
             {% else %}
                 <tr>
