@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Guests</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <style>
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card card-light">
+        <div class="top-bar">
+            <div class="header-actions" style="width: 100%;">
+                <a href="{{ url_for('admin.index') }}" class="btn" style="background-color: #666;">&larr; Back to Dashboard</a>
+                <h1>Manage Guest Invites</h1>
+            </div>
+        </div>
+
+        <div class="actions" style="margin-bottom: 30px; display: flex; gap: 15px;">
+            <a href="{{ url_for('admin.new_guest') }}" class="btn" style="background-color: #28a745;">+ Create New Invite</a>
+
+            <div class="import-section" style="border-left: 2px solid #ddd; padding-left: 15px;">
+                <strong>Bulk Import:</strong>
+                <form action="{{ url_for('admin.upload_excel') }}" method="POST" enctype="multipart/form-data" class="inline-upload-form" style="display: inline-flex; align-items: center; gap: 10px; margin-top: 5px;">
+                    <input type="file" name="file" id="file" accept=".xlsx, .xls" required style="font-size: 0.9em;">
+                    <button class="btn" type="submit" style="padding: 5px 10px; font-size: 0.9em;">Import Excel</button>
+                </form>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%;">
+                <thead>
+                <tr>
+                    <th>Invite Settings</th>
+                    <th>Link & Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in guest_links %}
+                    <tr>
+                        <td>
+                            <form action="{{ url_for('admin.update_guest', guest_id=item.id) }}" method="POST">
+                                <div class="inline-fields" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                                    <label>
+                                        <span class="small">Name</span>
+                                        <input type="text" name="guest_name" value="{{ item.guest_name }}" required>
+                                    </label>
+                                    <label>
+                                        <span class="small">Adults</span>
+                                        <input type="number" name="max_guests" min="1" value="{{ item.max_guests }}" required style="width: 60px;">
+                                    </label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="kids_allowed" {% if item.kids_allowed %}checked{% endif %}>
+                                        Kids
+                                    </label>
+                                    <label>
+                                        <span class="small">Max kids</span>
+                                        <input type="number" name="max_kids" min="0" value="{{ item.max_kids }}" required style="width: 60px;">
+                                    </label>
+                                    <label class="checkbox">
+                                        <input type="checkbox" name="is_attending" {% if item.is_attending %}checked{% endif %}>
+                                        Attending
+                                    </label>
+                                    <button class="btn" type="submit" style="padding: 5px 10px;">Save</button>
+                                </div>
+                            </form>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('main.invite', token=item.token, _external=True) }}" target="_blank" rel="noopener noreferrer">Open invite link</a>
+                            <div class="small" style="word-break: break-all; color: #666; margin: 5px 0;">{{ url_for('main.invite', token=item.token, _external=True) }}</div>
+                            <form action="{{ url_for('admin.delete_guest', guest_id=item.id) }}" method="POST" onsubmit="return confirm('Delete this invite and related RSVP answers?');">
+                                <button class="btn btn-danger" type="submit" style="padding: 5px 10px; font-size: 0.85em;">Delete Invite</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="2" style="text-align: center; padding: 20px;">No guest links created yet. Click "+ Create New Invite" or import an Excel file.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

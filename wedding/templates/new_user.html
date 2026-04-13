@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Admin User</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <style>
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #666;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .back-link:hover {
+            color: #333;
+        }
+        .form-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card card-dark form-container">
+        <div class="top-bar">
+            <h1>Create New Admin</h1>
+        </div>
+
+        <a href="{{ url_for('admin.manage_users') }}" class="back-link">&larr; Back to Admin Users List</a>
+
+        <p>Create a new administrator account. They will be able to manage all aspects of the wedding site.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form class="create-form" action="{{ url_for('admin.new_user') }}" method="POST" style="margin-top: 20px;">
+            <div class="field" style="margin-bottom: 20px;">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="e.g. maria_admin" required style="width: 100%; padding: 10px; font-size: 1.1em;">
+            </div>
+
+            <div class="field" style="margin-bottom: 20px;">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required style="width: 100%; padding: 10px;">
+            </div>
+
+            <div class="field" style="margin-bottom: 30px;">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required style="width: 100%; padding: 10px;">
+            </div>
+
+            <div style="text-align: right;">
+                <button class="btn" type="submit" style="background-color: #28a745; padding: 12px 25px; font-size: 1.1em; width: 100%;">Create Admin User</button>
+            </div>
+        </form>
+
+    </div>
+</div>
+</body>
+</html>

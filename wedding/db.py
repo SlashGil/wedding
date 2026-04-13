@@ -1,69 +1,45 @@
-import sqlite3
-import click
 from flask import current_app, g
-from flask.cli import with_appcontext
+from supabase import create_client, Client
 
 
-def get_db():
-    if 'db' not in g:
-        g.db = sqlite3.connect(
-            current_app.config['DATABASE'],
-            detect_types=sqlite3.PARSE_DECLTYPES
-        )
-        g.db.row_factory = sqlite3.Row
-    return g.db
-
-
-def close_db(e=None):
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
-
-
-def ensure_column(conn, table_name, column_name, definition):
-    columns = conn.execute(f"PRAGMA table_info({table_name})").fetchall()
-    existing = {col['name'] for col in columns}
-    if column_name not in existing:
-        conn.execute(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {definition}")
-
-
-def init_db():
-    db = get_db()
-    # This is a non-destructive init, it only creates tables if they don't exist
-    db.execute('CREATE TABLE IF NOT EXISTS guests (id INTEGER PRIMARY KEY, guest_name TEXT NOT NULL, max_guests INTEGER NOT NULL DEFAULT 1, kids_allowed BOOLEAN NOT NULL DEFAULT 0, max_kids INTEGER NOT NULL DEFAULT 0, token TEXT NOT NULL UNIQUE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)')
-    db.execute('CREATE TABLE IF NOT EXISTS rsvps (id INTEGER PRIMARY KEY, name TEXT NOT NULL, attending BOOLEAN NOT NULL, guests INTEGER NOT NULL, kids INTEGER NOT NULL DEFAULT 0, dietary_restrictions TEXT, guest_token TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)')
-    db.execute('CREATE TABLE IF NOT EXISTS photos (id INTEGER PRIMARY KEY, filename TEXT NOT NULL UNIQUE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)')
-    db.execute('CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)')
-
-    # Lightweight migration for older database versions
-    ensure_column(db, 'rsvps', 'kids', 'INTEGER NOT NULL DEFAULT 0')
-    ensure_column(db, 'rsvps', 'guest_token', 'TEXT')
-    ensure_column(db, 'rsvps', 'created_at', 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
-    ensure_column(db, 'guests', 'is_attending', 'BOOLEAN DEFAULT FALSE')
+def get_supabase_client() -> Client:
+    if 'supabase' not in g:
+        supabase_url = current_app.config.get('SUPABASE_URL')
+        supabase_key = current_app.config.get('SUPABASE_KEY')
+        if not supabase_url or not supabase_key:
+            raise ValueError("Supabase URL and Key must be configured in environment variables.")
+        g.supabase = create_client(supabase_url, supabase_key)
+    return g.supabase
 
 
 def get_setting(key, default=None):
-    db = get_db()
-    row = db.execute('SELECT value FROM settings WHERE key = ?', (key,)).fetchone()
-    return row['value'] if row else default
+    supabase = get_supabase_client()
+    try:
+        response = supabase.from_('settings').select('value').eq('key', key).execute()
+        if response.data:
+            return response.data[0]['value']
+        return default
+    except Exception as e:
+        current_app.logger.error(f"Error fetching setting from Supabase: {e}")
+        return default
 
 
 def set_setting(key, value):
-    db = get_db()
-    db.execute('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', (key, value))
-    db.commit()
-
-
-@click.command('init-db')
-@with_appcontext
-def init_db_command():
-    """Clear the existing data and create new tables."""
-    init_db()
-    click.echo('Initialized the database.')
+    supabase = get_supabase_client()
+    try:
+        # Check if the setting exists
+        response = supabase.from_('settings').select('key').eq('key', key).execute()
+        if response.data:
+            # Update existing setting
+            supabase.from_('settings').update({'value': value}).eq('key', key).execute()
+        else:
+            # Insert new setting
+            supabase.from_('settings').insert({'key': key, 'value': value}).execute()
+    except Exception as e:
+        current_app.logger.error(f"Error setting value in Supabase: {e}")
 
 
 def init_app(app):
-    # Register the close_db function to be called after each request
-    app.teardown_appcontext(close_db)
-    # Add the new 'init-db' command to the flask CLI
-    app.cli.add_command(init_db_command)
+    # No specific teardown needed for Supabase client in this pattern,
+    # as it's stateless per request.
+    pass

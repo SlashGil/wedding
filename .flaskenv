@@ -3,3 +3,5 @@ FLASK_ENV=development
 FLASK_SECRET_KEY='a-super-secret-key-for-dev-only'
 WEDDING_ADMIN_USERNAME=admin
 WEDDING_ADMIN_PASSWORD=wedding2026
+SUPABASE_URL=YOUR_SUPABASE_URL=https://afwwjdbvjwxmftfiieik.supabase.co
+SUPABASE_KEY=YOUR_SUPABASE_ANON_KEY=sb_publishable_bOs2G2HdIN2ExwYzT_JShA_C1prcq3q
