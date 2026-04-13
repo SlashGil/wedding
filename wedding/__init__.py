@@ -1,5 +1,5 @@
 import os
-from flask import Flask, url_for
+from flask import Flask, url_for, current_app
 
 
 def create_app(test_config=None):
