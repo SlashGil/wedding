@@ -42,17 +42,20 @@ def index():
     uploaded_photos = []
 
     try:
-        rsvp_response = supabase.from_('rsvps').select('*, guests(guest_name)').order('id', desc=True).execute()
+        rsvp_response = supabase.from_('rsvps').select(
+            'id,name,attending,guests,kids,dietary_restrictions,created_at,invited_guest:guests(guest_name)'
+        ).order('id', desc=True).execute()
         for rsvp in rsvp_response.data:
+            invited_guest = rsvp.get('invited_guest') if isinstance(rsvp.get('invited_guest'), dict) else {}
             rsvp_answers.append({
-                'id': rsvp['id'],
-                'name': rsvp['name'],
-                'attending': rsvp['attending'],
-                'guests': rsvp['guests'],
-                'kids': rsvp['kids'],
-                'dietary_restrictions': rsvp['dietary_restrictions'],
-                'created_at': rsvp['created_at'],
-                'invite_name': rsvp['guests']['guest_name'] if rsvp['guests'] else 'N/A'
+                'id': rsvp.get('id'),
+                'name': rsvp.get('name'),
+                'attending': rsvp.get('attending'),
+                'guests': rsvp.get('guests', 0),
+                'kids': rsvp.get('kids', 0),
+                'dietary_restrictions': rsvp.get('dietary_restrictions'),
+                'created_at': rsvp.get('created_at'),
+                'invite_name': invited_guest.get('guest_name') or 'N/A'
             })
 
         photo_response = supabase.from_('photos').select('id, filename').order('id', desc=True).execute()
@@ -91,7 +94,9 @@ def index():
 def export_rsvps():
     supabase = get_supabase_client()
     try:
-        response = supabase.from_('rsvps').select('*, guests(guest_name, phone_number)').eq('attending', True).order('id').execute()
+        response = supabase.from_('rsvps').select(
+            'name,kids,dietary_restrictions,created_at,guests,invited_guest:guests(guest_name, phone_number)'
+        ).eq('attending', True).order('id').execute()
         
         if not response.data:
             flash('No confirmed guests to export.')
@@ -99,12 +104,13 @@ def export_rsvps():
 
         export_data = []
         for rsvp in response.data:
+            invited_guest = rsvp.get('invited_guest') if isinstance(rsvp.get('invited_guest'), dict) else {}
             export_data.append({
                 'RSVP Name': rsvp.get('name'),
-                'Original Invite For': rsvp.get('guests', {}).get('guest_name') if rsvp.get('guests') else 'Public Form',
-                'Phone Number': rsvp.get('guests', {}).get('phone_number') if rsvp.get('guests') else '',
-                'Confirmed Adults': rsvp.get('guests'),
-                'Confirmed Kids': rsvp.get('kids'),
+                'Original Invite For': invited_guest.get('guest_name') or 'Public Form',
+                'Phone Number': invited_guest.get('phone_number') or '',
+                'Confirmed Adults': rsvp.get('guests', 0),
+                'Confirmed Kids': rsvp.get('kids', 0),
                 'Dietary Restrictions': rsvp.get('dietary_restrictions'),
                 'Submission Date': rsvp.get('created_at')
             })
