@@ -1,5 +1,5 @@
 import os
-from flask import Flask, url_for, current_app
+from flask import Flask, current_app
 
 
 def create_app(test_config=None):
@@ -68,18 +68,27 @@ def create_app(test_config=None):
         from .db import get_supabase_client
         supabase = get_supabase_client()
         bucket_name = current_app.config['SUPABASE_BUCKET']
-        
+
         photos = []
         try:
             response = supabase.from_('photos').select('filename').order('created_at', desc=True).execute()
+            existing_files = supabase.storage.from_(bucket_name).list('photos')
+            existing_names = {
+                item.get('name')
+                for item in (existing_files or [])
+                if isinstance(item, dict) and item.get('name')
+            }
+
             if response.data:
                 for photo_data in response.data:
-                    filename = photo_data['filename']
+                    filename = photo_data.get('filename')
+                    if not filename or filename not in existing_names:
+                        continue
                     public_url = supabase.storage.from_(bucket_name).get_public_url(f"photos/{filename}")
                     photos.append({'filename': filename, 'url': public_url})
         except Exception as e:
             app.logger.error(f"Error fetching photos from Supabase: {e}")
-        
+
         if not photos:
             fallback_urls = app.config['GALLERY_FALLBACK_URLS']
             for i, url in enumerate(fallback_urls):
