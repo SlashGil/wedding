@@ -17,26 +17,6 @@
         .back-link:hover {
             color: #333;
         }
-        .whatsapp-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background-color: #25D366;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-        }
-        .whatsapp-btn:hover {
-            background-color: #1EAE54;
-        }
-        .whatsapp-btn svg {
-            width: 20px;
-            height: 20px;
-        }
     </style>
 </head>
 <body>
@@ -63,7 +43,7 @@
             <strong>Invite created for {{ new_invite_info.guest_name }}:</strong><br>
             <a href="{{ new_invite_info.invite_link }}" target="_blank" rel="noopener noreferrer">{{ new_invite_info.invite_link }}</a>
             <div style="margin-top: 15px;">
-                <a href="{{ new_invite_info.whatsapp_link }}" class="whatsapp-btn" target="_blank" rel="noopener noreferrer">
+                <a href="{{ new_invite_info.whatsapp_link }}" class="btn whatsapp-btn" target="_blank" rel="noopener noreferrer">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.75 13.96c.25.13.43.2.5.25.13.06.16.25.1.44-.06.2-.25.38-.44.44-.2.06-.44.1-.75.06-.3-.06-.75-.2-1.25-.44s-.94-.56-1.38-.94c-.44-.38-.75-.81-.94-1.25-.2-.44-.25-.88-.2-1.31.06-.44.25-.81.44-1.06.2-.25.44-.44.69-.5.25-.06.5-.06.69.06.2.13.31.25.38.38.06.13.1.25.1.38s-.06.25-.13.38c-.06.13-.13.25-.25.38-.13.13-.25.25-.31.31-.06.06-.13.13-.16.2.03.06.06.13.1.2.13.25.25.5.44.69.2.2.44.38.69.5.25.13.44.25.63.31h.06zm-5.31-12.5c-4.69 0-8.5 3.81-8.5 8.5 0 1.5.38 2.94.94 4.25l-1.19 4.38 4.5-1.19c1.31.56 2.75.88 4.25.88h.06c4.69 0 8.5-3.81 8.5-8.5s-3.81-8.5-8.5-8.5zm0 15.5c-1.38 0-2.69-.38-3.81-1.06l-.25-.16-2.81.75.75-2.75-.16-.25c-.69-1.13-1.06-2.44-1.06-3.88 0-3.88 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7z"></path></svg>
                     Send via WhatsApp
                 </a>
@@ -75,24 +55,24 @@
         <form class="create-form" action="{{ url_for('admin.new_guest') }}" method="POST" style="margin-top: 20px;">
             <div class="field" style="margin-bottom: 20px;">
                 <label for="guest_name">Guest Name (e.g., Maria & Carlos)</label>
-                <input type="text" id="guest_name" name="guest_name" placeholder="Enter guest name" required style="width: 100%; padding: 10px; font-size: 1.1em;">
+                <input type="text" id="guest_name" name="guest_name" placeholder="Enter guest name" required>
             </div>
 
             <div class="field-row" style="display: flex; gap: 20px; margin-bottom: 20px;">
                 <div class="field" style="flex: 1;">
                     <label for="max_guests">Max Adults Allowed</label>
-                    <input type="number" id="max_guests" name="max_guests" min="1" value="1" required style="width: 100%; padding: 10px;">
+                    <input type="number" id="max_guests" name="max_guests" min="1" value="1" required>
                 </div>
 
                 <div class="field" style="flex: 1;">
                     <label for="max_kids">Max Kids Allowed</label>
-                    <input type="number" id="max_kids" name="max_kids" min="0" value="0" required style="width: 100%; padding: 10px;">
+                    <input type="number" id="max_kids" name="max_kids" min="0" value="0" required>
                 </div>
             </div>
 
             <div class="field" style="margin-bottom: 30px;">
-                <label class="checkbox" for="kids_allowed" style="display: flex; align-items: center; font-size: 1.1em; cursor: pointer;">
-                    <input type="checkbox" name="kids_allowed" id="kids_allowed" style="width: 20px; height: 20px; margin-right: 10px;">
+                <label class="checkbox" for="kids_allowed">
+                    <input type="checkbox" name="kids_allowed" id="kids_allowed">
                     Kids are allowed for this invite
                 </label>
                 <p class="small" style="color: #666; margin-top: 5px;">If unchecked, the guest will not be able to RSVP for kids, regardless of the max kids value.</p>

@@ -101,7 +101,13 @@
         <form action="{{ url_for('admin.upload_hero') }}" method="post" enctype="multipart/form-data" class="inline-upload-form">
             <div class="field" style="flex: 1;">
                 <label for="hero_image">Hero Image File</label>
-                <input type="file" name="hero_image" id="hero_image" accept="image/png, image/jpeg, image/gif" required>
+                <div class="file-input-wrapper">
+                    <input type="file" name="hero_image" id="hero_image" accept="image/png, image/jpeg, image/gif" required onchange="this.nextElementSibling.querySelector('.file-input-text').textContent = this.files[0] ? this.files[0].name : 'No file chosen'">
+                    <div class="file-input-button">
+                        <span>Choose File</span>
+                        <span class="file-input-text">No file chosen</span>
+                    </div>
+                </div>
             </div>
             <button class="btn" type="submit">Upload Hero</button>
         </form>
@@ -119,7 +125,13 @@
         <form action="{{ url_for('admin.upload_photo') }}" method="post" enctype="multipart/form-data" class="inline-upload-form">
             <div class="field" style="flex: 1;">
                 <label for="photo">Gallery Photo</label>
-                <input type="file" name="photo" id="photo" accept="image/png, image/jpeg, image/gif" required>
+                <div class="file-input-wrapper">
+                    <input type="file" name="photo" id="photo" accept="image/png, image/jpeg, image/gif" required onchange="this.nextElementSibling.querySelector('.file-input-text').textContent = this.files[0] ? this.files[0].name : 'No file chosen'">
+                    <div class="file-input-button">
+                        <span>Choose File</span>
+                        <span class="file-input-text">No file chosen</span>
+                    </div>
+                </div>
             </div>
             <button class="btn" type="submit">Upload Photo</button>
         </form>
