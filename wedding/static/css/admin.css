@@ -369,10 +369,10 @@ input:checked + .slider:before {
 .btn-secondary:hover { background-color: #5a6268; }
 
 .whatsapp-btn {
-    background-color: #25D366;
+    background-color: var(--brand);
     color: var(--white);
 }
-.whatsapp-btn:hover { background-color: #1EAE54; }
+.whatsapp-btn:hover { background-color: #007a7b; }
 .whatsapp-btn img {
     width: 20px;
     height: 20px;
