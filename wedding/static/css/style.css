@@ -249,19 +249,18 @@ body {
 .gift-table a {
     display: inline-block;
     margin: 10px;
-    padding: 12px 24px;
-    background-color: var(--secondary);
-    color: var(--brand);
+    padding: 14px 24px;
+    background-color: var(--brand);
+    color: white;
     text-decoration: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    text-transform: uppercase;
+    border-radius: 6px;
+    font-size: 1.1rem;
     letter-spacing: 1px;
     transition: opacity 0.3s;
 }
 
 .gift-table a:hover {
-    opacity: 0.88;
+    opacity: 0.9;
 }
 
 .rsvp-form {
