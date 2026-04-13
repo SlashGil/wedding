@@ -57,9 +57,13 @@
                         <td>
                             <form action="{{ url_for('admin.update_guest', guest_id=item.id) }}" method="POST">
                                 <div class="inline-fields" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
-                                    <div class="field" style="flex: 1.5; min-width: 200px;">
+                                    <div class="field" style="flex: 1.5; min-width: 150px;">
                                         <label for="guest_name-{{item.id}}">Name</label>
                                         <input type="text" id="guest_name-{{item.id}}" name="guest_name" value="{{ item.guest_name }}" required>
+                                    </div>
+                                    <div class="field" style="flex: 1; min-width: 120px;">
+                                        <label for="phone_number-{{item.id}}">Phone Number</label>
+                                        <input type="text" id="phone_number-{{item.id}}" name="phone_number" value="{{ item.phone_number or '' }}">
                                     </div>
                                     <div class="field" style="flex: 0.5; min-width: 80px;">
                                         <label for="max_guests-{{item.id}}">Adults</label>
@@ -91,7 +95,7 @@
                             <a href="{{ url_for('main.invite', token=item.token, _external=True) }}" target="_blank" rel="noopener noreferrer">Open invite link</a>
                             <div class="small" style="word-break: break-all; color: #666; margin: 5px 0;">{{ url_for('main.invite', token=item.token, _external=True) }}</div>
                             <div style="display: flex; gap: 10px; margin-top: 10px;">
-                                <button class="btn whatsapp-btn" onclick="openWhatsAppModal('{{ item.guest_name }}', '{{ url_for('main.invite', token=item.token, _external=True) }}')">
+                                <button class="btn whatsapp-btn" onclick="openWhatsAppModal('{{ item.guest_name }}', '{{ url_for('main.invite', token=item.token, _external=True) }}', '{{ item.phone_number or '' }}')">
                                     <img src="{{ url_for('static', filename='whatsapp.svg') }}" alt="WhatsApp">
                                     Send
                                 </button>
@@ -136,7 +140,7 @@
 <script>
     const defaultMessageTemplate = `{{ whatsapp_message | safe }}`;
 
-    function openWhatsAppModal(guestName, inviteLink) {
+    function openWhatsAppModal(guestName, inviteLink, phoneNumber) {
         const modal = document.getElementById('whatsappModal');
         const messageTextarea = document.getElementById('whatsappMessage');
         const sendLink = document.getElementById('sendWhatsAppLink');
@@ -146,7 +150,11 @@
 
         function updateLink() {
             const updatedMessage = messageTextarea.value;
-            sendLink.href = `https://wa.me/?text=${encodeURIComponent(updatedMessage)}`;
+            if (phoneNumber) {
+                sendLink.href = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(updatedMessage)}`;
+            } else {
+                sendLink.href = `https://wa.me/?text=${encodeURIComponent(updatedMessage)}`;
+            }
         }
 
         messageTextarea.oninput = updateLink;

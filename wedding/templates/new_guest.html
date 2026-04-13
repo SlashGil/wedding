@@ -30,7 +30,7 @@
             <strong>Invite created for {{ new_invite_info.guest_name }}:</strong><br>
             <a href="{{ new_invite_info.invite_link }}" target="_blank" rel="noopener noreferrer">{{ new_invite_info.invite_link }}</a>
             <div style="margin-top: 15px;">
-                <button class="btn whatsapp-btn" onclick="openWhatsAppModal('{{ new_invite_info.guest_name }}', '{{ new_invite_info.invite_link }}')">
+                <button class="btn whatsapp-btn" onclick="openWhatsAppModal('{{ new_invite_info.guest_name }}', '{{ new_invite_info.invite_link }}', '{{ new_invite_info.phone_number }}')">
                     <img src="{{ url_for('static', filename='whatsapp.svg') }}" alt="WhatsApp">
                     Send via WhatsApp
                 </button>
@@ -40,9 +40,15 @@
         {% endif %}
 
         <form action="{{ url_for('admin.new_guest') }}" method="POST" style="margin-top: 20px;">
-            <div class="field">
-                <label for="guest_name">Guest Name (e.g., Maria & Carlos)</label>
-                <input type="text" id="guest_name" name="guest_name" placeholder="Enter guest name" required>
+            <div style="display: flex; gap: 20px;">
+                <div class="field" style="flex: 2;">
+                    <label for="guest_name">Guest Name (e.g., Maria & Carlos)</label>
+                    <input type="text" id="guest_name" name="guest_name" placeholder="Enter guest name" required>
+                </div>
+                <div class="field" style="flex: 1;">
+                    <label for="phone_number">Phone Number (Optional)</label>
+                    <input type="text" id="phone_number" name="phone_number" placeholder="e.g. 15551234567">
+                </div>
             </div>
 
             <div style="display: flex; gap: 20px; margin-bottom: 20px;">

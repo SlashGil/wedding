@@ -17,9 +17,11 @@ bp = Blueprint('admin', __name__, url_prefix='/admin')
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
 
-def generate_whatsapp_link(message, guest_name, invite_link):
+def generate_whatsapp_link(message, guest_name, invite_link, phone_number=None):
     """Generates a WhatsApp send link with a pre-filled message."""
     final_message = message.replace('{guest_name}', guest_name).replace('{invite_link}', invite_link)
+    if phone_number:
+        return f"https://wa.me/{phone_number}?text={quote_plus(final_message)}"
     return f"https://wa.me/?text={quote_plus(final_message)}"
 
 
@@ -89,7 +91,7 @@ def index():
 def export_rsvps():
     supabase = get_supabase_client()
     try:
-        response = supabase.from_('rsvps').select('*, guests(guest_name)').eq('attending', True).order('id').execute()
+        response = supabase.from_('rsvps').select('*, guests(guest_name, phone_number)').eq('attending', True).order('id').execute()
         
         if not response.data:
             flash('No confirmed guests to export.')
@@ -100,6 +102,7 @@ def export_rsvps():
             export_data.append({
                 'RSVP Name': rsvp.get('name'),
                 'Original Invite For': rsvp.get('guests', {}).get('guest_name') if rsvp.get('guests') else 'Public Form',
+                'Phone Number': rsvp.get('guests', {}).get('phone_number') if rsvp.get('guests') else '',
                 'Confirmed Adults': rsvp.get('guests'),
                 'Confirmed Kids': rsvp.get('kids'),
                 'Dietary Restrictions': rsvp.get('dietary_restrictions'),
@@ -204,7 +207,6 @@ def delete_user(user_id):
 def manage_guests():
     supabase = get_supabase_client()
     guest_links = []
-    # FIX: Pass the whatsapp_message to the template context
     whatsapp_message = get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}')
     
     try:
@@ -223,6 +225,7 @@ def new_guest():
     if request.method == 'POST':
         supabase = get_supabase_client()
         guest_name = request.form.get('guest_name', '').strip()
+        phone_number = request.form.get('phone_number', '').strip()
         max_guests = request.form.get('max_guests', '1').strip()
         kids_allowed = request.form.get('kids_allowed') == 'on'
         max_kids = request.form.get('max_kids', '0').strip()
@@ -244,6 +247,7 @@ def new_guest():
         try:
             supabase.from_('guests').insert({
                 'guest_name': guest_name,
+                'phone_number': phone_number,
                 'max_guests': max_guests_int,
                 'kids_allowed': kids_allowed,
                 'max_kids': max_kids_int,
@@ -256,7 +260,7 @@ def new_guest():
             session['new_invite_info'] = {
                 'guest_name': guest_name,
                 'invite_link': invite_link,
-                'whatsapp_link': generate_whatsapp_link(whatsapp_message, guest_name, invite_link)
+                'whatsapp_link': generate_whatsapp_link(whatsapp_message, guest_name, invite_link, phone_number)
             }
             flash(f'Invite created for {guest_name}.')
         except Exception as e:
@@ -301,9 +305,11 @@ def upload_excel():
                 if kids_allowed:
                     try: max_kids = max(0, int(row.get('Max Kids', 0)))
                     except (ValueError, TypeError): max_kids = 0
+                phone_number = str(row.get('Phone Number', '')).strip()
                 token = secrets.token_urlsafe(10)
                 guests_to_insert.append({
                     'guest_name': guest_name,
+                    'phone_number': phone_number,
                     'max_guests': max_guests,
                     'kids_allowed': kids_allowed,
                     'max_kids': max_kids,
@@ -326,6 +332,7 @@ def upload_excel():
 def update_guest(guest_id):
     supabase = get_supabase_client()
     guest_name = request.form.get('guest_name', '').strip()
+    phone_number = request.form.get('phone_number', '').strip()
     max_guests = request.form.get('max_guests', '1').strip()
     kids_allowed = request.form.get('kids_allowed') == 'on'
     max_kids = request.form.get('max_kids', '0').strip()
@@ -347,6 +354,7 @@ def update_guest(guest_id):
     try:
         supabase.from_('guests').update({
             'guest_name': guest_name,
+            'phone_number': phone_number,
             'max_guests': max_guests_int,
             'kids_allowed': kids_allowed,
             'max_kids': max_kids_int,
