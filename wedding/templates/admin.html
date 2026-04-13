@@ -11,13 +11,13 @@
 <div class="container">
     <div class="card card-dark">
         <div class="top-bar">
-            <h1>Wedding Admin Panel</h1>
+            <h1 class="elegant-header">Wedding Admin Panel</h1>
             <form action="{{ url_for('auth.logout') }}" method="POST">
                 <button class="btn" type="submit">Logout</button>
             </form>
         </div>
 
-        <div class="actions" style="margin-bottom: 20px; display: flex; gap: 10px;">
+        <div class="actions" style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px;">
             <a href="{{ url_for('admin.manage_guests') }}" class="btn">Manage Guests & Invites</a>
             <a href="{{ url_for('admin.manage_users') }}" class="btn btn-secondary">Manage Admin Users</a>
         </div>
@@ -36,7 +36,7 @@
         <p>Set the template for WhatsApp messages. Use <code>{guest_name}</code> and <code>{invite_link}</code> as placeholders.</p>
         <form action="{{ url_for('admin.index') }}" method="post">
             <input type="hidden" name="update_whatsapp_message" value="1">
-            <div class="field">
+            <div class="field" style="margin-bottom: 1rem;">
                 <label for="whatsapp_message">WhatsApp Message Template</label>
                 <textarea name="whatsapp_message" id="whatsapp_message" rows="4" required>{{ whatsapp_message }}</textarea>
             </div>
@@ -181,9 +181,9 @@
                         <td>{{ rsvp.invite_name or 'Public form' }}</td>
                         <td>
                             {% if rsvp.attending %}
-                                <span class="status-yes" style="color: green; font-weight: bold;">Yes</span>
+                                <span class="status-yes">Yes</span>
                             {% else %}
-                                <span class="status-no" style="color: red; font-weight: bold;">No</span>
+                                <span class="status-no">No</span>
                             {% endif %}
                         </td>
                         <td>{{ rsvp.guests }}</td>
