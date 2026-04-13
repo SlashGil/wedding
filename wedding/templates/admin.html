@@ -32,6 +32,19 @@
 
         <hr>
 
+        <h2>Default WhatsApp Message</h2>
+        <p>Set the template for WhatsApp messages. Use <code>{guest_name}</code> and <code>{invite_link}</code> as placeholders.</p>
+        <form action="{{ url_for('admin.index') }}" method="post">
+            <input type="hidden" name="update_whatsapp_message" value="1">
+            <div class="field">
+                <label for="whatsapp_message">WhatsApp Message Template</label>
+                <textarea name="whatsapp_message" id="whatsapp_message" rows="4" required>{{ whatsapp_message }}</textarea>
+            </div>
+            <button class="btn" type="submit">Save WhatsApp Message</button>
+        </form>
+
+        <hr>
+
         <h2>Manage Dress Code</h2>
         <p>Update the dress code in Spanish. The English version will be automatically updated (you can adjust it below).</p>
         <form action="{{ url_for('admin.index') }}" method="post" class="inline-upload-form">

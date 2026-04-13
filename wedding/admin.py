@@ -2,6 +2,7 @@ import os
 import secrets
 import pandas as pd
 from io import BytesIO
+from urllib.parse import quote_plus
 from flask import (
     Blueprint, flash, redirect, render_template, request, url_for, current_app, session, send_file
 )
@@ -16,13 +17,25 @@ bp = Blueprint('admin', __name__, url_prefix='/admin')
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
 
+def generate_whatsapp_link(message, guest_name, invite_link):
+    """Generates a WhatsApp send link with a pre-filled message."""
+    final_message = message.replace('{guest_name}', guest_name).replace('{invite_link}', invite_link)
+    return f"https://wa.me/?text={quote_plus(final_message)}"
 
-@bp.route('/')
+
+@bp.route('/', methods=('GET', 'POST'))
 @login_required
 def index():
     supabase = get_supabase_client()
     bucket_name = current_app.config['SUPABASE_BUCKET']
     
+    if request.method == 'POST':
+        if 'update_whatsapp_message' in request.form:
+            whatsapp_message = request.form.get('whatsapp_message', '').strip()
+            set_setting('whatsapp_message', whatsapp_message)
+            flash('Default WhatsApp message updated.')
+            return redirect(url_for('admin.index'))
+
     rsvp_answers = []
     uploaded_photos = []
 
@@ -66,8 +79,10 @@ def index():
         'women': get_setting('pinterest_women', ''),
         'men': get_setting('pinterest_men', '')
     }
+    
+    default_whatsapp_message = get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}')
 
-    return render_template('admin.html', rsvp_answers=rsvp_answers, uploaded_photos=uploaded_photos, current_hero_url=current_hero_url, dress_code_es=dress_code_es, dress_code_en=dress_code_en, pinterest_links=pinterest_links)
+    return render_template('admin.html', rsvp_answers=rsvp_answers, uploaded_photos=uploaded_photos, current_hero_url=current_hero_url, dress_code_es=dress_code_es, dress_code_en=dress_code_en, pinterest_links=pinterest_links, whatsapp_message=default_whatsapp_message)
 
 @bp.route('/rsvps/export')
 @login_required
@@ -196,12 +211,18 @@ def delete_user(user_id):
 def manage_guests():
     supabase = get_supabase_client()
     guest_links = []
+    default_whatsapp_message = get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}')
+    
     try:
         guest_response = supabase.from_('guests').select('*').order('id', desc=True).execute()
-        guest_links = guest_response.data
+        for guest in guest_response.data:
+            invite_link = url_for('main.invite', token=guest['token'], _external=True)
+            guest['whatsapp_link'] = generate_whatsapp_link(default_whatsapp_message, guest['guest_name'], invite_link)
+            guest_links.append(guest)
     except Exception as e:
         current_app.logger.error(f"Error fetching guests from Supabase: {e}")
         flash(f"Error loading guests: {str(e)}")
+        
     return render_template('guests.html', guest_links=guest_links)
 
 
@@ -237,15 +258,27 @@ def new_guest():
                 'max_kids': max_kids_int,
                 'token': token
             }).execute()
-            generated_link = url_for('main.invite', token=token, _external=True)
-            flash(f'Invite created for {guest_name}. Link: {generated_link}')
+            
+            invite_link = url_for('main.invite', token=token, _external=True)
+            default_whatsapp_message = get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}')
+            whatsapp_link = generate_whatsapp_link(default_whatsapp_message, guest_name, invite_link)
+            
+            # Store generated links in session to show on the next page
+            session['new_invite_info'] = {
+                'guest_name': guest_name,
+                'invite_link': invite_link,
+                'whatsapp_link': whatsapp_link
+            }
+            flash(f'Invite created for {guest_name}.')
         except Exception as e:
             current_app.logger.error(f"Error creating guest in Supabase: {e}")
             flash(f'Error creating guest: {str(e)}')
         
         return redirect(url_for('admin.manage_guests'))
     
-    return render_template('new_guest.html')
+    # Pop the new invite info from session if it exists, to show it on the new_guest page
+    new_invite_info = session.pop('new_invite_info', None)
+    return render_template('new_guest.html', new_invite_info=new_invite_info)
 
 
 @bp.route('/upload_excel', methods=['POST'])
