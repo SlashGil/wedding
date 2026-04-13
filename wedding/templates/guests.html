@@ -6,23 +6,15 @@
     <title>Manage Guests</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
-    <style>
-        .header-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-    </style>
 </head>
 <body>
+<div class="page-header">
+    <a href="{{ url_for('admin.index') }}" class="back-link">&larr; Back to Dashboard</a>
+</div>
 <div class="container">
     <div class="card card-light">
         <div class="top-bar">
-            <div class="header-actions" style="width: 100%;">
-                <a href="{{ url_for('admin.index') }}" class="btn" style="background-color: #666;">&larr; Back to Dashboard</a>
-                <h1 class="elegant-header" style="color: var(--charcoal);">Manage Guest Invites</h1>
-            </div>
+            <h1 class="elegant-header" style="color: var(--charcoal);">Manage Guest Invites</h1>
         </div>
 
         <div class="actions" style="margin-bottom: 30px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center;">
@@ -100,7 +92,7 @@
                             <div class="small" style="word-break: break-all; color: #666; margin: 5px 0;">{{ url_for('main.invite', token=item.token, _external=True) }}</div>
                             <div style="display: flex; gap: 10px; margin-top: 10px;">
                                 <button class="btn whatsapp-btn" onclick="openWhatsAppModal('{{ item.guest_name }}', '{{ url_for('main.invite', token=item.token, _external=True) }}')">
-                                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.75 13.96c.25.13.43.2.5.25.13.06.16.25.1.44-.06.2-.25.38-.44.44-.2.06-.44.1-.75.06-.3-.06-.75-.2-1.25-.44s-.94-.56-1.38-.94c-.44-.38-.75-.81-.94-1.25-.2-.44-.25-.88-.2-1.31.06-.44.25-.81.44-1.06.2-.25.44-.44.69-.5.25-.06.5-.06.69.06.2.13.31.25.38.38.06.13.1.25.1.38s-.06.25-.13.38c-.06.13-.13.25-.25.38-.13.13-.25.25-.31.31-.06.06-.13.13-.16.2.03.06.06.13.1.2.13.25.25.5.44.69.2.2.44.38.69.5.25.13.44.25.63.31h.06zm-5.31-12.5c-4.69 0-8.5 3.81-8.5 8.5 0 1.5.38 2.94.94 4.25l-1.19 4.38 4.5-1.19c1.31.56 2.75.88 4.25.88h.06c4.69 0 8.5-3.81 8.5-8.5s-3.81-8.5-8.5-8.5zm0 15.5c-1.38 0-2.69-.38-3.81-1.06l-.25-.16-2.81.75.75-2.75-.16-.25c-.69-1.13-1.06-2.44-1.06-3.88 0-3.88 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7z"></path></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.487 5.235 3.487 8.413.003 6.556-5.338 11.891-11.893 11.891-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.885-.002 2.021.65 3.965 1.803 5.533l-1.082 3.946 3.995-1.052a9.826 9.826 0 0 0 5.593 1.805zM15.045 12.901c-.19.299-.44.499-.74.599-.3.1-.66.1-.96-.05-.3-.15-.66-.36-1.23-.75-1.4-1.021-2.1-2.5-2.16-2.64-.06-.14-.43-.73-.43-1.34s.34-1.02.52-1.2c.18-.18.39-.24.54-.24.14 0 .27.009.39.01.13.01.29.06.44.36.15.3.24.64.24.78s.06.29-.05.44c-.11.15-.24.29-.42.48-.18.18-.29.3-.39.4-.1.1-.21.21-.06.44.15.24.44.64.84 1.04.54.54 1.12.84 1.26.92.14.08.24.12.34.08.1-.04.43-.2.57-.38.14-.18.24-.29.39-.29.15 0 .3.06.44.12.14.06.64.3.73.48.1.18.15.29.15.44s-.05.59-.14.68z"/></svg>
                                     Send
                                 </button>
                                 <form action="{{ url_for('admin.delete_guest', guest_id=item.id) }}" method="POST" onsubmit="return confirm('Delete this invite and related RSVP answers?');">
@@ -134,7 +126,7 @@
         <div class="modal-actions">
             <button class="btn btn-secondary" onclick="closeWhatsAppModal()">Cancel</button>
             <a id="sendWhatsAppLink" class="btn whatsapp-btn" href="#" target="_blank" rel="noopener noreferrer">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.75 13.96c.25.13.43.2.5.25.13.06.16.25.1.44-.06.2-.25.38-.44.44-.2.06-.44.1-.75.06-.3-.06-.75-.2-1.25-.44s-.94-.56-1.38-.94c-.44-.38-.75-.81-.94-1.25-.2-.44-.25-.88-.2-1.31.06-.44.25-.81.44-1.06.2-.25.44-.44.69-.5.25-.06.5-.06.69.06.2.13.31.25.38.38.06.13.1.25.1.38s-.06.25-.13.38c-.06.13-.13.25-.25.38-.13.13-.25.25-.31.31-.06.06-.13.13-.16.2.03.06.06.13.1.2.13.25.25.5.44.69.2.2.44.38.69.5.25.13.44.25.63.31h.06zm-5.31-12.5c-4.69 0-8.5 3.81-8.5 8.5 0 1.5.38 2.94.94 4.25l-1.19 4.38 4.5-1.19c1.31.56 2.75.88 4.25.88h.06c4.69 0 8.5-3.81 8.5-8.5s-3.81-8.5-8.5-8.5zm0 15.5c-1.38 0-2.69-.38-3.81-1.06l-.25-.16-2.81.75.75-2.75-.16-.25c-.69-1.13-1.06-2.44-1.06-3.88 0-3.88 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7z"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.487 5.235 3.487 8.413.003 6.556-5.338 11.891-11.893 11.891-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.885-.002 2.021.65 3.965 1.803 5.533l-1.082 3.946 3.995-1.052a9.826 9.826 0 0 0 5.593 1.805zM15.045 12.901c-.19.299-.44.499-.74.599-.3.1-.66.1-.96-.05-.3-.15-.66-.36-1.23-.75-1.4-1.021-2.1-2.5-2.16-2.64-.06-.14-.43-.73-.43-1.34s.34-1.02.52-1.2c.18-.18.39-.24.54-.24.14 0 .27.009.39.01.13.01.29.06.44.36.15.3.24.64.24.78s.06.29-.05.44c-.11.15-.24.29-.42.48-.18.18-.29.3-.39.4-.1.1-.21.21-.06.44.15.24.44.64.84 1.04.54.54 1.12.84 1.26.92.14.08.24.12.34.08.1-.04.43-.2.57-.38.14-.18.24-.29.39-.29.15 0 .3.06.44.12.14.06.64.3.73.48.1.18.15.29.15.44s-.05.59-.14.68z"/></svg>
                 Send
             </a>
         </div>
@@ -142,14 +134,14 @@
 </div>
 
 <script>
-    const defaultMessageTemplate = `{{ get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}') | safe }}`;
+    const defaultMessageTemplate = `{{ whatsapp_message | safe }}`;
 
     function openWhatsAppModal(guestName, inviteLink) {
         const modal = document.getElementById('whatsappModal');
         const messageTextarea = document.getElementById('whatsappMessage');
         const sendLink = document.getElementById('sendWhatsAppLink');
 
-        const finalMessage = defaultMessageTemplate.replace('{guest_name}', guestName).replace('{invite_link}', inviteLink);
+        const finalMessage = defaultMessageTemplate.replace(/{guest_name}/g, guestName).replace(/{invite_link}/g, inviteLink);
         messageTextarea.value = finalMessage;
 
         function updateLink() {

@@ -89,14 +89,12 @@ def index():
 def export_rsvps():
     supabase = get_supabase_client()
     try:
-        # Fetch only confirmed guests
         response = supabase.from_('rsvps').select('*, guests(guest_name)').eq('attending', True).order('id').execute()
         
         if not response.data:
             flash('No confirmed guests to export.')
             return redirect(url_for('admin.index'))
 
-        # Prepare data for DataFrame
         export_data = []
         for rsvp in response.data:
             export_data.append({
@@ -110,7 +108,6 @@ def export_rsvps():
 
         df = pd.DataFrame(export_data)
         
-        # Create an in-memory Excel file
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name='Confirmed Guests')
@@ -160,13 +157,11 @@ def new_user():
             
         supabase = get_supabase_client()
         try:
-            # Check if user exists
             existing = supabase.from_('admins').select('id').eq('username', username).execute()
             if existing.data:
                 flash(f'User {username} already exists.')
                 return redirect(url_for('admin.new_user'))
                 
-            # Create user
             supabase.from_('admins').insert({
                 'username': username,
                 'password_hash': generate_password_hash(password)
@@ -184,8 +179,6 @@ def new_user():
 @bp.route('/users/<int:user_id>/delete', methods=['POST'])
 @login_required
 def delete_user(user_id):
-    # Prevent master admin from deleting themselves if they somehow get a DB entry with their name
-    # Also prevent deleting the currently logged-in user
     if session.get('user_id') == user_id:
          flash('You cannot delete your own account while logged in.')
          return redirect(url_for('admin.manage_users'))
@@ -211,19 +204,17 @@ def delete_user(user_id):
 def manage_guests():
     supabase = get_supabase_client()
     guest_links = []
-    default_whatsapp_message = get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}')
+    # FIX: Pass the whatsapp_message to the template context
+    whatsapp_message = get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}')
     
     try:
         guest_response = supabase.from_('guests').select('*').order('id', desc=True).execute()
-        for guest in guest_response.data:
-            invite_link = url_for('main.invite', token=guest['token'], _external=True)
-            guest['whatsapp_link'] = generate_whatsapp_link(default_whatsapp_message, guest['guest_name'], invite_link)
-            guest_links.append(guest)
+        guest_links = guest_response.data
     except Exception as e:
         current_app.logger.error(f"Error fetching guests from Supabase: {e}")
         flash(f"Error loading guests: {str(e)}")
         
-    return render_template('guests.html', guest_links=guest_links)
+    return render_template('guests.html', guest_links=guest_links, whatsapp_message=whatsapp_message)
 
 
 @bp.route('/guests/new', methods=('GET', 'POST'))
@@ -260,14 +251,12 @@ def new_guest():
             }).execute()
             
             invite_link = url_for('main.invite', token=token, _external=True)
-            default_whatsapp_message = get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}')
-            whatsapp_link = generate_whatsapp_link(default_whatsapp_message, guest_name, invite_link)
+            whatsapp_message = get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}')
             
-            # Store generated links in session to show on the next page
             session['new_invite_info'] = {
                 'guest_name': guest_name,
                 'invite_link': invite_link,
-                'whatsapp_link': whatsapp_link
+                'whatsapp_link': generate_whatsapp_link(whatsapp_message, guest_name, invite_link)
             }
             flash(f'Invite created for {guest_name}.')
         except Exception as e:
@@ -276,7 +265,6 @@ def new_guest():
         
         return redirect(url_for('admin.manage_guests'))
     
-    # Pop the new invite info from session if it exists, to show it on the new_guest page
     new_invite_info = session.pop('new_invite_info', None)
     return render_template('new_guest.html', new_invite_info=new_invite_info)
 

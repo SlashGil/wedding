@@ -6,27 +6,19 @@
     <title>Manage Admin Users</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
-    <style>
-        .header-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-    </style>
 </head>
 <body>
+<div class="page-header">
+    <a href="{{ url_for('admin.index') }}" class="back-link">&larr; Back to Dashboard</a>
+</div>
 <div class="container">
     <div class="card card-light">
         <div class="top-bar">
-            <div class="header-actions" style="width: 100%;">
-                <a href="{{ url_for('admin.index') }}" class="btn" style="background-color: #666;">&larr; Back to Dashboard</a>
-                <h1>Manage Admin Users</h1>
-            </div>
+            <h1 class="elegant-header" style="color: var(--charcoal);">Manage Admin Users</h1>
         </div>
 
         <div class="actions" style="margin-bottom: 30px;">
-            <a href="{{ url_for('admin.new_user') }}" class="btn" style="background-color: #28a745;">+ Create New Admin User</a>
+            <a href="{{ url_for('admin.new_user') }}" class="btn" style="background-color: var(--success);">+ Create New Admin User</a>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -56,7 +48,7 @@
                         <td>
                             {% if session.get('user_id') != user.id %}
                             <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this admin user?');">
-                                <button class="btn btn-danger" type="submit" style="padding: 5px 10px; font-size: 0.85em;">Delete</button>
+                                <button class="btn btn-danger" type="submit">Delete</button>
                             </form>
                             {% else %}
                             <span class="small" style="color: #666;">Current User</span>

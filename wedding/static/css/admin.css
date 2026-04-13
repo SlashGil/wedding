@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500;700&display=swap');
 
 :root {
-    --brand:#008C8D;
+    --brand: #008C8D; /* Restored brand color */
     --secondary: #f7f2ea;
     --white: #ffffff;
     --charcoal: #2d2d2d;
@@ -22,6 +22,23 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto 1.5rem auto;
+}
+
+.back-link {
+    font-weight: bold;
+    color: #666;
+    text-decoration: none;
+}
+.back-link:hover {
+    color: var(--charcoal);
 }
 
 .container {
@@ -82,6 +99,7 @@ p { margin-top: 0; }
     font-weight: 700;
     font-size: 2.2rem;
     color: var(--white);
+    margin: 0;
 }
 
 /* 2. Forms & Inputs */
@@ -179,7 +197,7 @@ input[type="password"]:focus,
 textarea:focus {
     outline: none;
     border-color: var(--brand);
-    box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.2);
+    box-shadow: 0 0 0 3px rgba(0, 140, 141, 0.2);
 }
 
 .card-dark input[type="text"],
@@ -294,7 +312,7 @@ input:checked + .slider:before {
 }
 
 .btn:hover {
-    background-color: #00695C;
+    background-color: #007a7b;
     transform: translateY(-1px);
 }
 
@@ -456,5 +474,4 @@ hr {
 @media (max-width: 600px) {
     body { padding: 16px; }
     .card { padding: 20px; }
-    .top-bar { flex-direction: column; align-items: flex-start; }
 }
