@@ -10,25 +10,23 @@
         .back-link {
             display: inline-block;
             margin-bottom: 20px;
-            color: #666;
+            color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
             font-weight: bold;
         }
         .back-link:hover {
-            color: #333;
+            color: var(--white);
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="card card-dark" style="max-width: 600px; margin: 0 auto;">
+    <div class="card card-dark" style="max-width: 600px; margin: 2rem auto;">
         <div class="top-bar">
-            <h1>Create New Invite</h1>
+            <h1 class="elegant-header">Create New Invite</h1>
         </div>
 
         <a href="{{ url_for('admin.manage_guests') }}" class="back-link">&larr; Back to Guest List</a>
-
-        <p>Create a personalized RSVP link for a guest and define if they can bring kids.</p>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -52,7 +50,7 @@
         <hr>
         {% endif %}
 
-        <form class="create-form" action="{{ url_for('admin.new_guest') }}" method="POST" style="margin-top: 20px;">
+        <form action="{{ url_for('admin.new_guest') }}" method="POST" style="margin-top: 20px;">
             <div class="field" style="margin-bottom: 20px;">
                 <label for="guest_name">Guest Name (e.g., Maria & Carlos)</label>
                 <input type="text" id="guest_name" name="guest_name" placeholder="Enter guest name" required>
@@ -60,30 +58,37 @@
 
             <div class="field-row" style="display: flex; gap: 20px; margin-bottom: 20px;">
                 <div class="field" style="flex: 1;">
-                    <label for="max_guests">Max Adults Allowed</label>
+                    <label for="max_guests">Adults</label>
                     <input type="number" id="max_guests" name="max_guests" min="1" value="1" required>
                 </div>
-
                 <div class="field" style="flex: 1;">
-                    <label for="max_kids">Max Kids Allowed</label>
-                    <input type="number" id="max_kids" name="max_kids" min="0" value="0" required>
+                    <label for="max_kids">Kids</label>
+                    <input type="number" id="max_kids" name="max_kids" min="0" value="0" required disabled>
                 </div>
             </div>
 
             <div class="field" style="margin-bottom: 30px;">
                 <label class="checkbox" for="kids_allowed">
-                    <input type="checkbox" name="kids_allowed" id="kids_allowed">
+                    <input type="checkbox" name="kids_allowed" id="kids_allowed" onchange="document.getElementById('max_kids').disabled = !this.checked;">
                     Kids are allowed for this invite
                 </label>
-                <p class="small" style="color: #666; margin-top: 5px;">If unchecked, the guest will not be able to RSVP for kids, regardless of the max kids value.</p>
+                <p class="hint-text">If unchecked, the guest will not be able to RSVP for kids.</p>
             </div>
 
-            <div style="text-align: right;">
-                <button class="btn" type="submit" style="background-color: #28a745; padding: 12px 25px; font-size: 1.1em;">Create Invite Link</button>
+            <div style="text-align: right; margin-top: 2rem;">
+                <button class="btn btn-primary-action" type="submit">Generate Custom RSVP Link</button>
             </div>
         </form>
 
     </div>
 </div>
+<script>
+    // Ensure the 'Max Kids' field is disabled on page load if the checkbox is not checked.
+    document.addEventListener('DOMContentLoaded', function() {
+        const kidsAllowedCheckbox = document.getElementById('kids_allowed');
+        const maxKidsInput = document.getElementById('max_kids');
+        maxKidsInput.disabled = !kidsAllowedCheckbox.checked;
+    });
+</script>
 </body>
 </html>

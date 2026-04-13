@@ -25,20 +25,20 @@
             </div>
         </div>
 
-        <div class="actions" style="margin-bottom: 30px; display: flex; gap: 15px;">
+        <div class="actions" style="margin-bottom: 30px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center;">
             <a href="{{ url_for('admin.new_guest') }}" class="btn" style="background-color: #28a745;">+ Create New Invite</a>
 
-            <div class="import-section" style="border-left: 2px solid #ddd; padding-left: 15px;">
+            <div class="import-section" style="border-left: 2px solid #ddd; padding-left: 20px;">
                 <strong>Bulk Import:</strong>
                 <form action="{{ url_for('admin.upload_excel') }}" method="POST" enctype="multipart/form-data" class="inline-upload-form" style="display: inline-flex; align-items: center; gap: 10px; margin-top: 5px;">
                     <div class="file-input-wrapper">
                         <input type="file" name="file" id="file" accept=".xlsx, .xls" required onchange="this.nextElementSibling.querySelector('.file-input-text').textContent = this.files[0] ? this.files[0].name : 'No file chosen'">
                         <div class="file-input-button">
-                            <span>Choose File</span>
+                            <span>Choose Excel File</span>
                             <span class="file-input-text">No file chosen</span>
                         </div>
                     </div>
-                    <button class="btn" type="submit" style="padding: 5px 10px; font-size: 0.9em;">Import Excel</button>
+                    <button class="btn" type="submit">Import</button>
                 </form>
             </div>
         </div>
