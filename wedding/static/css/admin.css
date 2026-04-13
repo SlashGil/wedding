@@ -41,6 +41,39 @@ body {
     color: var(--charcoal);
 }
 
+.header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.logout-form {
+    margin-left: auto; /* Pushes the form to the right */
+}
+
+.logout-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--white);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.3s;
+}
+
+.logout-btn:hover {
+    background: var(--white);
+    color: var(--brand);
+}
+
+.admin-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-start;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -100,6 +133,7 @@ p { margin-top: 0; }
     font-size: 2.2rem;
     color: var(--white);
     margin: 0;
+    text-align: left;
 }
 
 /* 2. Forms & Inputs */
@@ -339,7 +373,7 @@ input:checked + .slider:before {
     color: var(--white);
 }
 .whatsapp-btn:hover { background-color: #1EAE54; }
-.whatsapp-btn svg {
+.whatsapp-btn img {
     width: 20px;
     height: 20px;
     margin-right: 8px;
