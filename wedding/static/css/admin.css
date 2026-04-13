@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500;700&display=swap');
 
 :root {
     --brand:#008C8D;
@@ -8,11 +8,12 @@
     --danger: #d9534f;
     --light-gray: #f0f0f0;
     --border-color: #ddd;
+    --success: #28a745;
 }
 
 /* 1. General & Typography */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     margin: 0;
     padding: 24px;
     background: var(--light-gray);
@@ -34,8 +35,8 @@ body {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     margin-bottom: 24px;
     border: 1px solid var(--border-color);
-    position: relative; /* For background element */
-    overflow: hidden; /* For background element */
+    position: relative;
+    overflow: hidden;
 }
 
 .card-dark {
@@ -61,7 +62,6 @@ body {
     z-index: 1;
 }
 
-
 .card-light {
     background: var(--white);
     color: var(--charcoal);
@@ -69,7 +69,7 @@ body {
 
 h1, h2, h3, h4 {
     margin-top: 0;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.3;
 }
 h1 { font-size: 1.8rem; }
@@ -84,27 +84,12 @@ p { margin-top: 0; }
     color: var(--white);
 }
 
-
 /* 2. Forms & Inputs */
-.create-form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px;
-    align-items: end;
-    margin-bottom: 1rem;
-}
-
 .field {
     display: flex;
     flex-direction: column;
     gap: 8px;
-}
-
-.field-inline {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 44px;
+    margin-bottom: 1.25rem;
 }
 
 label {
@@ -115,7 +100,6 @@ label {
     color: inherit;
 }
 
-/* Consistent input styling */
 input[type="text"],
 input[type="number"],
 input[type="url"],
@@ -145,7 +129,6 @@ textarea {
     line-height: 1.5;
 }
 
-/* Custom File Input */
 .file-input-wrapper {
     position: relative;
     overflow: hidden;
@@ -199,7 +182,6 @@ textarea:focus {
     box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.2);
 }
 
-/* Styles for inputs in dark cards */
 .card-dark input[type="text"],
 .card-dark input[type="number"],
 .card-dark input[type="url"],
@@ -225,28 +207,70 @@ textarea:focus {
     cursor: not-allowed;
 }
 
+/* Slider Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+}
 
-.checkbox {
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 28px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--success);
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px var(--success);
+}
+
+input:checked + .slider:before {
+    transform: translateX(22px);
+}
+
+.switch-field {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin: 0;
-    font-size: 0.95rem;
-    white-space: nowrap;
-    user-select: none;
-    cursor: pointer;
-}
-input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
+    gap: 12px;
 }
 
 .hint-text {
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.8);
     margin-top: 5px;
-    padding-left: 28px; /* Align with checkbox text */
+    padding-left: 0;
+}
+.card-light .hint-text {
+    color: #666;
 }
 
 
@@ -262,7 +286,7 @@ input[type="checkbox"] {
     color: #fff;
     border-radius: 8px;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 0.95rem;
     white-space: nowrap;
     text-decoration: none;
@@ -287,27 +311,16 @@ input[type="checkbox"] {
     background: #fff;
 }
 
-.btn-danger {
-    background: var(--danger);
-}
-.btn-danger:hover {
-    background: #c9302c;
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-}
-.btn-secondary:hover {
-    background-color: #5a6268;
-}
+.btn-danger { background: var(--danger); }
+.btn-danger:hover { background: #c9302c; }
+.btn-secondary { background-color: #6c757d; }
+.btn-secondary:hover { background-color: #5a6268; }
 
 .whatsapp-btn {
     background-color: #25D366;
     color: var(--white);
 }
-.whatsapp-btn:hover {
-    background-color: #1EAE54;
-}
+.whatsapp-btn:hover { background-color: #1EAE54; }
 .whatsapp-btn svg {
     width: 20px;
     height: 20px;
@@ -315,17 +328,14 @@ input[type="checkbox"] {
 }
 
 .btn-primary-action {
-    background-color: #E91E63; /* A celebratory pink */
+    background-color: #E91E63;
     color: var(--white);
     font-size: 1.1em;
     padding: 12px 25px;
 }
-.btn-primary-action:hover {
-    background-color: #C2185B;
-}
+.btn-primary-action:hover { background-color: #C2185B; }
 
-
-/* 4. Tables */
+/* 4. Tables & Layout */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -336,7 +346,7 @@ th, td {
     border-bottom: 1px solid var(--border-color);
     padding: 14px;
     text-align: left;
-    vertical-align: top;
+    vertical-align: middle;
 }
 
 thead th {
@@ -355,12 +365,8 @@ thead th {
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-tbody tr:hover {
-    background-color: var(--light-gray);
-}
-.card-dark tbody tr:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-}
+tbody tr:hover { background-color: var(--light-gray); }
+.card-dark tbody tr:hover { background-color: rgba(0, 0, 0, 0.1); }
 
 .small {
     font-size: 0.85rem;
@@ -368,148 +374,87 @@ tbody tr:hover {
     word-break: break-all;
 }
 
-.card-dark .small {
-    color: rgba(247, 242, 234, 0.92);
-}
-
-/* 5. Miscellaneous & Layout */
-.top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-}
-
-.alert, .success-link {
-    padding: 14px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    border: 1px solid transparent;
-}
-
-.alert {
-    background: #f8d7da;
-    color: #721c24;
-    border-color: #f5c6cb;
-}
-
-.success-link {
-    background: #d4edda;
-    color: #155724;
-    border-color: #c3e6cb;
-    word-break: break-all;
-}
-.success-link a {
-    color: #0c5460;
-    font-weight: 600;
-}
-
-.inline-upload-form {
-    display: flex;
-    align-items: end;
-    gap: 16px;
-    flex-wrap: wrap;
-}
-
-.inline-fields {
-    display: grid;
-    grid-template-columns: 1.4fr 110px 120px 110px 120px;
-    gap: 10px;
-    align-items: end;
-}
-
-.inline-fields label {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin: 0;
-}
-
-.inline-fields .checkbox {
-    min-height: 44px;
-    align-self: end;
-}
-
-.row-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-}
+.card-dark .small { color: rgba(247, 242, 234, 0.92); }
 
 hr {
     border: none;
     border-top: 1px solid rgba(255, 255, 255, 0.2);
     margin: 32px 0;
 }
-.card-light hr {
-    border-top-color: var(--border-color);
+.card-light hr { border-top-color: var(--border-color); }
+
+/* 5. Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.photo-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+.modal-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.visible .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+}
+
+.modal-header h2 {
+    margin: 0;
+}
+
+.modal-close-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #888;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
     gap: 1rem;
-}
-.photo-card {
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1rem;
-    text-align: center;
-    background: #fff;
-}
-.photo-card img, .current-hero img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 4px;
-    margin-bottom: 0.5rem;
-}
-.current-hero img {
-    max-height: 200px;
-    border-radius: 8px;
-}
-
-.status-yes {
-    color: #28a745;
-    font-weight: 700;
-}
-
-.status-no {
-    color: var(--danger);
-    font-weight: 700;
-}
-
-a {
-    color: var(--brand);
-    text-decoration: none;
-}
-a:hover {
-    text-decoration: underline;
-}
-.card-dark a {
-    color: var(--secondary);
+    margin-top: 1.5rem;
 }
 
 /* Responsive Adjustments */
 @media (max-width: 900px) {
-    body { font-size: 15px; }
-    .create-form,
-    .inline-fields {
-        grid-template-columns: 1fr;
-    }
-
-    .field-inline {
-        justify-content: space-between;
-        flex-wrap: wrap;
-    }
+    .inline-fields { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 600px) {
     body { padding: 16px; }
     .card { padding: 20px; }
     .top-bar { flex-direction: column; align-items: flex-start; }
-    .btn { width: 100%; }
-    .row-actions .btn { width: auto; }
-    .inline-upload-form .btn { width: auto; }
 }

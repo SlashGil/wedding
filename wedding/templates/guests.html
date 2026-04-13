@@ -21,12 +21,12 @@
         <div class="top-bar">
             <div class="header-actions" style="width: 100%;">
                 <a href="{{ url_for('admin.index') }}" class="btn" style="background-color: #666;">&larr; Back to Dashboard</a>
-                <h1>Manage Guest Invites</h1>
+                <h1 class="elegant-header" style="color: var(--charcoal);">Manage Guest Invites</h1>
             </div>
         </div>
 
         <div class="actions" style="margin-bottom: 30px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center;">
-            <a href="{{ url_for('admin.new_guest') }}" class="btn" style="background-color: #28a745;">+ Create New Invite</a>
+            <a href="{{ url_for('admin.new_guest') }}" class="btn" style="background-color: var(--success);">+ Create New Invite</a>
 
             <div class="import-section" style="border-left: 2px solid #ddd; padding-left: 20px;">
                 <strong>Bulk Import:</strong>
@@ -64,28 +64,34 @@
                     <tr>
                         <td>
                             <form action="{{ url_for('admin.update_guest', guest_id=item.id) }}" method="POST">
-                                <div class="inline-fields" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-                                    <label>
-                                        <span class="small">Name</span>
-                                        <input type="text" name="guest_name" value="{{ item.guest_name }}" required>
-                                    </label>
-                                    <label>
-                                        <span class="small">Adults</span>
-                                        <input type="number" name="max_guests" min="1" value="{{ item.max_guests }}" required style="width: 60px;">
-                                    </label>
-                                    <label class="checkbox">
-                                        <input type="checkbox" name="kids_allowed" {% if item.kids_allowed %}checked{% endif %}>
-                                        Kids
-                                    </label>
-                                    <label>
-                                        <span class="small">Max kids</span>
-                                        <input type="number" name="max_kids" min="0" value="{{ item.max_kids }}" required style="width: 60px;">
-                                    </label>
-                                    <label class="checkbox">
-                                        <input type="checkbox" name="is_attending" {% if item.is_attending %}checked{% endif %}>
-                                        Attending
-                                    </label>
-                                    <button class="btn" type="submit" style="padding: 5px 10px;">Save</button>
+                                <div class="inline-fields" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+                                    <div class="field" style="flex: 1.5; min-width: 200px;">
+                                        <label for="guest_name-{{item.id}}">Name</label>
+                                        <input type="text" id="guest_name-{{item.id}}" name="guest_name" value="{{ item.guest_name }}" required>
+                                    </div>
+                                    <div class="field" style="flex: 0.5; min-width: 80px;">
+                                        <label for="max_guests-{{item.id}}">Adults</label>
+                                        <input type="number" id="max_guests-{{item.id}}" name="max_guests" min="1" value="{{ item.max_guests }}" required>
+                                    </div>
+                                    <div class="field" style="flex: 0.5; min-width: 80px;">
+                                        <label for="max_kids-{{item.id}}">Kids</label>
+                                        <input type="number" id="max_kids-{{item.id}}" name="max_kids" min="0" value="{{ item.max_kids }}" required>
+                                    </div>
+                                    <div class="field switch-field">
+                                        <label>Kids Allowed</label>
+                                        <label class="switch">
+                                            <input type="checkbox" name="kids_allowed" {% if item.kids_allowed %}checked{% endif %}>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="field switch-field">
+                                        <label>Attending</label>
+                                        <label class="switch">
+                                            <input type="checkbox" name="is_attending" {% if item.is_attending %}checked{% endif %}>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                    <button class="btn" type="submit" style="align-self: end;">Save</button>
                                 </div>
                             </form>
                         </td>
@@ -93,12 +99,12 @@
                             <a href="{{ url_for('main.invite', token=item.token, _external=True) }}" target="_blank" rel="noopener noreferrer">Open invite link</a>
                             <div class="small" style="word-break: break-all; color: #666; margin: 5px 0;">{{ url_for('main.invite', token=item.token, _external=True) }}</div>
                             <div style="display: flex; gap: 10px; margin-top: 10px;">
-                                <a href="{{ item.whatsapp_link }}" class="btn whatsapp-btn" target="_blank" rel="noopener noreferrer">
+                                <button class="btn whatsapp-btn" onclick="openWhatsAppModal('{{ item.guest_name }}', '{{ url_for('main.invite', token=item.token, _external=True) }}')">
                                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.75 13.96c.25.13.43.2.5.25.13.06.16.25.1.44-.06.2-.25.38-.44.44-.2.06-.44.1-.75.06-.3-.06-.75-.2-1.25-.44s-.94-.56-1.38-.94c-.44-.38-.75-.81-.94-1.25-.2-.44-.25-.88-.2-1.31.06-.44.25-.81.44-1.06.2-.25.44-.44.69-.5.25-.06.5-.06.69.06.2.13.31.25.38.38.06.13.1.25.1.38s-.06.25-.13.38c-.06.13-.13.25-.25.38-.13.13-.25.25-.31.31-.06.06-.13.13-.16.2.03.06.06.13.1.2.13.25.25.5.44.69.2.2.44.38.69.5.25.13.44.25.63.31h.06zm-5.31-12.5c-4.69 0-8.5 3.81-8.5 8.5 0 1.5.38 2.94.94 4.25l-1.19 4.38 4.5-1.19c1.31.56 2.75.88 4.25.88h.06c4.69 0 8.5-3.81 8.5-8.5s-3.81-8.5-8.5-8.5zm0 15.5c-1.38 0-2.69-.38-3.81-1.06l-.25-.16-2.81.75.75-2.75-.16-.25c-.69-1.13-1.06-2.44-1.06-3.88 0-3.88 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7z"></path></svg>
                                     Send
-                                </a>
+                                </button>
                                 <form action="{{ url_for('admin.delete_guest', guest_id=item.id) }}" method="POST" onsubmit="return confirm('Delete this invite and related RSVP answers?');">
-                                    <button class="btn btn-danger" type="submit" style="padding: 8px 12px; font-size: 0.85em;">Delete Invite</button>
+                                    <button class="btn btn-danger" type="submit">Delete</button>
                                 </form>
                             </div>
                         </td>
@@ -113,5 +119,54 @@
         </div>
     </div>
 </div>
+
+<!-- WhatsApp Modal -->
+<div id="whatsappModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Send WhatsApp Invite</h2>
+            <button class="modal-close-btn" onclick="closeWhatsAppModal()">&times;</button>
+        </div>
+        <div class="field">
+            <label for="whatsappMessage">Message</label>
+            <textarea id="whatsappMessage" rows="6"></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeWhatsAppModal()">Cancel</button>
+            <a id="sendWhatsAppLink" class="btn whatsapp-btn" href="#" target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.75 13.96c.25.13.43.2.5.25.13.06.16.25.1.44-.06.2-.25.38-.44.44-.2.06-.44.1-.75.06-.3-.06-.75-.2-1.25-.44s-.94-.56-1.38-.94c-.44-.38-.75-.81-.94-1.25-.2-.44-.25-.88-.2-1.31.06-.44.25-.81.44-1.06.2-.25.44-.44.69-.5.25-.06.5-.06.69.06.2.13.31.25.38.38.06.13.1.25.1.38s-.06.25-.13.38c-.06.13-.13.25-.25.38-.13.13-.25.25-.31.31-.06.06-.13.13-.16.2.03.06.06.13.1.2.13.25.25.5.44.69.2.2.44.38.69.5.25.13.44.25.63.31h.06zm-5.31-12.5c-4.69 0-8.5 3.81-8.5 8.5 0 1.5.38 2.94.94 4.25l-1.19 4.38 4.5-1.19c1.31.56 2.75.88 4.25.88h.06c4.69 0 8.5-3.81 8.5-8.5s-3.81-8.5-8.5-8.5zm0 15.5c-1.38 0-2.69-.38-3.81-1.06l-.25-.16-2.81.75.75-2.75-.16-.25c-.69-1.13-1.06-2.44-1.06-3.88 0-3.88 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7z"></path></svg>
+                Send
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const defaultMessageTemplate = `{{ get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}') | safe }}`;
+
+    function openWhatsAppModal(guestName, inviteLink) {
+        const modal = document.getElementById('whatsappModal');
+        const messageTextarea = document.getElementById('whatsappMessage');
+        const sendLink = document.getElementById('sendWhatsAppLink');
+
+        const finalMessage = defaultMessageTemplate.replace('{guest_name}', guestName).replace('{invite_link}', inviteLink);
+        messageTextarea.value = finalMessage;
+
+        function updateLink() {
+            const updatedMessage = messageTextarea.value;
+            sendLink.href = `https://wa.me/?text=${encodeURIComponent(updatedMessage)}`;
+        }
+
+        messageTextarea.oninput = updateLink;
+        updateLink(); // Set initial link
+
+        modal.classList.add('visible');
+    }
+
+    function closeWhatsAppModal() {
+        const modal = document.getElementById('whatsappModal');
+        modal.classList.remove('visible');
+    }
+</script>
 </body>
 </html>
