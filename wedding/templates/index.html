@@ -92,24 +92,26 @@
     <div class="dress-grid">
         <div class="dress-card">
             <h3 data-i18n="women">👗 Women</h3>
+            {% if pinterest_links.women %}
+                <a data-pin-do="embedBoard" href="{{ pinterest_links.women }}" data-pin-scale-height="600" data-pin-board-width="800"></a>
+            {% else %}
             <ul>
                 <li data-i18n="w_rule1">Long evening gowns, elegant midi dresses, or elevated cocktail dresses.</li>
                 <li data-i18n="w_rule2">Recommended palette: champagne, dusty rose, muted gold, and soft green.</li>
                 <li data-i18n="w_rule3">Please avoid white or ivory tones reserved for the bride.</li>
             </ul>
-            {% if pinterest_links.women %}
-                <a data-pin-do="embedBoard" href="{{ pinterest_links.women }}" data-pin-scale-width="80" data-pin-scale-height="320" data-pin-board-width="400"></a>
             {% endif %}
         </div>
         <div class="dress-card">
             <h3 data-i18n="men">🤵 Men</h3>
+            {% if pinterest_links.men %}
+                <a data-pin-do="embedBoard" href="{{ pinterest_links.men }}" data-pin-scale-height="600" data-pin-board-width="800"></a>
+            {% else %}
             <ul>
                 <li data-i18n="m_rule1">Dark suit with tie or bow tie, or a tuxedo for a more formal look.</li>
                 <li data-i18n="m_rule2">Recommended colors: black, navy, charcoal, and deep green.</li>
                 <li data-i18n="m_rule3">Polished dress shoes are preferred for the ceremony and reception.</li>
             </ul>
-            {% if pinterest_links.men %}
-                <a data-pin-do="embedBoard" href="{{ pinterest_links.men }}" data-pin-scale-width="80" data-pin-scale-height="320" data-pin-board-width="400"></a>
             {% endif %}
         </div>
     </div>

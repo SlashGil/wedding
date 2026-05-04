@@ -165,12 +165,12 @@ body {
 }
 
 .dress-grid {
-    max-width: 880px;
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 16px;
     text-align: left;
+    justify-content: center;
 }
 
 .dress-card {
@@ -180,6 +180,7 @@ body {
     border-radius: 12px;
     padding: 18px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    width: fit-content;
 }
 
 .dress-card h3 {
