@@ -37,6 +37,12 @@ def index():
             set_setting('whatsapp_message', whatsapp_message)
             flash('Default WhatsApp message updated.')
             return redirect(url_for('admin.index'))
+        
+        if 'update_pinterest_links' in request.form:
+            set_setting('pinterest_women', request.form.get('pinterest_women', '').strip())
+            set_setting('pinterest_men', request.form.get('pinterest_men', '').strip())
+            flash('Pinterest links updated successfully.')
+            return redirect(url_for('admin.index'))
 
     rsvp_answers = []
     uploaded_photos = []
