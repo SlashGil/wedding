@@ -6,6 +6,7 @@
     <title>Carito & Chava Wedding</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script async defer src="//assets.pinterest.com/js/pinit.js"></script>
 </head>
 <body>
 
@@ -97,7 +98,7 @@
                 <li data-i18n="w_rule3">Please avoid white or ivory tones reserved for the bride.</li>
             </ul>
             {% if pinterest_links.women %}
-                <a class="map-link" href="{{ pinterest_links.women }}" target="_blank" rel="noopener noreferrer" style="margin-top: 15px;">Inspiration Board 📌</a>
+                <a data-pin-do="embedBoard" href="{{ pinterest_links.women }}" data-pin-scale-width="80" data-pin-scale-height="320" data-pin-board-width="400"></a>
             {% endif %}
         </div>
         <div class="dress-card">
@@ -108,7 +109,7 @@
                 <li data-i18n="m_rule3">Polished dress shoes are preferred for the ceremony and reception.</li>
             </ul>
             {% if pinterest_links.men %}
-                <a class="map-link" href="{{ pinterest_links.men }}" target="_blank" rel="noopener noreferrer" style="margin-top: 15px;">Inspiration Board 📌</a>
+                <a data-pin-do="embedBoard" href="{{ pinterest_links.men }}" data-pin-scale-width="80" data-pin-scale-height="320" data-pin-board-width="400"></a>
             {% endif %}
         </div>
     </div>
