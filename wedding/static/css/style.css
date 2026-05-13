@@ -167,7 +167,7 @@ body {
 .dress-grid {
     margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 16px;
     text-align: left;
     justify-content: center;
@@ -500,6 +500,10 @@ audio {
     .countdown-box .label {
         font-size: 0.9em;
     }
+
+.dress-grid {
+    grid-template-columns: 1fr;
+}
 
     .gift-table a {
         font-size: 1em;

@@ -92,8 +92,17 @@
     <div class="dress-grid">
         <div class="dress-card">
             <h3 data-i18n="women">👗 Women</h3>
+            <div style="margin-bottom: 1.5em;">
+                <strong data-i18n="forbidden_colors_title" style="font-size: 1.1em;">Forbidden Colors:</strong>
+                <div style="margin-top: 0.5em; text-align: center; line-height: 1.6;">
+                    <span data-i18n="color_red">Red</span><br>
+                    <span data-i18n="color_beige">Beige</span><br>
+                    <span data-i18n="color_petroleum_blue">Petrol Blue</span><br>
+                    <span data-i18n="color_navy_blue">Navy Blue</span>
+                </div>
+            </div>
             {% if pinterest_links.women %}
-                <a data-pin-do="embedBoard" href="{{ pinterest_links.women }}" data-pin-scale-height="600" data-pin-board-width="800"></a>
+                <a data-pin-do="embedBoard" href="{{ pinterest_links.women }}" data-pin-scale-height="450" data-pin-board-width="320"></a>
             {% else %}
             <ul>
                 <li data-i18n="w_rule1">Long evening gowns, elegant midi dresses, or elevated cocktail dresses.</li>
@@ -105,7 +114,7 @@
         <div class="dress-card">
             <h3 data-i18n="men">🤵 Men</h3>
             {% if pinterest_links.men %}
-                <a data-pin-do="embedBoard" href="{{ pinterest_links.men }}" data-pin-scale-height="600" data-pin-board-width="800"></a>
+                <a data-pin-do="embedBoard" href="{{ pinterest_links.men }}" data-pin-scale-height="450" data-pin-board-width="320"></a>
             {% else %}
             <ul>
                 <li data-i18n="m_rule1">Dark suit with tie or bow tie, or a tuxedo for a more formal look.</li>
@@ -232,6 +241,11 @@
             w_rule1: "Long evening gowns, elegant midi dresses, or elevated cocktail dresses.",
             w_rule2: "Recommended palette: champagne, dusty rose, muted gold, and soft green.",
             w_rule3: "Please avoid white or ivory tones reserved for the bride.",
+            forbidden_colors_title: "Forbidden Colors:",
+            color_red: "Red",
+            color_beige: "Beige",
+            color_petroleum_blue: "Petrol Blue",
+            color_navy_blue: "Navy Blue",
             hotels: "Suggested Hotels",
             view_map: "View on Map",
             photos: "Our Photos",
@@ -281,6 +295,11 @@
             w_rule1: "Vestidos largos de noche, vestidos midi elegantes o de cóctel de gala.",
             w_rule2: "Colores recomendados: champagne, rosa viejo, dorado opaco y verde suave.",
             w_rule3: "Por favor evitar colores blancos o marfil reservados para la novia.",
+            forbidden_colors_title: "Colores Prohibidos:",
+            color_red: "Rojo",
+            color_beige: "Beige",
+            color_petroleum_blue: "Azul petróleo",
+            color_navy_blue: "Azul marino",
             m_rule1: "Traje oscuro con corbata o moño, o esmoquin para un look más formal.",
             m_rule2: "Colores recomendados: negro, azul marino, carbón y verde oscuro.",
             m_rule3: "Se prefieren zapatos de vestir lustrados para ceremonia y recepción.",
