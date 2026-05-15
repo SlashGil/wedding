@@ -507,37 +507,49 @@ hr {
 
 .photo-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
     margin-top: 1rem;
 }
 
 .photo-card {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 8px;
-    padding: 12px;
+    padding: 10px;
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: opacity 0.3s ease;
+}
+
+.photo-card.hidden-photo {
+    opacity: 0.5;
 }
 
 .photo-card img {
     width: 100%;
-    height: 100px;
+    height: 80px;
     object-fit: cover;
     border-radius: 6px;
     margin-bottom: 8px;
 }
 
 .photo-card .small {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     margin-bottom: 10px;
     word-break: break-all;
 }
 
-.photo-card .btn-danger {
+.photo-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.photo-actions .btn {
     width: 100%;
-    height: 36px;
-    font-size: 0.85rem;
+    height: 34px;
+    font-size: 0.8rem;
+    padding: 0 10px;
 }
 
 /* Responsive Adjustments */

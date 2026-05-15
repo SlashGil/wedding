@@ -58,8 +58,9 @@ def create_app(test_config=None):
         hero_image_url = 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1920&q=80'
         if hero_filename:
             try:
-                # Use signed URL for private buckets
-                signed_url_response = supabase.storage.from_(bucket_name).create_signed_url(f"uploads/{hero_filename}", 3600)
+                # Use signed URL with transformation for public hero image
+                transform_options = {'width': 1920, 'height': 1080, 'quality': 80, 'resize': 'cover'}
+                signed_url_response = supabase.storage.from_(bucket_name).create_signed_url(f"uploads/{hero_filename}", 3600, options={'transform': transform_options})
                 hero_image_url = signed_url_response['signedURL']
             except Exception as e:
                 app.logger.error(f"Error fetching hero image from Supabase Storage: {e}")
@@ -73,16 +74,16 @@ def create_app(test_config=None):
 
         photos = []
         try:
-            response = supabase.from_('photos').select('filename').order('created_at', desc=True).execute()
+            response = supabase.from_('photos').select('filename').eq('is_visible', True).order('created_at', desc=True).execute()
             
             if response.data:
                 paths = [f"photos/{p['filename']}" for p in response.data if p.get('filename')]
                 
                 if paths:
-                    # Create signed URLs in a single batch call for efficiency
-                    signed_urls_response = supabase.storage.from_(bucket_name).create_signed_urls(paths, 3600)
+                    # Create signed URLs with transformations for the public gallery
+                    transform_options = {'width': 800, 'height': 600, 'quality': 75, 'resize': 'cover'}
+                    signed_urls_response = supabase.storage.from_(bucket_name).create_signed_urls(paths, 3600, options={'transform': transform_options})
                     
-                    # Create a mapping from filename to signed URL for easy lookup
                     url_map = {os.path.basename(item['path']): item['signedURL'] for item in signed_urls_response if not item.get('error')}
                     
                     for photo_data in response.data:

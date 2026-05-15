@@ -157,13 +157,20 @@
                 {% if uploaded_photos %}
                 <div class="photo-grid">
                     {% for photo in uploaded_photos %}
-                    <div class="photo-card">
+                    <div class="photo-card {% if not photo.is_visible %}hidden-photo{% endif %}">
                         <img src="{{ photo.url }}" alt="{{ photo.filename }}">
                         <p class="small">{{ photo.filename }}</p>
-                        <form action="{{ url_for('admin.delete_photo', photo_id=photo.id) }}" method="post"
-                              onsubmit="return confirm('Are you sure you want to delete this photo?');">
-                            <button class="btn btn-danger" type="submit">Delete</button>
-                        </form>
+                        <div class="photo-actions">
+                            <form action="{{ url_for('admin.toggle_photo_visibility', photo_id=photo.id) }}" method="post">
+                                <button class="btn btn-secondary" type="submit">
+                                    {{ 'Show' if not photo.is_visible else 'Hide' }}
+                                </button>
+                            </form>
+                            <form action="{{ url_for('admin.delete_photo', photo_id=photo.id) }}" method="post"
+                                  onsubmit="return confirm('Are you sure you want to delete this photo?');">
+                                <button class="btn btn-danger" type="submit">Delete</button>
+                            </form>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>

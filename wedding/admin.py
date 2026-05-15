@@ -64,13 +64,26 @@ def index():
                 'invite_name': invited_guest.get('guest_name') or 'N/A'
             })
 
-        photo_response = supabase.from_('photos').select('id, filename').order('id', desc=True).execute()
-        uploaded_photos_data = photo_response.data
-        for photo_data in uploaded_photos_data:
-            filename = photo_data['filename']
-            # Use signed URLs for private buckets
-            signed_url_response = supabase.storage.from_(bucket_name).create_signed_url(f"photos/{filename}", 3600)
-            uploaded_photos.append({'id': photo_data['id'], 'filename': filename, 'url': signed_url_response['signedURL']})
+        photo_response = supabase.from_('photos').select('id, filename, is_visible').order('id', desc=True).execute()
+        
+        if photo_response.data:
+            photo_paths = [f"photos/{p['filename']}" for p in photo_response.data]
+            
+            # Create signed URLs with transformations for the admin grid
+            transform_options = {'width': 200, 'height': 200, 'resize': 'cover'}
+            signed_urls_response = supabase.storage.from_(bucket_name).create_signed_urls(photo_paths, 3600, options={'transform': transform_options})
+            
+            url_map = {os.path.basename(item['path']): item['signedURL'] for item in signed_urls_response if not item.get('error')}
+
+            for photo_data in photo_response.data:
+                filename = photo_data['filename']
+                if filename in url_map:
+                    uploaded_photos.append({
+                        'id': photo_data['id'],
+                        'filename': filename,
+                        'url': url_map[filename],
+                        'is_visible': photo_data.get('is_visible', True)
+                    })
 
     except Exception as e:
         current_app.logger.error(f"Error fetching data from Supabase: {e}")
@@ -80,8 +93,9 @@ def index():
     current_hero_url = None
     if current_hero_filename:
         try:
-            # Use signed URLs for private buckets
-            signed_url_response = supabase.storage.from_(bucket_name).create_signed_url(f"uploads/{current_hero_filename}", 3600)
+            # Create a signed URL with transformation for the hero preview
+            transform_options = {'width': 600, 'quality': 75}
+            signed_url_response = supabase.storage.from_(bucket_name).create_signed_url(f"uploads/{current_hero_filename}", 3600, options={'transform': transform_options})
             current_hero_url = signed_url_response['signedURL']
         except Exception as e:
             current_app.logger.error(f"Error fetching hero image URL from Supabase Storage: {e}")
@@ -427,7 +441,7 @@ def upload_photo():
     inserted_id = None
     try:
         # First, insert a record into the database.
-        response = supabase.from_('photos').insert({'filename': filename}).execute()
+        response = supabase.from_('photos').insert({'filename': filename, 'is_visible': True}).execute()
         if not response.data:
             raise Exception("Database insert failed. Check RLS policies on 'photos' table.")
         
@@ -482,6 +496,33 @@ def delete_photo(photo_id):
     except Exception as e:
         current_app.logger.error(f"Error deleting photo from Supabase: {e}")
         flash(f"Error deleting photo: {str(e)}")
+    return redirect(url_for('admin.index'))
+
+
+@bp.route('/photo/<int:photo_id>/toggle_visibility', methods=['POST'])
+@login_required
+def toggle_photo_visibility(photo_id):
+    supabase = get_supabase_client()
+    try:
+        # First, get the current visibility status
+        photo_response = supabase.from_('photos').select('is_visible').eq('id', photo_id).execute()
+        if not photo_response.data:
+            flash('Photo not found.')
+            return redirect(url_for('admin.index'))
+        
+        current_visibility = photo_response.data[0].get('is_visible', True)
+        new_visibility = not current_visibility
+        
+        # Update the visibility in the database
+        supabase.from_('photos').update({'is_visible': new_visibility}).eq('id', photo_id).execute()
+        
+        status = "shown" if new_visibility else "hidden"
+        flash(f'Photo visibility updated. It is now {status}.')
+        
+    except Exception as e:
+        current_app.logger.error(f"Error toggling photo visibility: {e}")
+        flash(f'An error occurred: {str(e)}')
+
     return redirect(url_for('admin.index'))
 
 
