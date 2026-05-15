@@ -68,8 +68,9 @@ def index():
         uploaded_photos_data = photo_response.data
         for photo_data in uploaded_photos_data:
             filename = photo_data['filename']
-            public_url = supabase.storage.from_(bucket_name).get_public_url(f"photos/{filename}")
-            uploaded_photos.append({'id': photo_data['id'], 'filename': filename, 'url': public_url})
+            # Use signed URLs for private buckets
+            signed_url_response = supabase.storage.from_(bucket_name).create_signed_url(f"photos/{filename}", 3600)
+            uploaded_photos.append({'id': photo_data['id'], 'filename': filename, 'url': signed_url_response['signedURL']})
 
     except Exception as e:
         current_app.logger.error(f"Error fetching data from Supabase: {e}")
@@ -79,7 +80,9 @@ def index():
     current_hero_url = None
     if current_hero_filename:
         try:
-            current_hero_url = supabase.storage.from_(bucket_name).get_public_url(f"uploads/{current_hero_filename}")
+            # Use signed URLs for private buckets
+            signed_url_response = supabase.storage.from_(bucket_name).create_signed_url(f"uploads/{current_hero_filename}", 3600)
+            current_hero_url = signed_url_response['signedURL']
         except Exception as e:
             current_app.logger.error(f"Error fetching hero image URL from Supabase Storage: {e}")
 
@@ -413,19 +416,41 @@ def upload_photo():
         return redirect(url_for('admin.index'))
 
     file = request.files['photo']
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        try:
-            path_on_storage = f"photos/{filename}"
-            supabase.storage.from_(bucket_name).upload(path_on_storage, file.read(), {'content-type': file.content_type})
-            
-            supabase.from_('photos').insert({'filename': filename}).execute()
-            flash(f'Photo "{filename}" uploaded successfully.')
-        except Exception as e:
-            current_app.logger.error(f"Error uploading photo to Supabase: {e}")
-            flash(f'An error occurred: {str(e)}')
-    else:
+    if not file or not allowed_file(file.filename):
         flash(f'Invalid file type. Allowed types are: {", ".join(current_app.config["ALLOWED_EXTENSIONS"])}.')
+        return redirect(url_for('admin.index'))
+
+    filename = secure_filename(file.filename)
+    file_content = file.read()
+    path_on_storage = f"photos/{filename}"
+    
+    inserted_id = None
+    try:
+        # First, insert a record into the database.
+        response = supabase.from_('photos').insert({'filename': filename}).execute()
+        if not response.data:
+            raise Exception("Database insert failed. Check RLS policies on 'photos' table.")
+        
+        inserted_id = response.data[0]['id']
+
+        # If DB insert is successful, upload the file to storage.
+        supabase.storage.from_(bucket_name).upload(path_on_storage, file_content, {'content-type': file.content_type})
+        
+        flash(f'Photo "{filename}" uploaded successfully.')
+
+    except Exception as e:
+        # If anything fails, log the error and flash a message.
+        current_app.logger.error(f"Error uploading photo: {e}")
+        flash(f'An error occurred: {str(e)}')
+        
+        # If the database record was created but the upload failed, roll back the DB insert.
+        if inserted_id:
+            try:
+                supabase.from_('photos').delete().eq('id', inserted_id).execute()
+                current_app.logger.info(f"Rolled back photo insert for id {inserted_id}")
+            except Exception as rollback_e:
+                current_app.logger.error(f"Fatal: Failed to roll back photo insert: {rollback_e}")
+
     return redirect(url_for('admin.index'))
 
 
@@ -471,26 +496,39 @@ def upload_hero():
         return redirect(url_for('admin.index'))
 
     file = request.files['hero_image']
-    if file and allowed_file(file.filename):
-        ext = file.filename.rsplit('.', 1)[1].lower()
-        filename = f"hero_{secrets.token_hex(8)}.{ext}"
-        path_on_storage = f"uploads/{filename}"
+    if not file or not allowed_file(file.filename):
+        flash(f'Invalid file type for hero image. Allowed: {", ".join(current_app.config["ALLOWED_EXTENSIONS"])}.')
+        return redirect(url_for('admin.index'))
 
+    ext = file.filename.rsplit('.', 1)[1].lower()
+    filename = f"hero_{secrets.token_hex(8)}.{ext}"
+    path_on_storage = f"uploads/{filename}"
+    
+    try:
+        # Step 1: Upload the new file.
+        supabase.storage.from_(bucket_name).upload(path_on_storage, file.read(), {'content-type': file.content_type})
+
+        # Step 2: If upload is successful, update the database.
         old_filename = get_setting('hero_image_filename')
+        set_setting('hero_image_filename', filename)
+        flash('Hero image updated successfully.')
 
-        try:
-            supabase.storage.from_(bucket_name).upload(path_on_storage, file.read(), {'content-type': file.content_type})
-            
-            set_setting('hero_image_filename', filename)
-            flash('Hero image updated successfully.')
-
-            if old_filename:
+        # Step 3: If database update is successful, delete the old file.
+        if old_filename and old_filename != filename:
+            try:
                 old_path_on_storage = f"uploads/{old_filename}"
                 supabase.storage.from_(bucket_name).remove([old_path_on_storage])
+            except Exception as e:
+                current_app.logger.error(f"Non-fatal: Failed to remove old hero image '{old_filename}': {e}")
 
-        except Exception as e:
-            current_app.logger.error(f"Error updating hero image in Supabase: {e}")
-            flash(f'An error occurred while updating hero image: {str(e)}')
-    else:
-        flash(f'Invalid file type for hero image. Allowed: {", ".join(current_app.config["ALLOWED_EXTENSIONS"])}.')
+    except Exception as e:
+        # If any step fails, log the error and attempt to roll back the file upload.
+        current_app.logger.error(f"Error updating hero image: {e}")
+        flash(f'An error occurred while updating hero image: {str(e)}')
+        try:
+            supabase.storage.from_(bucket_name).remove([path_on_storage])
+            current_app.logger.info(f"Rolled back hero image upload for '{filename}'")
+        except Exception as rollback_e:
+            current_app.logger.error(f"Fatal: Failed to roll back hero image upload: {rollback_e}")
+
     return redirect(url_for('admin.index'))

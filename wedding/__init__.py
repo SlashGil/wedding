@@ -58,7 +58,9 @@ def create_app(test_config=None):
         hero_image_url = 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1920&q=80'
         if hero_filename:
             try:
-                hero_image_url = supabase.storage.from_(bucket_name).get_public_url(f"uploads/{hero_filename}")
+                # Use signed URL for private buckets
+                signed_url_response = supabase.storage.from_(bucket_name).create_signed_url(f"uploads/{hero_filename}", 3600)
+                hero_image_url = signed_url_response['signedURL']
             except Exception as e:
                 app.logger.error(f"Error fetching hero image from Supabase Storage: {e}")
         return dict(hero_image_url=hero_image_url)
@@ -72,20 +74,22 @@ def create_app(test_config=None):
         photos = []
         try:
             response = supabase.from_('photos').select('filename').order('created_at', desc=True).execute()
-            existing_files = supabase.storage.from_(bucket_name).list('photos')
-            existing_names = {
-                item.get('name')
-                for item in (existing_files or [])
-                if isinstance(item, dict) and item.get('name')
-            }
-
+            
             if response.data:
-                for photo_data in response.data:
-                    filename = photo_data.get('filename')
-                    if not filename or filename not in existing_names:
-                        continue
-                    public_url = supabase.storage.from_(bucket_name).get_public_url(f"photos/{filename}")
-                    photos.append({'filename': filename, 'url': public_url})
+                paths = [f"photos/{p['filename']}" for p in response.data if p.get('filename')]
+                
+                if paths:
+                    # Create signed URLs in a single batch call for efficiency
+                    signed_urls_response = supabase.storage.from_(bucket_name).create_signed_urls(paths, 3600)
+                    
+                    # Create a mapping from filename to signed URL for easy lookup
+                    url_map = {os.path.basename(item['path']): item['signedURL'] for item in signed_urls_response if not item.get('error')}
+                    
+                    for photo_data in response.data:
+                        filename = photo_data.get('filename')
+                        if filename in url_map:
+                            photos.append({'filename': filename, 'url': url_map[filename]})
+
         except Exception as e:
             app.logger.error(f"Error fetching photos from Supabase: {e}")
 
