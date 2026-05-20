@@ -28,7 +28,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1200px;
+    max-width: 1400px; /* Increased width */
     margin: 0 auto 1.5rem auto;
 }
 
@@ -75,7 +75,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1400px; /* Increased width */
     margin: 0 auto;
 }
 
@@ -583,32 +583,20 @@ hr {
     padding: 0 10px;
 }
 
-.stats-container {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
+.stats-bar {
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    padding: 15px 20px;
     margin-bottom: 30px;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    font-size: 1.1rem;
+    color: #333;
 }
 
-.stat-item {
-    background: #f9f9f9;
-    padding: 20px;
-    border-radius: 10px;
-    border: 1px solid #e0e0e0;
-    flex: 1;
-}
-
-.stat-value {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: var(--brand);
-}
-
-.stat-label {
-    font-size: 1rem;
-    color: #555;
-    margin-top: 5px;
+.stat-divider {
+    color: #ccc;
 }
 
 .actions-cell {
@@ -623,4 +611,6 @@ hr {
 @media (max-width: 600px) {
     body { padding: 16px; }
     .card { padding: 20px; }
+    .stats-bar { flex-direction: column; gap: 10px; align-items: center; }
+    .stat-divider { display: none; }
 }

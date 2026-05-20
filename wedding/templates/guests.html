@@ -17,19 +17,12 @@
             <h1 class="elegant-header" style="color: var(--charcoal);">Manage Guest Invites</h1>
         </div>
 
-        <div class="stats-container">
-            <div class="stat-item">
-                <span class="stat-value">{{ total_invitations }}</span>
-                <span class="stat-label">Total Invites</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-value">{{ total_guests }}</span>
-                <span class="stat-label">Total Adults</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-value">{{ total_kids }}</span>
-                <span class="stat-label">Total Kids</span>
-            </div>
+        <div class="stats-bar">
+            <span><strong>Total Invites:</strong> {{ total_invitations }}</span>
+            <span class="stat-divider">|</span>
+            <span><strong>Total Adults:</strong> {{ total_guests }}</span>
+            <span class="stat-divider">|</span>
+            <span><strong>Total Kids:</strong> {{ total_kids }}</span>
         </div>
 
         <div class="actions" style="margin-bottom: 30px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center;">
