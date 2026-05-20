@@ -69,12 +69,9 @@
                                         <label for="guest_name-{{item.id}}">Name</label>
                                         <input type="text" id="guest_name-{{item.id}}" name="guest_name" value="{{ item.guest_name }}" required>
                                     </div>
-                                    <div class="field" style="flex: 1; min-width: 120px;">
+                                    <div class="field" style="flex: 1; min-width: 180px;">
                                         <label for="phone_number-{{item.id}}">Phone Number</label>
-                                        <div class="phone-input">
-                                            <input type="text" name="country_code" value="{{ item.country_code or '' }}" class="country-code-input" placeholder="+52">
-                                            <input type="text" id="phone_number-{{item.id}}" name="phone_number" value="{{ item.phone_number_formatted or '' }}">
-                                        </div>
+                                        <input type="text" id="phone_number-{{item.id}}" name="phone_number" value="{{ item.phone_number or '' }}" placeholder="+52 55 1234 5678">
                                     </div>
                                     <div class="field" style="flex: 0.5; min-width: 80px;">
                                         <label for="max_guests-{{item.id}}">Adults</label>

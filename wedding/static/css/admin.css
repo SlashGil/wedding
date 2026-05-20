@@ -325,24 +325,6 @@ input:checked + .slider:before {
     color: #666;
 }
 
-.phone-input {
-    display: flex;
-    align-items: center;
-}
-
-.country-code-input {
-    width: 60px !important;
-    border-radius: 8px 0 0 8px;
-    text-align: center;
-    background-color: #f0f0f0;
-}
-
-.phone-input input[name="phone_number"] {
-    border-left: none;
-    border-radius: 0 8px 8px 0;
-}
-
-
 /* 3. Buttons */
 .btn {
     display: inline-flex;
