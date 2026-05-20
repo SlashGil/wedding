@@ -585,6 +585,17 @@ hr {
     text-align: center;
 }
 
+.search-bar-container {
+    margin-bottom: 20px;
+}
+
+#guest-search-input {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    display: block;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 900px) {
     .inline-fields { grid-template-columns: 1fr; }

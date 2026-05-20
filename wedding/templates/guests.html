@@ -43,6 +43,10 @@
             </div>
         </div>
 
+        <div class="search-bar-container">
+            <input type="text" id="guest-search-input" placeholder="Search by guest name...">
+        </div>
+
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -59,9 +63,9 @@
                     <th>Link & Actions</th>
                 </tr>
                 </thead>
-                <tbody>
+                <tbody id="guest-list-body">
                 {% for item in guest_links %}
-                    <tr>
+                    <tr class="guest-row">
                         <td>
                             <form action="{{ url_for('admin.update_guest', guest_id=item.id) }}" method="POST">
                                 <div class="inline-fields" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
@@ -155,6 +159,26 @@
 </div>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('guest-search-input');
+        const guestRows = document.querySelectorAll('#guest-list-body .guest-row');
+
+        searchInput.addEventListener('keyup', function() {
+            const searchTerm = searchInput.value.toLowerCase();
+
+            guestRows.forEach(row => {
+                const nameInput = row.querySelector('input[name="guest_name"]');
+                const guestName = nameInput.value.toLowerCase();
+
+                if (guestName.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+
     const defaultMessageTemplate = `{{ whatsapp_message | safe }}`;
 
     async function markAndOpenWhatsApp(button, guestId, guestName, inviteLink, phoneNumber) {
