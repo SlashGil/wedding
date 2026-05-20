@@ -1,6 +1,6 @@
 import os
 from flask import Flask, current_app
-
+from datetime import datetime
 
 def create_app(test_config=None):
     # Create and configure the app
@@ -48,6 +48,22 @@ def create_app(test_config=None):
     app.register_blueprint(admin.bp)
 
     app.add_url_rule('/', endpoint='index')
+
+    @app.template_filter('format_datetime')
+    def format_datetime(value, format='%Y-%m-%d %H:%M'):
+        if value is None:
+            return ""
+        # Supabase returns ISO 8601 format with TZ info
+        if isinstance(value, str):
+            try:
+                # Handle the +00:00 timezone format
+                if '+' in value:
+                    value = value.split('+')[0]
+                dt = datetime.fromisoformat(value)
+                return dt.strftime(format)
+            except (ValueError, TypeError):
+                return value
+        return value
 
     @app.context_processor
     def inject_hero_image():

@@ -3,8 +3,9 @@ import secrets
 import pandas as pd
 from io import BytesIO
 from urllib.parse import quote_plus
+from datetime import datetime, timezone
 from flask import (
-    Blueprint, flash, redirect, render_template, request, url_for, current_app, session, send_file
+    Blueprint, flash, redirect, render_template, request, url_for, current_app, session, send_file, jsonify
 )
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash
@@ -82,7 +83,6 @@ def index():
         if photo_response.data:
             photo_paths = [f"photos/{p['filename']}" for p in photo_response.data]
             
-            # Create signed URLs with transformations for the admin grid
             transform_options = {'width': 200, 'height': 200, 'resize': 'cover'}
             signed_urls_response = supabase.storage.from_(bucket_name).create_signed_urls(photo_paths, 3600, options={'transform': transform_options})
             
@@ -106,7 +106,6 @@ def index():
     current_hero_url = None
     if current_hero_filename:
         try:
-            # Create a signed URL with transformation for the hero preview
             transform_options = {'width': 600, 'quality': 75}
             signed_url_response = supabase.storage.from_(bucket_name).create_signed_url(f"uploads/{current_hero_filename}", 3600, options={'transform': transform_options})
             current_hero_url = signed_url_response['signedURL']
@@ -255,7 +254,7 @@ def manage_guests():
     whatsapp_message = get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}')
     
     try:
-        guest_response = supabase.from_('guests').select('*').order('id', desc=True).execute()
+        guest_response = supabase.from_('guests').select('*, sent_by_admin:admins(username)').order('id', desc=True).execute()
         guest_links = guest_response.data
         
         total_invitations = len(guest_links)
@@ -266,6 +265,9 @@ def manage_guests():
             phone, code = format_phone(guest.get('phone_number'))
             guest['phone_number_formatted'] = phone
             guest['country_code'] = code
+            
+            admin = guest.get('sent_by_admin')
+            guest['sent_by_username'] = admin['username'] if isinstance(admin, dict) else None
 
     except Exception as e:
         current_app.logger.error(f"Error fetching guests from Supabase: {e}")
@@ -278,6 +280,22 @@ def manage_guests():
                            total_guests=total_guests,
                            total_kids=total_kids)
 
+@bp.route('/guest/<int:guest_id>/mark_sent', methods=['POST'])
+@login_required
+def mark_sent(guest_id):
+    supabase = get_supabase_client()
+    admin_id = session.get('user_id')
+    
+    try:
+        supabase.from_('guests').update({
+            'sent_at': datetime.now(timezone.utc).isoformat(),
+            'sent_by_admin_id': admin_id
+        }).eq('id', guest_id).execute()
+        
+        return jsonify({'status': 'success', 'message': 'Marked as sent.'})
+    except Exception as e:
+        current_app.logger.error(f"Error marking guest as sent: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @bp.route('/guests/new', methods=('GET', 'POST'))
 @login_required

@@ -397,6 +397,13 @@ input:checked + .slider:before {
     margin-right: 8px;
 }
 
+.resent-btn {
+    background-color: #f0ad4e; /* Orange for re-send */
+}
+.resent-btn:hover {
+    background-color: #ec971f;
+}
+
 .btn-primary-action {
     background-color: #E91E63;
     color: var(--white);
@@ -452,6 +459,13 @@ hr {
     margin: 32px 0;
 }
 .card-light hr { border-top-color: var(--border-color); }
+
+.sent-status {
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 5px;
+    font-style: italic;
+}
 
 /* 5. Modal Styles */
 .modal-overlay {
@@ -571,32 +585,32 @@ hr {
     padding: 0 10px;
 }
 
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 20px;
+.stats-table-container {
     margin-bottom: 30px;
+}
+
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
     text-align: center;
 }
 
-.stat-card {
-    background: #f9f9f9;
-    padding: 20px;
-    border-radius: 10px;
+.stats-table th, .stats-table td {
     border: 1px solid #e0e0e0;
+    padding: 12px;
 }
 
-.stat-value {
-    font-size: 2.5rem;
+.stats-table th {
+    background-color: #f7f7f7;
+    font-weight: 600;
+}
+
+.stats-table td {
+    font-size: 1.8rem;
     font-weight: bold;
     color: var(--brand);
 }
 
-.stat-label {
-    font-size: 1rem;
-    color: #555;
-    margin-top: 5px;
-}
 
 /* Responsive Adjustments */
 @media (max-width: 900px) {

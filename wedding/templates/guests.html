@@ -17,19 +17,23 @@
             <h1 class="elegant-header" style="color: var(--charcoal);">Manage Guest Invites</h1>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value">{{ total_invitations }}</div>
-                <div class="stat-label">Total Invites</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">{{ total_guests }}</div>
-                <div class="stat-label">Total Adults</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">{{ total_kids }}</div>
-                <div class="stat-label">Total Kids</div>
-            </div>
+        <div class="stats-table-container">
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Total Invites</th>
+                        <th>Total Adults</th>
+                        <th>Total Kids</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ total_invitations }}</td>
+                        <td>{{ total_guests }}</td>
+                        <td>{{ total_kids }}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
         <div class="actions" style="margin-bottom: 30px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center;">
@@ -58,12 +62,7 @@
             {% endif %}
         {% endwith %}
 
-        <div class="header-flex" style="margin-top: 20px;">
-            <h3>Guest List</h3>
-            <button class="btn btn-secondary" id="toggle-guests-btn">Show/Hide Guests</button>
-        </div>
-
-        <div id="guest-list-container" class="hidden" style="overflow-x: auto;">
+        <div style="overflow-x: auto;">
             <table style="width: 100%;">
                 <thead>
                 <tr>
@@ -119,10 +118,18 @@
                         <td>
                             <a href="{{ url_for('main.invite', token=item.token, _external=True) }}" target="_blank" rel="noopener noreferrer">Open invite link</a>
                             <div class="small" style="word-break: break-all; color: #666; margin: 5px 0;">{{ url_for('main.invite', token=item.token, _external=True) }}</div>
+
+                            {% if item.sent_at %}
+                                <div class="sent-status">
+                                    Sent by {{ item.sent_by_username or 'N/A' }} on {{ item.sent_at | format_datetime }}
+                                </div>
+                            {% endif %}
+
                             <div style="display: flex; gap: 10px; margin-top: 10px;">
-                                <button class="btn whatsapp-btn" onclick="openWhatsAppModal('{{ item.guest_name }}', '{{ url_for('main.invite', token=item.token, _external=True) }}', '{{ item.phone_number or '' }}')">
+                                <button class="btn whatsapp-btn {% if item.sent_at %}resent-btn{% endif %}"
+                                        onclick="markAndOpenWhatsApp(this, '{{ item.id }}', '{{ item.guest_name }}', '{{ url_for('main.invite', token=item.token, _external=True) }}', '{{ item.phone_number or '' }}')">
                                     <img src="{{ url_for('static', filename='whatsapp.svg') }}" alt="WhatsApp">
-                                    Send
+                                    <span>{{ 'Re-send' if item.sent_at else 'Send' }}</span>
                                 </button>
                                 <form action="{{ url_for('admin.delete_guest', guest_id=item.id) }}" method="POST" onsubmit="return confirm('Delete this invite and related RSVP answers?');">
                                     <button class="btn btn-danger" type="submit">Delete</button>
@@ -154,7 +161,7 @@
         </div>
         <div class="modal-actions">
             <button class="btn btn-secondary" onclick="closeWhatsAppModal()">Cancel</button>
-            <a id="sendWhatsAppLink" class="btn whatsapp-btn" href="#" target="_blank" rel="noopener noreferrer">
+            <a id="sendWhatsAppLink" class="btn whatsapp-btn" href="#" target="_blank" rel="noopener noreferrer" onclick="closeWhatsAppModal()">
                 <img src="{{ url_for('static', filename='whatsapp.svg') }}" alt="WhatsApp">
                 Send
             </a>
@@ -163,11 +170,28 @@
 </div>
 
 <script>
-    document.getElementById('toggle-guests-btn').addEventListener('click', function() {
-        document.getElementById('guest-list-container').classList.toggle('hidden');
-    });
-
     const defaultMessageTemplate = `{{ whatsapp_message | safe }}`;
+
+    async function markAndOpenWhatsApp(button, guestId, guestName, inviteLink, phoneNumber) {
+        try {
+            const response = await fetch(`/admin/guest/${guestId}/mark_sent`, { method: 'POST' });
+            if (response.ok) {
+                // Visually update the button and status without a full page reload
+                button.classList.add('resent-btn');
+                button.querySelector('span').textContent = 'Re-send';
+
+                // You could also dynamically add the "Sent by..." status here,
+                // but a page refresh after sending is simpler for now.
+                // For a better UX, you would update the DOM here.
+            } else {
+                console.error('Failed to mark as sent');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+
+        openWhatsAppModal(guestName, inviteLink, phoneNumber);
+    }
 
     function openWhatsAppModal(guestName, inviteLink, phoneNumber) {
         const modal = document.getElementById('whatsappModal');
