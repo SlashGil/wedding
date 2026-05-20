@@ -12,9 +12,14 @@
     <div class="card card-dark">
         <div class="header-flex">
             <h1 class="elegant-header">Wedding Admin Panel</h1>
-            <form class="logout-form" action="{{ url_for('auth.logout') }}" method="POST">
-                <button class="btn logout-btn" type="submit">Logout</button>
-            </form>
+            <div class="user-actions">
+                {% if session.username %}
+                    <span class="username-display">Welcome, {{ session.username }}</span>
+                {% endif %}
+                <form class="logout-form" action="{{ url_for('auth.logout') }}" method="POST">
+                    <button class="btn logout-btn" type="submit">Logout</button>
+                </form>
+            </div>
         </div>
 
         <div class="admin-actions">

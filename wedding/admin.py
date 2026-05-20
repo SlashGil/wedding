@@ -20,41 +20,38 @@ def allowed_file(filename):
 
 def sanitize_and_normalize_phone(phone_number_str):
     """
-    Takes a raw phone number string and returns a normalized, digits-only string
-    with a country code. Defaults to Mexico (+52).
+    Aggressively sanitizes a phone number string to a consistent, digits-only format.
+    - Removes all non-digit characters.
+    - Intelligently adds a country code, defaulting to '52' for Mexico.
     """
     if not phone_number_str:
         return ""
 
-    s = str(phone_number_str).strip().replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
+    # 1. Get only the digits from the string
+    digits = ''.join(filter(str.isdigit, str(phone_number_str)))
 
-    known_plus_codes = ['+52', '+1', '+41', '+34', '+47']
-    for code in known_plus_codes:
-        if s.startswith(code):
-            return ''.join(filter(str.isdigit, s))
+    # 2. Check for known country codes at the start of the digits
+    #    This handles cases like '52123...' or '1123...'
+    known_codes = ['52', '1', '41', '34', '47']
+    for code in known_codes:
+        # Check if it starts with a code and is longer than a typical local number
+        if digits.startswith(code) and len(digits) > 10:
+            return digits
 
-    digits_only = ''.join(filter(str.isdigit, s))
-    
-    if digits_only.startswith('52') and len(digits_only) > 10:
-        return digits_only
-    if digits_only.startswith('1') and len(digits_only) > 10:
-        return digits_only
-    if digits_only.startswith('41') and len(digits_only) > 10:
-        return digits_only
-    if digits_only.startswith('34') and len(digits_only) > 10:
-        return digits_only
-    if digits_only.startswith('47') and len(digits_only) > 10:
-        return digits_only
-
-    if len(digits_only) == 10:
-        return '52' + digits_only
+    # 3. If it's exactly 10 digits, assume it's a Mexican number and add '52'
+    if len(digits) == 10:
+        return '52' + digits
         
-    return digits_only
+    # 4. For any other case (e.g., a number that's already correct with a code,
+    #    or a number with an unknown code), return the cleaned digits.
+    return digits
 
 def format_phone_for_display(phone_digits_str):
-    """Adds a '+' to a digits-only phone number string for display."""
+    """
+    Takes a clean, digits-only phone number and formats it for display by adding a '+'.
+    """
     if not phone_digits_str or not str(phone_digits_str).isdigit():
-        return phone_digits_str
+        return phone_digits_str  # Return as-is if it's not what we expect
     return f"+{phone_digits_str}"
 
 def generate_whatsapp_link(message, guest_name, invite_link, phone_number=None):

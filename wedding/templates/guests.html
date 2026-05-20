@@ -10,6 +10,14 @@
 <body>
 <div class="page-header">
     <a href="{{ url_for('admin.index') }}" class="back-link">&larr; Back to Dashboard</a>
+    <div class="user-actions">
+        {% if session.username %}
+            <span class="username-display" style="color: var(--charcoal);">Welcome, {{ session.username }}</span>
+        {% endif %}
+        <form class="logout-form" action="{{ url_for('auth.logout') }}" method="POST">
+            <button class="btn logout-btn" style="background: var(--brand); color: var(--white);" type="submit">Logout</button>
+        </form>
+    </div>
 </div>
 <div class="container">
     <div class="card card-light">

@@ -48,8 +48,19 @@ body {
     margin-bottom: 20px;
 }
 
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.username-display {
+    font-weight: 500;
+    color: var(--white);
+}
+
 .logout-form {
-    margin-left: auto;
+    margin: 0;
 }
 
 .logout-btn {
