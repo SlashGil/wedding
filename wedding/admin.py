@@ -51,6 +51,12 @@ def sanitize_and_normalize_phone(phone_number_str):
         
     return digits_only
 
+def format_phone_for_display(phone_digits_str):
+    """Adds a '+' to a digits-only phone number string for display."""
+    if not phone_digits_str or not str(phone_digits_str).isdigit():
+        return phone_digits_str
+    return f"+{phone_digits_str}"
+
 def generate_whatsapp_link(message, guest_name, invite_link, phone_number=None):
     """Generates a WhatsApp send link with a pre-filled message."""
     final_message = message.replace('{guest_name}', guest_name).replace('{invite_link}', invite_link)
@@ -282,6 +288,7 @@ def manage_guests():
         total_kids = sum(g.get('max_kids', 0) for g in guest_links if g.get('kids_allowed'))
 
         for guest in guest_links:
+            guest['phone_number_display'] = format_phone_for_display(guest.get('phone_number'))
             admin = guest.get('sent_by_admin')
             guest['sent_by_username'] = admin['username'] if isinstance(admin, dict) else None
 
