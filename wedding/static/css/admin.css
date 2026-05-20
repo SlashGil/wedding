@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500;700&display=swap');
 
 :root {
-    --brand: #008C8D; /* Restored brand color */
+    --brand: #008C8D;
     --secondary: #f7f2ea;
     --white: #ffffff;
     --charcoal: #2d2d2d;
@@ -49,7 +49,7 @@ body {
 }
 
 .logout-form {
-    margin-left: auto; /* Pushes the form to the right */
+    margin-left: auto;
 }
 
 .logout-btn {
@@ -330,16 +330,15 @@ input:checked + .slider:before {
     align-items: center;
 }
 
-.country-code {
-    padding: 10px;
-    background-color: #e9ecef;
-    border: 1px solid #ced4da;
-    border-right: none;
+.country-code-input {
+    width: 60px !important;
     border-radius: 8px 0 0 8px;
-    font-weight: bold;
+    text-align: center;
+    background-color: #f0f0f0;
 }
 
-.phone-input input {
+.phone-input input[name="phone_number"] {
+    border-left: none;
     border-radius: 0 8px 8px 0;
 }
 
@@ -533,8 +532,7 @@ hr {
 }
 
 /* Photo Grid */
-.photo-grid-container.hidden,
-#guest-list-container.hidden {
+.photo-grid-container.hidden {
     display: none;
 }
 
@@ -585,32 +583,37 @@ hr {
     padding: 0 10px;
 }
 
-.stats-table-container {
+.stats-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
     margin-bottom: 30px;
-}
-
-.stats-table {
-    width: 100%;
-    border-collapse: collapse;
     text-align: center;
 }
 
-.stats-table th, .stats-table td {
+.stat-item {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
     border: 1px solid #e0e0e0;
-    padding: 12px;
+    flex: 1;
 }
 
-.stats-table th {
-    background-color: #f7f7f7;
-    font-weight: 600;
-}
-
-.stats-table td {
-    font-size: 1.8rem;
+.stat-value {
+    font-size: 2.5rem;
     font-weight: bold;
     color: var(--brand);
 }
 
+.stat-label {
+    font-size: 1rem;
+    color: #555;
+    margin-top: 5px;
+}
+
+.actions-cell {
+    text-align: center;
+}
 
 /* Responsive Adjustments */
 @media (max-width: 900px) {

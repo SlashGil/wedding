@@ -17,23 +17,19 @@
             <h1 class="elegant-header" style="color: var(--charcoal);">Manage Guest Invites</h1>
         </div>
 
-        <div class="stats-table-container">
-            <table class="stats-table">
-                <thead>
-                    <tr>
-                        <th>Total Invites</th>
-                        <th>Total Adults</th>
-                        <th>Total Kids</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{{ total_invitations }}</td>
-                        <td>{{ total_guests }}</td>
-                        <td>{{ total_kids }}</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="stats-container">
+            <div class="stat-item">
+                <span class="stat-value">{{ total_invitations }}</span>
+                <span class="stat-label">Total Invites</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">{{ total_guests }}</span>
+                <span class="stat-label">Total Adults</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">{{ total_kids }}</span>
+                <span class="stat-label">Total Kids</span>
+            </div>
         </div>
 
         <div class="actions" style="margin-bottom: 30px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center;">
@@ -83,9 +79,7 @@
                                     <div class="field" style="flex: 1; min-width: 120px;">
                                         <label for="phone_number-{{item.id}}">Phone Number</label>
                                         <div class="phone-input">
-                                            {% if item.country_code %}
-                                            <span class="country-code">{{ item.country_code }}</span>
-                                            {% endif %}
+                                            <input type="text" name="country_code" value="{{ item.country_code or '' }}" class="country-code-input" placeholder="+52">
                                             <input type="text" id="phone_number-{{item.id}}" name="phone_number" value="{{ item.phone_number_formatted or '' }}">
                                         </div>
                                     </div>
@@ -115,7 +109,7 @@
                                 </div>
                             </form>
                         </td>
-                        <td>
+                        <td class="actions-cell">
                             <a href="{{ url_for('main.invite', token=item.token, _external=True) }}" target="_blank" rel="noopener noreferrer">Open invite link</a>
                             <div class="small" style="word-break: break-all; color: #666; margin: 5px 0;">{{ url_for('main.invite', token=item.token, _external=True) }}</div>
 
@@ -127,11 +121,12 @@
 
                             <div style="display: flex; gap: 10px; margin-top: 10px;">
                                 <button class="btn whatsapp-btn {% if item.sent_at %}resent-btn{% endif %}"
+                                        type="button"
                                         onclick="markAndOpenWhatsApp(this, '{{ item.id }}', '{{ item.guest_name }}', '{{ url_for('main.invite', token=item.token, _external=True) }}', '{{ item.phone_number or '' }}')">
                                     <img src="{{ url_for('static', filename='whatsapp.svg') }}" alt="WhatsApp">
                                     <span>{{ 'Re-send' if item.sent_at else 'Send' }}</span>
                                 </button>
-                                <form action="{{ url_for('admin.delete_guest', guest_id=item.id) }}" method="POST" onsubmit="return confirm('Delete this invite and related RSVP answers?');">
+                                <form action="{{ url_for('admin.delete_guest', guest_id=item.id) }}" method="POST" onsubmit="return confirm('Delete this invite and related RSVP answers?');" style="display: inline;">
                                     <button class="btn btn-danger" type="submit">Delete</button>
                                 </form>
                             </div>
@@ -176,18 +171,12 @@
         try {
             const response = await fetch(`/admin/guest/${guestId}/mark_sent`, { method: 'POST' });
             if (response.ok) {
-                // Visually update the button and status without a full page reload
                 button.classList.add('resent-btn');
                 button.querySelector('span').textContent = 'Re-send';
-
-                // You could also dynamically add the "Sent by..." status here,
-                // but a page refresh after sending is simpler for now.
-                // For a better UX, you would update the DOM here.
-            } else {
-                console.error('Failed to mark as sent');
+                // Consider adding the sent status dynamically here for better UX
             }
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error marking as sent:', error);
         }
 
         openWhatsAppModal(guestName, inviteLink, phoneNumber);
@@ -211,7 +200,7 @@
         }
 
         messageTextarea.oninput = updateLink;
-        updateLink(); // Set initial link
+        updateLink();
 
         modal.classList.add('visible');
     }

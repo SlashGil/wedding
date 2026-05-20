@@ -19,17 +19,40 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
 
 def format_phone(phone_number):
-    """Formats a phone number to separate country code if it has more than 10 digits."""
-    if not phone_number or not phone_number.isdigit():
-        return phone_number, ""
+    """
+    Formats a phone number to find an explicit country code (+52, +1, +41, +34, +47).
+    It also checks for numbers starting with the code digits directly.
+    Defaults to +52 if no specific code is found.
+    """
+    if not phone_number:
+        return "", ""
     
-    if len(phone_number) > 10:
-        country_code_len = len(phone_number) - 10
-        country_code = f"+{phone_number[:country_code_len]}"
-        local_number = phone_number[country_code_len:]
-        return local_number, country_code
+    # 1. Sanitize the input: remove spaces, dashes, parens
+    sanitized_phone = str(phone_number).replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
     
-    return phone_number, ""
+    # 2. Check for explicit '+' codes first
+    known_plus_codes = ['+52', '+1', '+41', '+34', '+47']
+    for code in known_plus_codes:
+        if sanitized_phone.startswith(code):
+            local_number = sanitized_phone[len(code):]
+            return local_number, code
+
+    # 3. Check for digit-only codes (without '+')
+    if sanitized_phone.startswith('52') and len(sanitized_phone) > 10:
+        return sanitized_phone[2:], '+52'
+    if sanitized_phone.startswith('1') and len(sanitized_phone) > 10:
+        return sanitized_phone[1:], '+1'
+    if sanitized_phone.startswith('41') and len(sanitized_phone) > 10:
+        return sanitized_phone[2:], '+41'
+    if sanitized_phone.startswith('34') and len(sanitized_phone) > 10:
+        return sanitized_phone[2:], '+34'
+    if sanitized_phone.startswith('47') and len(sanitized_phone) > 10:
+        return sanitized_phone[2:], '+47'
+        
+    # 4. If no code is found, default to +52
+    digits = ''.join(filter(str.isdigit, sanitized_phone))
+    return digits, '+52'
+
 
 def generate_whatsapp_link(message, guest_name, invite_link, phone_number=None):
     """Generates a WhatsApp send link with a pre-filled message."""
@@ -321,11 +344,14 @@ def new_guest():
 
         if not kids_allowed: max_kids_int = 0
         token = secrets.token_urlsafe(10)
+        
+        # Sanitize phone number to store only digits
+        sanitized_phone = ''.join(filter(str.isdigit, phone_number))
 
         try:
             supabase.from_('guests').insert({
                 'guest_name': guest_name,
-                'phone_number': phone_number,
+                'phone_number': sanitized_phone,
                 'max_guests': max_guests_int,
                 'kids_allowed': kids_allowed,
                 'max_kids': max_kids_int,
@@ -338,7 +364,7 @@ def new_guest():
             session['new_invite_info'] = {
                 'guest_name': guest_name,
                 'invite_link': invite_link,
-                'whatsapp_link': generate_whatsapp_link(whatsapp_message, guest_name, invite_link, phone_number)
+                'whatsapp_link': generate_whatsapp_link(whatsapp_message, guest_name, invite_link, sanitized_phone)
             }
             flash(f'Invite created for {guest_name}.')
         except Exception as e:
@@ -383,11 +409,14 @@ def upload_excel():
                 if kids_allowed:
                     try: max_kids = max(0, int(row.get('Max Kids', 0)))
                     except (ValueError, TypeError): max_kids = 0
+                
                 phone_number = str(row.get('Phone Number', '')).strip()
+                sanitized_phone = ''.join(filter(str.isdigit, phone_number))
+                
                 token = secrets.token_urlsafe(10)
                 guests_to_insert.append({
                     'guest_name': guest_name,
-                    'phone_number': phone_number,
+                    'phone_number': sanitized_phone,
                     'max_guests': max_guests,
                     'kids_allowed': kids_allowed,
                     'max_kids': max_kids,
@@ -410,7 +439,8 @@ def upload_excel():
 def update_guest(guest_id):
     supabase = get_supabase_client()
     guest_name = request.form.get('guest_name', '').strip()
-    phone_number = request.form.get('phone_number', '').strip()
+    country_code = request.form.get('country_code', '').strip()
+    local_number = request.form.get('phone_number', '').strip()
     max_guests = request.form.get('max_guests', '1').strip()
     kids_allowed = request.form.get('kids_allowed') == 'on'
     max_kids = request.form.get('max_kids', '0').strip()
@@ -428,11 +458,15 @@ def update_guest(guest_id):
         return redirect(url_for('admin.manage_guests'))
 
     if not kids_allowed: max_kids_int = 0
+    
+    # Recombine country code and local number, then sanitize to get the full number
+    full_phone_number = (country_code or '') + (local_number or '')
+    sanitized_phone = ''.join(filter(str.isdigit, full_phone_number))
 
     try:
         supabase.from_('guests').update({
             'guest_name': guest_name,
-            'phone_number': phone_number,
+            'phone_number': sanitized_phone,
             'max_guests': max_guests_int,
             'kids_allowed': kids_allowed,
             'max_kids': max_kids_int,
