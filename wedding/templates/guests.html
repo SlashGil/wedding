@@ -17,6 +17,21 @@
             <h1 class="elegant-header" style="color: var(--charcoal);">Manage Guest Invites</h1>
         </div>
 
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ total_invitations }}</div>
+                <div class="stat-label">Total Invites</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ total_guests }}</div>
+                <div class="stat-label">Total Adults</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ total_kids }}</div>
+                <div class="stat-label">Total Kids</div>
+            </div>
+        </div>
+
         <div class="actions" style="margin-bottom: 30px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center;">
             <a href="{{ url_for('admin.new_guest') }}" class="btn" style="background-color: var(--success);">+ Create New Invite</a>
 
@@ -43,7 +58,12 @@
             {% endif %}
         {% endwith %}
 
-        <div style="overflow-x: auto;">
+        <div class="header-flex" style="margin-top: 20px;">
+            <h3>Guest List</h3>
+            <button class="btn btn-secondary" id="toggle-guests-btn">Show/Hide Guests</button>
+        </div>
+
+        <div id="guest-list-container" class="hidden" style="overflow-x: auto;">
             <table style="width: 100%;">
                 <thead>
                 <tr>
@@ -63,7 +83,12 @@
                                     </div>
                                     <div class="field" style="flex: 1; min-width: 120px;">
                                         <label for="phone_number-{{item.id}}">Phone Number</label>
-                                        <input type="text" id="phone_number-{{item.id}}" name="phone_number" value="{{ item.phone_number or '' }}">
+                                        <div class="phone-input">
+                                            {% if item.country_code %}
+                                            <span class="country-code">{{ item.country_code }}</span>
+                                            {% endif %}
+                                            <input type="text" id="phone_number-{{item.id}}" name="phone_number" value="{{ item.phone_number_formatted or '' }}">
+                                        </div>
                                     </div>
                                     <div class="field" style="flex: 0.5; min-width: 80px;">
                                         <label for="max_guests-{{item.id}}">Adults</label>
@@ -138,6 +163,10 @@
 </div>
 
 <script>
+    document.getElementById('toggle-guests-btn').addEventListener('click', function() {
+        document.getElementById('guest-list-container').classList.toggle('hidden');
+    });
+
     const defaultMessageTemplate = `{{ whatsapp_message | safe }}`;
 
     function openWhatsAppModal(guestName, inviteLink, phoneNumber) {

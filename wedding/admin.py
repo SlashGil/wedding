@@ -17,6 +17,19 @@ bp = Blueprint('admin', __name__, url_prefix='/admin')
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
 
+def format_phone(phone_number):
+    """Formats a phone number to separate country code if it has more than 10 digits."""
+    if not phone_number or not phone_number.isdigit():
+        return phone_number, ""
+    
+    if len(phone_number) > 10:
+        country_code_len = len(phone_number) - 10
+        country_code = f"+{phone_number[:country_code_len]}"
+        local_number = phone_number[country_code_len:]
+        return local_number, country_code
+    
+    return phone_number, ""
+
 def generate_whatsapp_link(message, guest_name, invite_link, phone_number=None):
     """Generates a WhatsApp send link with a pre-filled message."""
     final_message = message.replace('{guest_name}', guest_name).replace('{invite_link}', invite_link)
@@ -236,16 +249,34 @@ def delete_user(user_id):
 def manage_guests():
     supabase = get_supabase_client()
     guest_links = []
+    total_invitations = 0
+    total_guests = 0
+    total_kids = 0
     whatsapp_message = get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}')
     
     try:
         guest_response = supabase.from_('guests').select('*').order('id', desc=True).execute()
         guest_links = guest_response.data
+        
+        total_invitations = len(guest_links)
+        total_guests = sum(g.get('max_guests', 0) for g in guest_links)
+        total_kids = sum(g.get('max_kids', 0) for g in guest_links if g.get('kids_allowed'))
+
+        for guest in guest_links:
+            phone, code = format_phone(guest.get('phone_number'))
+            guest['phone_number_formatted'] = phone
+            guest['country_code'] = code
+
     except Exception as e:
         current_app.logger.error(f"Error fetching guests from Supabase: {e}")
         flash(f"Error loading guests: {str(e)}")
         
-    return render_template('guests.html', guest_links=guest_links, whatsapp_message=whatsapp_message)
+    return render_template('guests.html', 
+                           guest_links=guest_links, 
+                           whatsapp_message=whatsapp_message,
+                           total_invitations=total_invitations,
+                           total_guests=total_guests,
+                           total_kids=total_kids)
 
 
 @bp.route('/guests/new', methods=('GET', 'POST'))
