@@ -6,6 +6,7 @@
     <title>Carito & Chava Wedding</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/css/lightgallery.min.css">
     <script async defer src="//assets.pinterest.com/js/pinit.js"></script>
 </head>
 <body>
@@ -127,38 +128,17 @@
 </div>
 
 <div class="section section-light">
-    <h2 data-i18n="hotels">Suggested Hotels</h2>
-    <div class="hotels-grid">
-        <div class="venue-card">
-            <div class="icon-title"><span>🛏️</span><strong>Hotel Mexico</strong></div>
-            <p>Independencia Ote. 101, Centro, Tehuacán</p>
-            <a class="map-link" href="https://maps.google.com/?q=Hotel+Mexico+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
-        </div>
-        <div class="venue-card">
-            <div class="icon-title"><span>🛏️</span><strong>Hotel Villablanca</strong></div>
-            <p>1 Poniente 206, Centro, Tehuacán</p>
-            <a class="map-link" href="https://maps.google.com/?q=Hotel+Villablanca+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
-        </div>
-        <div class="venue-card">
-            <div class="icon-title"><span>🛏️</span><strong>City Express Tehuacán</strong></div>
-            <p>Blvd. Socorro Romero Sanchez 2101</p>
-            <a class="map-link" href="https://maps.google.com/?q=City+Express+Tehuacan" target="_blank" rel="noopener noreferrer"><span data-i18n="view_map">View on Map</span> ↗</a>
-        </div>
+    <h2 data-i18n="photos">Our Photos</h2>
+    <div id="photo-gallery" class="photo-grid">
+        {% for photo in photos %}
+            <a href="{{ photo.full }}" class="gallery-item" data-sub-html="<h4>{{ photo.filename }}</h4>">
+                <img src="{{ photo.thumbnail }}" alt="{{ photo.filename }}">
+            </a>
+        {% endfor %}
     </div>
 </div>
 
 <div class="section section-dark">
-    <h2 data-i18n="photos">Our Photos</h2>
-    <div class="photos">
-        {% if photos and photos|length > 0 %}
-            {% for photo in photos %}
-                <img src="{{ photo.url }}" alt="Wedding Photo">
-            {% endfor %}
-        {% endif %}
-    </div>
-</div>
-
-<div class="section section-light">
     <h2 data-i18n="registry">Gift Registry</h2>
     <p style="font-size: 1.1em; max-width: 650px; margin: 0 auto 20px auto;" data-i18n="gift_msg">Your presence is the greatest gift of all. However, if you wish to honor us with a gift, we are registered at the following stores.</p>
     <div class="gift-table">
@@ -167,7 +147,7 @@
     </div>
 </div>
 
-<div class="section section-dark" id="rsvp">
+<div class="section section-light" id="rsvp">
     <h2 data-i18n="rsvp_title">RSVP</h2>
 
     {% if rsvp_submitted and submitted_data %}
@@ -217,7 +197,17 @@
     {% endif %}
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/lightgallery.min.js"></script>
 <script>
+    // --- LightGallery ---
+    document.addEventListener('DOMContentLoaded', function() {
+        lightGallery(document.getElementById('photo-gallery'), {
+            selector: '.gallery-item',
+            download: false,
+            getCaptionFromTitleOrAlt: false
+        });
+    });
+
     // --- Internationalization (i18n) ---
     const translations = {
         en: {

@@ -93,19 +93,28 @@ def create_app(test_config=None):
             response = supabase.from_('photos').select('filename').eq('is_visible', True).order('created_at', desc=True).execute()
             
             if response.data:
-                paths = [f"photos/{p['filename']}" for p in response.data if p.get('filename')]
+                photo_files = [p['filename'] for p in response.data if p.get('filename')]
                 
-                if paths:
-                    # Create signed URLs with transformations for the public gallery
-                    transform_options = {'width': 800, 'height': 600, 'quality': 75, 'resize': 'cover'}
-                    signed_urls_response = supabase.storage.from_(bucket_name).create_signed_urls(paths, 3600, options={'transform': transform_options})
-                    
-                    url_map = {os.path.basename(item['path']): item['signedURL'] for item in signed_urls_response if not item.get('error')}
-                    
-                    for photo_data in response.data:
-                        filename = photo_data.get('filename')
-                        if filename in url_map:
-                            photos.append({'filename': filename, 'url': url_map[filename]})
+                if photo_files:
+                    # Generate Thumbnail URLs
+                    thumb_paths = [f"photos/{name}" for name in photo_files]
+                    thumb_transform = {'width': 400, 'height': 400, 'resize': 'cover', 'quality': 75}
+                    thumb_urls_res = supabase.storage.from_(bucket_name).create_signed_urls(thumb_paths, 3600, options={'transform': thumb_transform})
+                    thumb_map = {os.path.basename(item['path']): item['signedURL'] for item in thumb_urls_res if not item.get('error')}
+
+                    # Generate Full-size Image URLs
+                    full_paths = [f"photos/{name}" for name in photo_files]
+                    full_transform = {'width': 1920, 'height': 1080, 'quality': 85}
+                    full_urls_res = supabase.storage.from_(bucket_name).create_signed_urls(full_paths, 3600, options={'transform': full_transform})
+                    full_map = {os.path.basename(item['path']): item['signedURL'] for item in full_urls_res if not item.get('error')}
+
+                    for filename in photo_files:
+                        if filename in thumb_map and filename in full_map:
+                            photos.append({
+                                'thumbnail': thumb_map[filename],
+                                'full': full_map[filename],
+                                'filename': filename
+                            })
 
         except Exception as e:
             app.logger.error(f"Error fetching photos from Supabase: {e}")
@@ -113,7 +122,7 @@ def create_app(test_config=None):
         if not photos:
             fallback_urls = app.config['GALLERY_FALLBACK_URLS']
             for i, url in enumerate(fallback_urls):
-                photos.append({'filename': f'fallback_{i+1}.jpg', 'url': url})
+                photos.append({'thumbnail': url, 'full': url, 'filename': f'fallback_{i+1}.jpg'})
 
         return dict(photos=photos)
 
