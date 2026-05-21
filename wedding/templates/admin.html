@@ -166,10 +166,7 @@
     const doneBtn = document.getElementById('modal-done-btn');
 
     uploadZone.addEventListener('click', () => fileInput.click());
-    uploadZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadZone.classList.add('dragover');
-    });
+    uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
     uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
     uploadZone.addEventListener('drop', (e) => {
         e.preventDefault();
@@ -192,19 +189,26 @@
 
         if (isZip) {
             const zipFile = files[0];
-            fileStatusList.innerHTML = `<li>Unzipping ${zipFile.name}... <span class="status-icon">...</span></li>`;
+            const li = document.createElement('li');
+            li.innerHTML = `<span>Unzipping ${zipFile.name}...</span><progress id="zip-progress" value="0" max="100"></progress>`;
+            fileStatusList.appendChild(li);
+            const zipProgress = document.getElementById('zip-progress');
+
             try {
                 const jszip = new JSZip();
-                const zip = await jszip.loadAsync(zipFile);
+                const zip = await jszip.loadAsync(zipFile, {
+                    onUpdate: (metadata) => {
+                        zipProgress.value = metadata.percent;
+                    }
+                });
                 for (const filename in zip.files) {
                     if (!zip.files[filename].dir && !filename.startsWith('__MACOSX')) {
                         const fileData = await zip.files[filename].async('blob');
-                        const file = new File([fileData], filename, { type: fileData.type });
-                        filesToUpload.push(file);
+                        filesToUpload.push(new File([fileData], filename, { type: fileData.type }));
                     }
                 }
             } catch (e) {
-                fileStatusList.innerHTML = '<li>Failed to read ZIP file. <span class="status-icon">❌</span></li>';
+                li.innerHTML = 'Failed to read ZIP file. <span class="status-icon">❌</span>';
                 doneBtn.style.display = 'block';
                 return;
             }
@@ -212,37 +216,56 @@
             filesToUpload = Array.from(files);
         }
 
-        fileStatusList.innerHTML = ''; // Clear "Unzipping..." message
+        fileStatusList.innerHTML = '';
         filesToUpload.forEach(file => {
             const li = document.createElement('li');
             li.id = `file-${file.name.replace(/[^a-zA-Z0-9]/g, '-')}`;
-            li.innerHTML = `${file.name} <span class="status-icon">...</span>`;
+            li.innerHTML = `<span>${file.name}</span><progress class="upload-progress" value="0" max="100"></progress><span class="status-icon">...</span>`;
             fileStatusList.appendChild(li);
         });
 
         for (const file of filesToUpload) {
-            const formData = new FormData();
-            formData.append('photo', file);
-            try {
-                const response = await fetch("{{ url_for('admin.upload_single_photo_ajax') }}", {
-                    method: 'POST',
-                    body: formData,
-                });
-                const result = await response.json();
-                updateStatus(result.filename, result.status === 'success' ? '✔️' : '❌');
-            } catch (error) {
-                updateStatus(file.name, '❌');
-            }
+            await uploadFile(file);
         }
         doneBtn.style.display = 'block';
     }
 
-    function updateStatus(filename, icon) {
-        const li = document.getElementById(`file-${filename.replace(/[^a-zA-Z0-9]/g, '-')}`);
-        if (li) {
-            const iconEl = li.querySelector('.status-icon');
-            iconEl.textContent = icon;
-        }
+    function uploadFile(file) {
+        return new Promise((resolve) => {
+            const li = document.getElementById(`file-${file.name.replace(/[^a-zA-Z0-9]/g, '-')}`);
+            const progress = li.querySelector('.upload-progress');
+            const statusIcon = li.querySelector('.status-icon');
+
+            const formData = new FormData();
+            formData.append('photo', file);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', "{{ url_for('admin.upload_single_photo_ajax') }}", true);
+
+            xhr.upload.onprogress = (event) => {
+                if (event.lengthComputable) {
+                    progress.value = (event.loaded / event.total) * 100;
+                }
+            };
+
+            xhr.onload = () => {
+                progress.style.display = 'none';
+                if (xhr.status === 200) {
+                    statusIcon.textContent = '✔️';
+                } else {
+                    statusIcon.textContent = '❌';
+                }
+                resolve();
+            };
+
+            xhr.onerror = () => {
+                progress.style.display = 'none';
+                statusIcon.textContent = '❌';
+                resolve();
+            };
+
+            xhr.send(formData);
+        });
     }
 </script>
 </body>
