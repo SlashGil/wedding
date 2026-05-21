@@ -78,12 +78,12 @@
         <p>Upload multiple photos at once, or a single .zip file.</p>
         <div class="upload-zone-wrapper">
             <label for="file-input">Upload Photos or ZIP</label>
-            <form id="upload-form" class="upload-zone" enctype="multipart/form-data">
+            <div id="upload-zone" class="upload-zone">
                 <input type="file" id="file-input" name="files" multiple accept="image/png, image/jpeg, image/gif, .zip">
                 <div class="upload-zone-text">
                     <span>Drag & drop files here, or <strong>browse</strong></span>
                 </div>
-            </form>
+            </div>
         </div>
 
         <div style="margin-top: 25px;">
@@ -158,15 +158,21 @@
     }
 
     // Multi-upload and ZIP handling
-    const uploadForm = document.getElementById('upload-form');
+    const uploadZone = document.getElementById('upload-zone');
     const fileInput = document.getElementById('file-input');
     const modal = document.getElementById('upload-modal');
     const fileStatusList = document.getElementById('file-status-list');
     const doneBtn = document.getElementById('modal-done-btn');
 
-    uploadForm.addEventListener('dragover', (e) => e.preventDefault());
-    uploadForm.addEventListener('drop', (e) => {
+    uploadZone.addEventListener('click', () => fileInput.click());
+    uploadZone.addEventListener('dragover', (e) => {
         e.preventDefault();
+        uploadZone.classList.add('dragover');
+    });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
         fileInput.files = e.dataTransfer.files;
         handleFiles(fileInput.files);
     });
@@ -180,39 +186,47 @@
         doneBtn.style.display = 'none';
         modal.classList.add('visible');
 
-        const formData = new FormData();
         const isZip = files.length === 1 && files[0].name.endsWith('.zip');
 
         if (isZip) {
+            // Handle ZIP file separately for now (or implement client-side unzipping)
+            const formData = new FormData();
             formData.append('zip_file', files[0]);
             fileStatusList.innerHTML = `<li>Processing ZIP file: ${files[0].name} <span class="status-icon">...</span></li>`;
+            // This part remains a single request, as client-side unzipping is complex
+            // For a better UX, you would unzip on the client and use the file-by-file upload below
+            try {
+                const response = await fetch("{{ url_for('admin.upload_photos_ajax') }}", { method: 'POST', body: formData });
+                const result = await response.json();
+                fileStatusList.innerHTML = `<li>ZIP Processed. Success: ${result.successful_files.length}, Failed: ${result.failed_files.length} <span class="status-icon">✔️</span></li>`;
+            } catch (e) {
+                fileStatusList.innerHTML = '<li>ZIP Upload failed. <span class="status-icon">❌</span></li>';
+            } finally {
+                doneBtn.style.display = 'block';
+            }
         } else {
+            // File-by-file upload for multiple images
             for (const file of files) {
-                formData.append('photos[]', file);
                 const li = document.createElement('li');
                 li.id = `file-${file.name.replace(/[^a-zA-Z0-9]/g, '-')}`;
                 li.innerHTML = `${file.name} <span class="status-icon">...</span>`;
                 fileStatusList.appendChild(li);
             }
-        }
 
-        try {
-            const response = await fetch("{{ url_for('admin.upload_photos_ajax') }}", {
-                method: 'POST',
-                body: formData,
-            });
-            const result = await response.json();
-
-            if (isZip) {
-                fileStatusList.innerHTML = `<li>ZIP Processed. Success: ${result.successful_files.length}, Failed: ${result.failed_files.length} <span class="status-icon">✔️</span></li>`;
-            } else {
-                result.successful_files.forEach(name => updateStatus(name, '✔️'));
-                result.failed_files.forEach(name => updateStatus(name, '❌'));
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append('photo', file);
+                try {
+                    const response = await fetch("{{ url_for('admin.upload_single_photo_ajax') }}", {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    const result = await response.json();
+                    updateStatus(result.filename, result.status === 'success' ? '✔️' : '❌');
+                } catch (error) {
+                    updateStatus(file.name, '❌');
+                }
             }
-        } catch (error) {
-            console.error('Upload failed:', error);
-            fileStatusList.innerHTML = '<li>Upload failed. Please check the console. <span class="status-icon">❌</span></li>';
-        } finally {
             doneBtn.style.display = 'block';
         }
     }

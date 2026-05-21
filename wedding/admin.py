@@ -127,8 +127,36 @@ def delete_user(user_id):
 @bp.route('/guests')
 @login_required
 def manage_guests():
-    # ... (code remains the same)
-    pass
+    supabase = get_supabase_client()
+    guest_links = []
+    total_invitations = 0
+    total_guests = 0
+    total_kids = 0
+    whatsapp_message = get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}')
+    
+    try:
+        guest_response = supabase.from_('guests').select('*, sent_by_admin:admins(username)').order('id', desc=True).execute()
+        guest_links = guest_response.data
+        
+        total_invitations = len(guest_links)
+        total_guests = sum(g.get('max_guests', 0) for g in guest_links)
+        total_kids = sum(g.get('max_kids', 0) for g in guest_links if g.get('kids_allowed'))
+
+        for guest in guest_links:
+            guest['phone_number_display'] = format_phone_for_display(guest.get('phone_number'))
+            admin = guest.get('sent_by_admin')
+            guest['sent_by_username'] = admin['username'] if isinstance(admin, dict) else None
+
+    except Exception as e:
+        current_app.logger.error(f"Error fetching guests from Supabase: {e}")
+        flash(f"Error loading guests: {str(e)}", 'danger')
+        
+    return render_template('guests.html', 
+                           guest_links=guest_links, 
+                           whatsapp_message=whatsapp_message,
+                           total_invitations=total_invitations,
+                           total_guests=total_guests,
+                           total_kids=total_kids)
 
 @bp.route('/guest/<int:guest_id>/mark_sent', methods=['POST'])
 @login_required
@@ -160,71 +188,67 @@ def delete_guest(guest_id):
     # ... (code remains the same)
     pass
 
-@bp.route('/upload_photos_ajax', methods=['POST'])
+@bp.route('/upload_single_photo_ajax', methods=['POST'])
 @login_required
-def upload_photos_ajax():
+def upload_single_photo_ajax():
     supabase = get_supabase_client()
     bucket_name = current_app.config['SUPABASE_BUCKET']
     
-    successful_files = []
-    failed_files = []
-    files_to_process = []
+    if 'photo' not in request.files:
+        return jsonify({'status': 'error', 'message': 'No photo file found in request.'}), 400
+
+    file = request.files['photo']
+    if not (file and allowed_file(file.filename)):
+        return jsonify({'status': 'error', 'message': 'Invalid file type.'}), 400
+
+    filename = secure_filename(file.filename)
+    file_content = file.read()
+    path_on_storage = f"photos/{filename}"
     
-    source = "unknown"
-    if 'zip_file' in request.files:
-        source = "ZIP file"
-        zip_file = request.files['zip_file']
-        if zip_file and zip_file.filename.endswith('.zip'):
-            try:
-                with zipfile.ZipFile(BytesIO(zip_file.read())) as z:
-                    for filename in z.namelist():
-                        if not filename.startswith('__MACOSX') and allowed_file(filename):
-                            files_to_process.append((secure_filename(filename), z.read(filename)))
-            except zipfile.BadZipFile:
-                current_app.logger.error("Upload failed: Invalid ZIP file provided.")
-                return jsonify({'error': 'Invalid ZIP file.'}), 400
-    
-    elif 'photos[]' in request.files:
-        source = "direct file upload"
-        uploaded_files = request.files.getlist('photos[]')
-        for file in uploaded_files:
-            if file and allowed_file(file.filename):
-                files_to_process.append((secure_filename(file.filename), file.read()))
-
-    if not files_to_process:
-        current_app.logger.warning("Photo upload endpoint called but no valid files were processed.")
-        return jsonify({'error': 'No valid files to process.'}), 400
-
-    current_app.logger.info(f"Starting multi-photo upload from {source}. Processing {len(files_to_process)} files.")
-
-    for filename, file_content in files_to_process:
-        path_on_storage = f"photos/{filename}"
+    try:
+        supabase.storage.from_(bucket_name).upload(path_on_storage, file_content)
+        supabase.from_('photos').insert({'filename': filename, 'is_visible': True}).execute()
+        current_app.logger.info(f"Successfully uploaded and registered '{filename}'.")
+        return jsonify({'status': 'success', 'filename': filename})
+    except Exception as e:
+        current_app.logger.error(f"Failed to upload '{filename}': {e}")
         try:
-            supabase.storage.from_(bucket_name).upload(path_on_storage, file_content)
-            supabase.from_('photos').insert({'filename': filename, 'is_visible': True}).execute()
-            successful_files.append(filename)
-            current_app.logger.info(f"Successfully uploaded and registered '{filename}'.")
-        except Exception as e:
-            failed_files.append(filename)
-            current_app.logger.error(f"Failed to upload '{filename}': {e}")
-            try:
-                supabase.storage.from_(bucket_name).remove([path_on_storage])
-            except Exception as cleanup_e:
-                current_app.logger.error(f"CRITICAL: Failed to clean up orphaned file '{path_on_storage}' after a failed DB insert. Error: {cleanup_e}")
-
-    summary_message = f"Multi-upload complete. Success: {len(successful_files)}, Failed: {len(failed_files)}."
-    current_app.logger.info(summary_message)
-
-    return jsonify({
-        'successful_files': successful_files,
-        'failed_files': failed_files
-    })
+            supabase.storage.from_(bucket_name).remove([path_on_storage])
+        except Exception as cleanup_e:
+            current_app.logger.error(f"CRITICAL: Failed to clean up orphaned file '{path_on_storage}' after a failed DB insert. Error: {cleanup_e}")
+        return jsonify({'status': 'error', 'message': str(e), 'filename': filename}), 500
 
 @bp.route('/photo/<int:photo_id>/delete', methods=['POST'])
 @login_required
 def delete_photo(photo_id):
-    # ... (code remains the same)
-    pass
+    supabase = get_supabase_client()
+    bucket_name = current_app.config['SUPABASE_BUCKET']
+
+    try:
+        photo_response = supabase.from_('photos').select('filename').eq('id', photo_id).execute()
+        
+        if not photo_response.data:
+            flash('Photo not found in database.', 'danger')
+        else:
+            filename = photo_response.data[0]['filename']
+            
+            # First, delete the database record.
+            supabase.from_('photos').delete().eq('id', photo_id).execute()
+            
+            # Then, attempt to remove the file from storage.
+            try:
+                path_on_storage = f"photos/{filename}"
+                supabase.storage.from_(bucket_name).remove([path_on_storage])
+                flash(f"Photo '{filename}' deleted successfully.", 'success')
+            except Exception as storage_e:
+                current_app.logger.warning(f"Photo '{filename}' deleted from DB, but couldn't be removed from storage (it may have been already deleted). Error: {storage_e}")
+                flash(f"Photo '{filename}' deleted from database.", 'info')
+
+    except Exception as e:
+        current_app.logger.error(f"Error during photo deletion process: {e}")
+        flash(f"An error occurred while deleting the photo: {str(e)}", 'danger')
+        
+    return redirect(url_for('admin.index'))
 
 @bp.route('/photo/<int:photo_id>/toggle_visibility', methods=['POST'])
 @login_required
