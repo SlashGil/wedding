@@ -607,6 +607,48 @@ hr {
     display: block;
 }
 
+/* Upload Zone */
+.upload-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    position: relative;
+}
+.upload-zone:hover {
+    background-color: #f9f9f9;
+    border-color: var(--brand);
+}
+.upload-zone input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Upload Modal */
+#file-status-list {
+    list-style: none;
+    padding: 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+#file-status-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.status-icon {
+    font-weight: bold;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 900px) {
     .inline-fields { grid-template-columns: 1fr; }

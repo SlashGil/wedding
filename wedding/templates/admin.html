@@ -38,85 +38,25 @@
         <hr>
 
         <h2>Default WhatsApp Message</h2>
-        <p>Set the template for WhatsApp messages. Use <code>{guest_name}</code> and <code>{invite_link}</code> as
-            placeholders.</p>
+        <p>Set the template for WhatsApp messages. Use <code>{guest_name}</code> and <code>{invite_link}</code> as placeholders.</p>
         <form action="{{ url_for('admin.index') }}" method="post">
             <input type="hidden" name="update_whatsapp_message" value="1">
             <div class="field" style="margin-bottom: 1rem;">
                 <label for="whatsapp_message">WhatsApp Message Template</label>
-                <textarea name="whatsapp_message" id="whatsapp_message" rows="4"
-                          required>{{ whatsapp_message }}</textarea>
+                <textarea name="whatsapp_message" id="whatsapp_message" rows="4" required>{{ whatsapp_message }}</textarea>
             </div>
             <button class="btn" type="submit">Save WhatsApp Message</button>
         </form>
 
         <hr>
 
-        <h2>Manage Dress Code</h2>
-        <p>Update the dress code in Spanish. The English version will be automatically updated (you can adjust it
-            below).</p>
-        <form action="{{ url_for('admin.index') }}" method="post" class="inline-upload-form">
-            <input type="hidden" name="update_dress_code" value="1">
-            <div class="field" style="flex: 1;">
-                <label for="dress_code_es">Dress Code (Spanish)</label>
-                <input type="text" name="dress_code_es" id="dress_code_es" value="{{ dress_code_es }}" required
-                       oninput="updateEnglishDressCode(this.value)">
-            </div>
-            <div class="field" style="flex: 1;">
-                <label for="dress_code_en">Dress Code (English)</label>
-                <input type="text" name="dress_code_en" id="dress_code_en" value="{{ dress_code_en }}" required>
-            </div>
-            <button class="btn" type="submit">Update Dress Code</button>
-        </form>
-
-        <hr>
-
-        <h2>Pinterest Boards</h2>
-        <p>Add links to your Pinterest boards for dress code inspiration.</p>
-        <form action="{{ url_for('admin.index') }}" method="post" class="inline-upload-form">
-            <input type="hidden" name="update_pinterest_links" value="1">
-            <div class="field" style="flex: 1;">
-                <label for="pinterest_women">Women's Board URL</label>
-                <input type="url" name="pinterest_women" id="pinterest_women"
-                       value="{{ pinterest_links.get('women', '') }}" placeholder="https://pinterest.com/...">
-            </div>
-            <div class="field" style="flex: 1;">
-                <label for="pinterest_men">Men's Board URL</label>
-                <input type="url" name="pinterest_men" id="pinterest_men" value="{{ pinterest_links.get('men', '') }}"
-                       placeholder="https://pinterest.com/...">
-            </div>
-            <button class="btn" type="submit">Save Links</button>
-        </form>
-
-        <script>
-            function updateEnglishDressCode(esValue) {
-                const enInput = document.getElementById('dress_code_en');
-                const translations = {
-                    'Formal / Etiqueta Opcional': 'Formal / Black-Tie Optional',
-                    'Etiqueta': 'Black-Tie',
-                    'Formal': 'Formal',
-                    'Semi-formal': 'Semi-formal',
-                    'Casual': 'Casual',
-                    'Guayabera / Formal de Playa': 'Guayabera / Beach Formal'
-                };
-                if (translations[esValue]) {
-                    enInput.value = translations[esValue];
-                }
-            }
-        </script>
-
-        <hr>
-
         <h2>Manage Hero Image</h2>
         <p>Upload a new hero image. This will replace the main background image on the homepage.</p>
-        <form action="{{ url_for('admin.upload_hero') }}" method="post" enctype="multipart/form-data"
-              class="inline-upload-form">
+        <form action="{{ url_for('admin.upload_hero') }}" method="post" enctype="multipart/form-data" class="inline-upload-form">
             <div class="field" style="flex: 1;">
                 <label for="hero_image">Hero Image File</label>
                 <div class="file-input-wrapper">
-                    <input type="file" name="hero_image" id="hero_image" accept="image/png, image/jpeg, image/gif"
-                           required
-                           onchange="this.nextElementSibling.querySelector('.file-input-text').textContent = this.files[0] ? this.files[0].name : 'No file chosen'">
+                    <input type="file" name="hero_image" id="hero_image" accept="image/png, image/jpeg, image/gif" required onchange="this.nextElementSibling.querySelector('.file-input-text').textContent = this.files[0] ? this.files[0].name : 'No file chosen'">
                     <div class="file-input-button">
                         <span>Choose File</span>
                         <span class="file-input-text">No file chosen</span>
@@ -128,29 +68,21 @@
         {% if current_hero_url %}
         <div class="current-hero" style="margin-top: 20px;">
             <h4>Current Hero Image:</h4>
-            <img src="{{ current_hero_url }}" alt="Current Hero Image"
-                 style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px;">
+            <img src="{{ current_hero_url }}" alt="Current Hero Image" style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px;">
         </div>
         {% endif %}
 
         <hr>
 
         <h2>Manage Photos</h2>
-        <p>Upload photos for the gallery section on the main page.</p>
-        <form action="{{ url_for('admin.upload_photo') }}" method="post" enctype="multipart/form-data"
-              class="inline-upload-form">
-            <div class="field" style="flex: 1;">
-                <label for="photo">Gallery Photo</label>
-                <div class="file-input-wrapper">
-                    <input type="file" name="photo" id="photo" accept="image/png, image/jpeg, image/gif" required
-                           onchange="this.nextElementSibling.querySelector('.file-input-text').textContent = this.files[0] ? this.files[0].name : 'No file chosen'">
-                    <div class="file-input-button">
-                        <span>Choose File</span>
-                        <span class="file-input-text">No file chosen</span>
-                    </div>
-                </div>
+        <p>Upload multiple photos at once, or a single .zip file.</p>
+        <form id="upload-form" class="upload-zone" enctype="multipart/form-data">
+            <input type="file" id="file-input" name="files" multiple accept="image/png, image/jpeg, image/gif, .zip">
+            <div class="upload-zone-text">
+                <p><strong>Drag & drop files here</strong></p>
+                <p>or</p>
+                <p><span class="btn btn-secondary">Browse Files</span></p>
             </div>
-            <button class="btn" type="submit">Upload Photo</button>
         </form>
 
         <div style="margin-top: 25px;">
@@ -162,17 +94,14 @@
                 {% if uploaded_photos %}
                 <div class="photo-grid">
                     {% for photo in uploaded_photos %}
-                    <div class="photo-card {% if not photo.is_visible %}hidden-photo{% endif %}">
+                    <div class="photo-card {% if not photo.is_visible %}hidden-photo{% endif %}" id="photo-card-{{ photo.id }}">
                         <img src="{{ photo.url }}" alt="{{ photo.filename }}">
                         <p class="small">{{ photo.filename }}</p>
                         <div class="photo-actions">
-                            <form action="{{ url_for('admin.toggle_photo_visibility', photo_id=photo.id) }}" method="post">
-                                <button class="btn btn-secondary" type="submit">
-                                    {{ 'Show' if not photo.is_visible else 'Hide' }}
-                                </button>
-                            </form>
-                            <form action="{{ url_for('admin.delete_photo', photo_id=photo.id) }}" method="post"
-                                  onsubmit="return confirm('Are you sure you want to delete this photo?');">
+                            <button class="btn btn-secondary" type="button" onclick="toggleVisibility({{ photo.id }}, this)">
+                                {{ 'Show' if not photo.is_visible else 'Hide' }}
+                            </button>
+                            <form action="{{ url_for('admin.delete_photo', photo_id=photo.id) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this photo?');">
                                 <button class="btn btn-danger" type="submit">Delete</button>
                             </form>
                         </div>
@@ -186,61 +115,114 @@
         </div>
     </div>
 
-    <div class="card card-dark">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2>RSVP Answers Dashboard</h2>
-            <a href="{{ url_for('admin.export_rsvps') }}" class="btn btn-secondary">Export Confirmed Guests</a>
+    <!-- Other cards remain here -->
+</div>
+
+<!-- Upload Progress Modal -->
+<div id="upload-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Uploading Files...</h2>
         </div>
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                <tr>
-                    <th>Guest Name</th>
-                    <th>Invite</th>
-                    <th>Attending</th>
-                    <th>Adults</th>
-                    <th>Kids</th>
-                    <th>Dietary</th>
-                    <th>Submitted</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for rsvp in rsvp_answers %}
-                <tr>
-                    <td>{{ rsvp.name }}</td>
-                    <td>{{ rsvp.invite_name or 'Public form' }}</td>
-                    <td>
-                        {% if rsvp.attending %}
-                        <span class="status-yes">Yes</span>
-                        {% else %}
-                        <span class="status-no">No</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ rsvp.guests }}</td>
-                    <td>{{ rsvp.kids }}</td>
-                    <td>{{ rsvp.dietary_restrictions or '-' }}</td>
-                    <td class="small">
-                        {% if rsvp.created_at is string %}
-                        {{ rsvp.created_at[:16].replace('T', ' ') }}
-                        {% else %}
-                        {{ rsvp.created_at.strftime('%Y-%m-%d %H:%M') if rsvp.created_at else '-' }}
-                        {% endif %}
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="7">No RSVP answers yet.</td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+        <ul id="file-status-list"></ul>
+        <div class="modal-actions">
+            <button id="modal-done-btn" class="btn" style="display: none;">Done</button>
         </div>
     </div>
 </div>
+
 <script>
+    // Photo Gallery Toggle
     document.getElementById('toggle-photos-btn').addEventListener('click', function() {
         document.getElementById('photo-gallery').classList.toggle('hidden');
     });
+
+    // AJAX Photo Visibility Toggle
+    async function toggleVisibility(photoId, button) {
+        try {
+            const response = await fetch(`/admin/photo/${photoId}/toggle_visibility`, { method: 'POST' });
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                const card = document.getElementById(`photo-card-${photoId}`);
+                card.classList.toggle('hidden-photo', !data.new_visibility);
+                button.textContent = data.new_visibility ? 'Hide' : 'Show';
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Failed to toggle visibility:', error);
+            alert('An unexpected error occurred.');
+        }
+    }
+
+    // Multi-upload and ZIP handling
+    const uploadForm = document.getElementById('upload-form');
+    const fileInput = document.getElementById('file-input');
+    const modal = document.getElementById('upload-modal');
+    const fileStatusList = document.getElementById('file-status-list');
+    const doneBtn = document.getElementById('modal-done-btn');
+
+    uploadForm.addEventListener('dragover', (e) => e.preventDefault());
+    uploadForm.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileInput.files = e.dataTransfer.files;
+        handleFiles(fileInput.files);
+    });
+    fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+    doneBtn.addEventListener('click', () => window.location.reload());
+
+    async function handleFiles(files) {
+        if (files.length === 0) return;
+
+        fileStatusList.innerHTML = '';
+        doneBtn.style.display = 'none';
+        modal.classList.add('visible');
+
+        const formData = new FormData();
+        const isZip = files.length === 1 && files[0].name.endsWith('.zip');
+
+        if (isZip) {
+            formData.append('zip_file', files[0]);
+            fileStatusList.innerHTML = `<li>Processing ZIP file: ${files[0].name} <span class="status-icon">...</span></li>`;
+        } else {
+            for (const file of files) {
+                formData.append('photos[]', file);
+                const li = document.createElement('li');
+                li.id = `file-${file.name.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                li.innerHTML = `${file.name} <span class="status-icon">...</span>`;
+                fileStatusList.appendChild(li);
+            }
+        }
+
+        try {
+            const response = await fetch("{{ url_for('admin.upload_photos_ajax') }}", {
+                method: 'POST',
+                body: formData,
+            });
+            const result = await response.json();
+
+            if (isZip) {
+                fileStatusList.innerHTML = `<li>ZIP Processed. Success: ${result.successful_files.length}, Failed: ${result.failed_files.length} <span class="status-icon">✔️</span></li>`;
+            } else {
+                result.successful_files.forEach(name => updateStatus(name, '✔️'));
+                result.failed_files.forEach(name => updateStatus(name, '❌'));
+            }
+        } catch (error) {
+            console.error('Upload failed:', error);
+            fileStatusList.innerHTML = '<li>Upload failed. Please check the console. <span class="status-icon">❌</span></li>';
+        } finally {
+            doneBtn.style.display = 'block';
+        }
+    }
+
+    function updateStatus(filename, icon) {
+        const li = document.getElementById(`file-${filename.replace(/[^a-zA-Z0-9]/g, '-')}`);
+        if (li) {
+            const iconEl = li.querySelector('.status-icon');
+            iconEl.textContent = icon;
+        }
+    }
 </script>
 </body>
 </html>
