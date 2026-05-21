@@ -6,6 +6,7 @@
     <title>Wedding Admin</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 <div class="container">
@@ -186,49 +187,54 @@
         doneBtn.style.display = 'none';
         modal.classList.add('visible');
 
+        let filesToUpload = [];
         const isZip = files.length === 1 && files[0].name.endsWith('.zip');
 
         if (isZip) {
-            // Handle ZIP file separately for now (or implement client-side unzipping)
-            const formData = new FormData();
-            formData.append('zip_file', files[0]);
-            fileStatusList.innerHTML = `<li>Processing ZIP file: ${files[0].name} <span class="status-icon">...</span></li>`;
-            // This part remains a single request, as client-side unzipping is complex
-            // For a better UX, you would unzip on the client and use the file-by-file upload below
+            const zipFile = files[0];
+            fileStatusList.innerHTML = `<li>Unzipping ${zipFile.name}... <span class="status-icon">...</span></li>`;
             try {
-                const response = await fetch("{{ url_for('admin.upload_photos_ajax') }}", { method: 'POST', body: formData });
-                const result = await response.json();
-                fileStatusList.innerHTML = `<li>ZIP Processed. Success: ${result.successful_files.length}, Failed: ${result.failed_files.length} <span class="status-icon">✔️</span></li>`;
+                const jszip = new JSZip();
+                const zip = await jszip.loadAsync(zipFile);
+                for (const filename in zip.files) {
+                    if (!zip.files[filename].dir && !filename.startsWith('__MACOSX')) {
+                        const fileData = await zip.files[filename].async('blob');
+                        const file = new File([fileData], filename, { type: fileData.type });
+                        filesToUpload.push(file);
+                    }
+                }
             } catch (e) {
-                fileStatusList.innerHTML = '<li>ZIP Upload failed. <span class="status-icon">❌</span></li>';
-            } finally {
+                fileStatusList.innerHTML = '<li>Failed to read ZIP file. <span class="status-icon">❌</span></li>';
                 doneBtn.style.display = 'block';
+                return;
             }
         } else {
-            // File-by-file upload for multiple images
-            for (const file of files) {
-                const li = document.createElement('li');
-                li.id = `file-${file.name.replace(/[^a-zA-Z0-9]/g, '-')}`;
-                li.innerHTML = `${file.name} <span class="status-icon">...</span>`;
-                fileStatusList.appendChild(li);
-            }
-
-            for (const file of files) {
-                const formData = new FormData();
-                formData.append('photo', file);
-                try {
-                    const response = await fetch("{{ url_for('admin.upload_single_photo_ajax') }}", {
-                        method: 'POST',
-                        body: formData,
-                    });
-                    const result = await response.json();
-                    updateStatus(result.filename, result.status === 'success' ? '✔️' : '❌');
-                } catch (error) {
-                    updateStatus(file.name, '❌');
-                }
-            }
-            doneBtn.style.display = 'block';
+            filesToUpload = Array.from(files);
         }
+
+        fileStatusList.innerHTML = ''; // Clear "Unzipping..." message
+        filesToUpload.forEach(file => {
+            const li = document.createElement('li');
+            li.id = `file-${file.name.replace(/[^a-zA-Z0-9]/g, '-')}`;
+            li.innerHTML = `${file.name} <span class="status-icon">...</span>`;
+            fileStatusList.appendChild(li);
+        });
+
+        for (const file of filesToUpload) {
+            const formData = new FormData();
+            formData.append('photo', file);
+            try {
+                const response = await fetch("{{ url_for('admin.upload_single_photo_ajax') }}", {
+                    method: 'POST',
+                    body: formData,
+                });
+                const result = await response.json();
+                updateStatus(result.filename, result.status === 'success' ? '✔️' : '❌');
+            } catch (error) {
+                updateStatus(file.name, '❌');
+            }
+        }
+        doneBtn.style.display = 'block';
     }
 
     function updateStatus(filename, icon) {
