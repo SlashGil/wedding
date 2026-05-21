@@ -76,14 +76,15 @@
 
         <h2>Manage Photos</h2>
         <p>Upload multiple photos at once, or a single .zip file.</p>
-        <form id="upload-form" class="upload-zone" enctype="multipart/form-data">
-            <input type="file" id="file-input" name="files" multiple accept="image/png, image/jpeg, image/gif, .zip">
-            <div class="upload-zone-text">
-                <p><strong>Drag & drop files here</strong></p>
-                <p>or</p>
-                <p><span class="btn btn-secondary">Browse Files</span></p>
-            </div>
-        </form>
+        <div class="upload-zone-wrapper">
+            <label for="file-input">Upload Photos or ZIP</label>
+            <form id="upload-form" class="upload-zone" enctype="multipart/form-data">
+                <input type="file" id="file-input" name="files" multiple accept="image/png, image/jpeg, image/gif, .zip">
+                <div class="upload-zone-text">
+                    <span>Drag & drop files here, or <strong>browse</strong></span>
+                </div>
+            </form>
+        </div>
 
         <div style="margin-top: 25px;">
             <div class="header-flex">
