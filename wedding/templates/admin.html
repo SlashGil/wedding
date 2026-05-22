@@ -97,17 +97,24 @@
                 <div class="photo-grid">
                     {% for photo in uploaded_photos %}
                     <div class="photo-card {% if not photo.is_visible %}hidden-photo{% endif %}" id="photo-card-{{ photo.id }}">
-                        <img src="{{ photo.url }}" alt="{{ photo.filename }}">
-                        <p class="small">{{ photo.filename }}</p>
-                        <div class="photo-actions">
+                        <div class="photo-card-img">
+                            <img src="{{ photo.url }}" alt="{{ photo.filename }}">
                             <button class="btn-icon star-btn {% if photo.is_featured %}featured{% endif %}" type="button" onclick="toggleFeatured({{ photo.id }}, this)">
-                                ⭐
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.77 5.82 22 7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
                             </button>
-                            <button class="btn btn-secondary" type="button" onclick="toggleVisibility({{ photo.id }}, this)">
-                                {{ 'Show' if not photo.is_visible else 'Hide' }}
+                        </div>
+                        <div class="photo-card-actions">
+                            <button class="btn-icon" type="button" onclick="toggleVisibility({{ photo.id }}, this)">
+                                {% if photo.is_visible %}
+                                <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                {% else %}
+                                <svg class="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22"></path></svg>
+                                {% endif %}
                             </button>
                             <form action="{{ url_for('admin.delete_photo', photo_id=photo.id) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this photo?');">
-                                <button class="btn btn-danger" type="submit">Delete</button>
+                                <button class="btn-icon" type="submit">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                </button>
                             </form>
                         </div>
                     </div>
@@ -149,7 +156,9 @@
             const data = await response.json();
             if (data.status === 'success') {
                 document.getElementById(`photo-card-${photoId}`).classList.toggle('hidden-photo', !data.new_visibility);
-                button.textContent = data.new_visibility ? 'Hide' : 'Show';
+                button.innerHTML = data.new_visibility
+                    ? `<svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`
+                    : `<svg class="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22"></path></svg>`;
             } else { alert('Error: ' + data.message); }
         } catch (error) { console.error('Failed to toggle visibility:', error); alert('An unexpected error occurred.'); }
     }

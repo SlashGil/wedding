@@ -77,7 +77,7 @@ def index():
         photo_response = supabase.from_('photos').select('id, filename, is_visible, is_featured').order('id', desc=True).execute()
         if photo_response.data:
             photo_paths = [f"photos/{p['filename']}" for p in photo_response.data]
-            transform_options = {'width': 200, 'height': 200, 'resize': 'cover'}
+            transform_options = {'width': 200, 'height': 200, 'resize': 'cover', 'quality': 60}
             signed_urls_response = supabase.storage.from_(bucket_name).create_signed_urls(photo_paths, 3600, options={'transform': transform_options})
             url_map = {os.path.basename(item['path']): item['signedURL'] for item in signed_urls_response if not item.get('error')}
             for photo_data in photo_response.data:
