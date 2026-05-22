@@ -72,7 +72,7 @@ def create_app(test_config=None):
         hero_image_url = 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1920&q=80'
         if hero_filename:
             try:
-                transform_options = {'width': 1600, 'quality': 75, 'resize': 'contain'}
+                transform_options = {'width': 1600, 'quality': 85, 'resize': 'contain'}
                 signed_url_response = supabase.storage.from_(bucket_name).create_signed_url(f"uploads/{hero_filename}", 3600, options={'transform': transform_options})
                 hero_image_url = signed_url_response['signedURL']
             except Exception as e:
@@ -95,12 +95,12 @@ def create_app(test_config=None):
                 if photo_files:
                     filenames = [p['filename'] for p in photo_files]
                     thumb_paths = [f"photos/{name}" for name in filenames]
-                    thumb_transform = {'width': 250, 'height': 250, 'resize': 'cover', 'quality': 60}
+                    thumb_transform = {'width': 250, 'height': 250, 'resize': 'cover', 'quality': 80}
                     thumb_urls_res = supabase.storage.from_(bucket_name).create_signed_urls(thumb_paths, 3600, options={'transform': thumb_transform})
                     thumb_map = {os.path.basename(item['path']): item['signedURL'] for item in thumb_urls_res if not item.get('error')}
 
                     full_paths = [f"photos/{name}" for name in filenames]
-                    full_transform = {'width': 1280, 'height': 720, 'quality': 75, 'resize': 'contain'}
+                    full_transform = {'width': 1280, 'height': 720, 'quality': 90, 'resize': 'contain'}
                     full_urls_res = supabase.storage.from_(bucket_name).create_signed_urls(full_paths, 3600, options={'transform': full_transform})
                     full_map = {os.path.basename(item['path']): item['signedURL'] for item in full_urls_res if not item.get('error')}
 
