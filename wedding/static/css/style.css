@@ -232,19 +232,21 @@ body {
 }
 
 .photo-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 15px;
     max-width: 1200px;
     margin: 0 auto;
+    column-count: 3;
+    column-gap: 15px;
 }
 
 .gallery-item {
-    display: block;
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 15px;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    break-inside: avoid;
 }
 
 .gallery-item:hover {
@@ -254,8 +256,7 @@ body {
 
 .gallery-item img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
     display: block;
 }
 
@@ -539,6 +540,10 @@ audio {
     grid-template-columns: 1fr;
 }
 
+    .photo-grid {
+        column-count: 2;
+    }
+
     .gift-table a {
         font-size: 1em;
     }
@@ -573,6 +578,10 @@ audio {
 @media (max-width: 600px) {
     .hero h1 {
         font-size: 2.8em;
+    }
+
+    .photo-grid {
+        column-count: 1;
     }
 
     .rsvp-form {
