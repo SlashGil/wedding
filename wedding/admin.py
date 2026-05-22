@@ -65,6 +65,12 @@ def index():
             set_setting('pinterest_men', request.form.get('pinterest_men', '').strip())
             flash('Pinterest links updated successfully.', 'success')
             return redirect(url_for('admin.index'))
+        
+        if 'update_gallery_settings' in request.form:
+            initial_photos = request.form.get('gallery_initial_photos', '6')
+            set_setting('gallery_initial_photos', initial_photos)
+            flash('Gallery display settings updated.', 'success')
+            return redirect(url_for('admin.index'))
 
     rsvp_answers, uploaded_photos = [], []
     try:
@@ -93,6 +99,8 @@ def index():
         except Exception as e:
             current_app.logger.error(f"Error generating hero image URL: {e}")
 
+    gallery_initial_photos = get_setting('gallery_initial_photos', '6')
+
     return render_template('admin.html', 
                            rsvp_answers=rsvp_answers, 
                            uploaded_photos=uploaded_photos, 
@@ -100,7 +108,8 @@ def index():
                            dress_code_es=get_setting('dress_code_es', 'Formal / Etiqueta Opcional'), 
                            dress_code_en=get_setting('dress_code_en', 'Formal / Black-Tie Optional'), 
                            pinterest_links={'women': get_setting('pinterest_women', ''), 'men': get_setting('pinterest_men', '')}, 
-                           whatsapp_message=get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}'))
+                           whatsapp_message=get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}'),
+                           gallery_initial_photos=gallery_initial_photos)
 
 @bp.route('/rsvps/export')
 @login_required
@@ -206,16 +215,14 @@ def delete_photo(photo_id):
         else:
             filename = photo_response.data[0]['filename']
             
-            # First, delete the database record.
             supabase.from_('photos').delete().eq('id', photo_id).execute()
             
-            # Then, attempt to remove the file from storage.
             try:
                 path_on_storage = f"photos/{filename}"
                 supabase.storage.from_(bucket_name).remove([path_on_storage])
                 flash(f"Photo '{filename}' deleted successfully.", 'success')
             except Exception as storage_e:
-                current_app.logger.warning(f"Photo '{filename}' deleted from DB, but couldn't be removed from storage (it may have been already deleted). Error: {storage_e}")
+                current_app.logger.warning(f"Photo '{filename}' deleted from DB, but couldn't be removed from storage. Error: {storage_e}")
                 flash(f"Photo '{filename}' deleted from database.", 'info')
 
     except Exception as e:

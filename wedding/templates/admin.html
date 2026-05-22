@@ -76,6 +76,16 @@
         <hr>
 
         <h2>Manage Photos</h2>
+
+        <form action="{{ url_for('admin.index') }}" method="post" class="inline-upload-form" style="margin-bottom: 1rem;">
+            <input type="hidden" name="update_gallery_settings" value="1">
+            <div class="field" style="flex: 1;">
+                <label for="gallery_initial_photos">Initial Photos to Display</label>
+                <input type="number" name="gallery_initial_photos" id="gallery_initial_photos" value="{{ gallery_initial_photos }}" min="1" required>
+            </div>
+            <button class="btn" type="submit">Save Gallery Settings</button>
+        </form>
+
         <p>Upload multiple photos at once, or a single .zip file.</p>
         <div class="upload-zone-wrapper">
             <label for="file-input">Upload Photos or ZIP</label>
