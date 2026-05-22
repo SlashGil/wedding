@@ -71,6 +71,7 @@ def create_app(test_config=None):
 
     @app.context_processor
     def inject_hero_image():
+        from .db import get_setting
         hero_filename = get_setting('hero_image_filename')
         hero_image_url = 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1920&q=80'
         if hero_filename:
