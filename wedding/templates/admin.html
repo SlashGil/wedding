@@ -76,17 +76,7 @@
         <hr>
 
         <h2>Manage Photos</h2>
-
-        <form action="{{ url_for('admin.index') }}" method="post" class="inline-upload-form" style="margin-bottom: 1rem;">
-            <input type="hidden" name="update_gallery_settings" value="1">
-            <div class="field" style="flex: 1;">
-                <label for="gallery_initial_photos">Initial Photos to Display</label>
-                <input type="number" name="gallery_initial_photos" id="gallery_initial_photos" value="{{ gallery_initial_photos }}" min="1" required>
-            </div>
-            <button class="btn" type="submit">Save Gallery Settings</button>
-        </form>
-
-        <p>Upload multiple photos at once, or a single .zip file.</p>
+        <p>Use the star (⭐) to feature photos in the initial gallery view on the main page.</p>
         <div class="upload-zone-wrapper">
             <label for="file-input">Upload Photos or ZIP</label>
             <div id="upload-zone" class="upload-zone">
@@ -110,6 +100,9 @@
                         <img src="{{ photo.url }}" alt="{{ photo.filename }}">
                         <p class="small">{{ photo.filename }}</p>
                         <div class="photo-actions">
+                            <button class="btn-icon star-btn {% if photo.is_featured %}featured{% endif %}" type="button" onclick="toggleFeatured({{ photo.id }}, this)">
+                                ⭐
+                            </button>
                             <button class="btn btn-secondary" type="button" onclick="toggleVisibility({{ photo.id }}, this)">
                                 {{ 'Show' if not photo.is_visible else 'Hide' }}
                             </button>
@@ -149,23 +142,26 @@
         document.getElementById('photo-gallery').classList.toggle('hidden');
     });
 
-    // AJAX Photo Visibility Toggle
+    // AJAX Photo Visibility & Featured Toggle
     async function toggleVisibility(photoId, button) {
         try {
             const response = await fetch(`/admin/photo/${photoId}/toggle_visibility`, { method: 'POST' });
             const data = await response.json();
-
             if (data.status === 'success') {
-                const card = document.getElementById(`photo-card-${photoId}`);
-                card.classList.toggle('hidden-photo', !data.new_visibility);
+                document.getElementById(`photo-card-${photoId}`).classList.toggle('hidden-photo', !data.new_visibility);
                 button.textContent = data.new_visibility ? 'Hide' : 'Show';
-            } else {
-                alert('Error: ' + data.message);
-            }
-        } catch (error) {
-            console.error('Failed to toggle visibility:', error);
-            alert('An unexpected error occurred.');
-        }
+            } else { alert('Error: ' + data.message); }
+        } catch (error) { console.error('Failed to toggle visibility:', error); alert('An unexpected error occurred.'); }
+    }
+
+    async function toggleFeatured(photoId, button) {
+        try {
+            const response = await fetch(`/admin/photo/${photoId}/toggle_featured`, { method: 'POST' });
+            const data = await response.json();
+            if (data.status === 'success') {
+                button.classList.toggle('featured', data.new_featured_state);
+            } else { alert('Error: ' + data.message); }
+        } catch (error) { console.error('Failed to toggle featured state:', error); alert('An unexpected error occurred.'); }
     }
 
     // Multi-upload and ZIP handling
@@ -189,11 +185,9 @@
 
     async function handleFiles(files) {
         if (files.length === 0) return;
-
         fileStatusList.innerHTML = '';
         doneBtn.style.display = 'none';
         modal.classList.add('visible');
-
         let filesToUpload = [];
         const isZip = files.length === 1 && files[0].name.endsWith('.zip');
 
@@ -203,14 +197,9 @@
             li.innerHTML = `<span>Unzipping ${zipFile.name}...</span><progress id="zip-progress" value="0" max="100"></progress>`;
             fileStatusList.appendChild(li);
             const zipProgress = document.getElementById('zip-progress');
-
             try {
                 const jszip = new JSZip();
-                const zip = await jszip.loadAsync(zipFile, {
-                    onUpdate: (metadata) => {
-                        zipProgress.value = metadata.percent;
-                    }
-                });
+                const zip = await jszip.loadAsync(zipFile, { onUpdate: (m) => { zipProgress.value = m.percent; } });
                 for (const filename in zip.files) {
                     if (!zip.files[filename].dir && !filename.startsWith('__MACOSX')) {
                         const fileData = await zip.files[filename].async('blob');
@@ -234,9 +223,7 @@
             fileStatusList.appendChild(li);
         });
 
-        for (const file of filesToUpload) {
-            await uploadFile(file);
-        }
+        for (const file of filesToUpload) { await uploadFile(file); }
         doneBtn.style.display = 'block';
     }
 
@@ -245,35 +232,21 @@
             const li = document.getElementById(`file-${file.name.replace(/[^a-zA-Z0-9]/g, '-')}`);
             const progress = li.querySelector('.upload-progress');
             const statusIcon = li.querySelector('.status-icon');
-
             const formData = new FormData();
             formData.append('photo', file);
-
             const xhr = new XMLHttpRequest();
             xhr.open('POST', "{{ url_for('admin.upload_single_photo_ajax') }}", true);
-
-            xhr.upload.onprogress = (event) => {
-                if (event.lengthComputable) {
-                    progress.value = (event.loaded / event.total) * 100;
-                }
-            };
-
+            xhr.upload.onprogress = (e) => { if (e.lengthComputable) progress.value = (e.loaded / e.total) * 100; };
             xhr.onload = () => {
                 progress.style.display = 'none';
-                if (xhr.status === 200) {
-                    statusIcon.textContent = '✔️';
-                } else {
-                    statusIcon.textContent = '❌';
-                }
+                statusIcon.textContent = (xhr.status === 200) ? '✔️' : '❌';
                 resolve();
             };
-
             xhr.onerror = () => {
                 progress.style.display = 'none';
                 statusIcon.textContent = '❌';
                 resolve();
             };
-
             xhr.send(formData);
         });
     }

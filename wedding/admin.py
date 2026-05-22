@@ -65,12 +65,6 @@ def index():
             set_setting('pinterest_men', request.form.get('pinterest_men', '').strip())
             flash('Pinterest links updated successfully.', 'success')
             return redirect(url_for('admin.index'))
-        
-        if 'update_gallery_settings' in request.form:
-            initial_photos = request.form.get('gallery_initial_photos', '6')
-            set_setting('gallery_initial_photos', initial_photos)
-            flash('Gallery display settings updated.', 'success')
-            return redirect(url_for('admin.index'))
 
     rsvp_answers, uploaded_photos = [], []
     try:
@@ -79,7 +73,7 @@ def index():
             invited_guest = rsvp.get('invited_guest') if isinstance(rsvp.get('invited_guest'), dict) else {}
             rsvp_answers.append({**rsvp, 'invite_name': invited_guest.get('guest_name') or 'N/A'})
 
-        photo_response = supabase.from_('photos').select('id, filename, is_visible').order('id', desc=True).execute()
+        photo_response = supabase.from_('photos').select('id, filename, is_visible, is_featured').order('id', desc=True).execute()
         if photo_response.data:
             for photo_data in photo_response.data:
                 transform = {'width': 200, 'height': 200, 'resize': 'cover', 'quality': 70}
@@ -99,8 +93,6 @@ def index():
         except Exception as e:
             current_app.logger.error(f"Error generating hero image URL: {e}")
 
-    gallery_initial_photos = get_setting('gallery_initial_photos', '6')
-
     return render_template('admin.html', 
                            rsvp_answers=rsvp_answers, 
                            uploaded_photos=uploaded_photos, 
@@ -108,8 +100,7 @@ def index():
                            dress_code_es=get_setting('dress_code_es', 'Formal / Etiqueta Opcional'), 
                            dress_code_en=get_setting('dress_code_en', 'Formal / Black-Tie Optional'), 
                            pinterest_links={'women': get_setting('pinterest_women', ''), 'men': get_setting('pinterest_men', '')}, 
-                           whatsapp_message=get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}'),
-                           gallery_initial_photos=gallery_initial_photos)
+                           whatsapp_message=get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}'))
 
 @bp.route('/rsvps/export')
 @login_required
@@ -249,6 +240,25 @@ def toggle_photo_visibility(photo_id):
         
     except Exception as e:
         current_app.logger.error(f"Error toggling photo visibility: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@bp.route('/photo/<int:photo_id>/toggle_featured', methods=['POST'])
+@login_required
+def toggle_featured(photo_id):
+    supabase = get_supabase_client()
+    try:
+        photo = supabase.from_('photos').select('is_featured').eq('id', photo_id).single().execute()
+        if not photo.data:
+            return jsonify({'status': 'error', 'message': 'Photo not found.'}), 404
+        
+        new_featured_state = not photo.data.get('is_featured', False)
+        
+        supabase.from_('photos').update({'is_featured': new_featured_state}).eq('id', photo_id).execute()
+        
+        return jsonify({'status': 'success', 'new_featured_state': new_featured_state})
+
+    except Exception as e:
+        current_app.logger.error(f"Error toggling featured state for photo {photo_id}: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @bp.route('/upload_hero', methods=['POST'])

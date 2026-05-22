@@ -575,16 +575,37 @@ hr {
 
 .photo-actions {
     display: flex;
-    flex-direction: column;
     gap: 8px;
+    justify-content: center;
 }
 
-.photo-actions .btn {
-    width: 100%;
+.photo-actions .btn, .photo-actions .btn-icon {
+    width: auto;
     height: 34px;
     font-size: 0.8rem;
     padding: 0 10px;
 }
+
+.btn-icon {
+    background: none;
+    border: 1px solid transparent;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0 5px;
+    line-height: 1;
+}
+
+.star-btn {
+    color: #ccc;
+    transition: color 0.2s;
+}
+.star-btn:hover {
+    color: #ffc107;
+}
+.star-btn.featured {
+    color: #ffc107;
+}
+
 
 .stats-bar {
     background-color: #f0f0f0;
@@ -696,6 +717,7 @@ progress::-webkit-progress-value {
     display: flex;
     align-items: center;
     padding: 1rem;
+    margin-top: 1rem;
     margin-bottom: 1rem;
     border-radius: 8px;
     border: 1px solid transparent;

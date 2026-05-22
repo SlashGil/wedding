@@ -131,12 +131,12 @@
     <h2 data-i18n="photos">Our Photos</h2>
     <div id="photo-gallery" class="photo-grid">
         {% for photo in photos %}
-            <a href="{{ photo.full }}" class="gallery-item {% if loop.index > gallery_initial_photos %}hidden-initially{% endif %}" data-sub-html="<h4>{{ photo.filename }}</h4>">
+            <a href="{{ photo.full }}" class="gallery-item {% if not photo.is_featured %}hidden-initially{% endif %}" data-sub-html="<h4>{{ photo.filename }}</h4>">
                 <img src="{{ photo.thumbnail }}" alt="{{ photo.filename }}">
             </a>
         {% endfor %}
     </div>
-    {% if photos|length > gallery_initial_photos %}
+    {% if photos | selectattr('is_featured', 'equalto', false) | list | length > 0 %}
         <button id="load-more-photos" class="btn-load-more">View More</button>
     {% endif %}
 </div>
