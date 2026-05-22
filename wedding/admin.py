@@ -110,8 +110,8 @@ def reorder_photos():
         return jsonify({'status': 'error', 'message': 'No order provided.'}), 400
 
     try:
-        updates = [{'id': photo_id, 'position': index} for index, photo_id in enumerate(ordered_ids)]
-        supabase.from_('photos').upsert(updates).execute()
+        for index, photo_id in enumerate(ordered_ids):
+            supabase.from_('photos').update({'position': index}).eq('id', photo_id).execute()
         return jsonify({'status': 'success'})
     except Exception as e:
         current_app.logger.error(f"Error reordering photos: {e}")
