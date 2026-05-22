@@ -18,6 +18,7 @@ def create_app(test_config=None):
         SUPABASE_URL=os.environ.get('SUPABASE_URL'),
         SUPABASE_KEY=os.environ.get('SUPABASE_KEY'),
         SUPABASE_BUCKET='wedding-images',
+        CLOUDFLARE_DOMAIN='media.caritoychava.lat', # Your new Cloudflare subdomain
         GALLERY_FALLBACK_URLS=[
             'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=800&q=60',
             'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=60',
@@ -63,58 +64,48 @@ def create_app(test_config=None):
                 return value
         return value
 
+    def get_image_url(path, transform_params):
+        base_url = f"https://{current_app.config['CLOUDFLARE_DOMAIN']}/{current_app.config['SUPABASE_BUCKET']}/{path}"
+        params = '&'.join([f'{k}={v}' for k, v in transform_params.items()])
+        return f"{base_url}?{params}"
+
     @app.context_processor
     def inject_hero_image():
-        from .db import get_setting, get_supabase_client
-        supabase = get_supabase_client()
-        bucket_name = current_app.config['SUPABASE_BUCKET']
         hero_filename = get_setting('hero_image_filename')
         hero_image_url = 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1920&q=80'
         if hero_filename:
             try:
-                transform_options = {'width': 1920, 'height': 1080, 'quality': 80, 'resize': 'cover'}
-                signed_url_response = supabase.storage.from_(bucket_name).create_signed_url(f"uploads/{hero_filename}", 3600, options={'transform': transform_options})
-                hero_image_url = signed_url_response['signedURL']
+                transform = {'width': 1600, 'quality': 75}
+                hero_image_url = get_image_url(f"uploads/{hero_filename}", transform)
             except Exception as e:
-                app.logger.error(f"Error fetching hero image from Supabase Storage: {e}")
+                app.logger.error(f"Error generating hero image URL: {e}")
         return dict(hero_image_url=hero_image_url)
 
     @app.context_processor
     def inject_photos():
         from .db import get_supabase_client
         supabase = get_supabase_client()
-        bucket_name = current_app.config['SUPABASE_BUCKET']
-
+        
         photos = []
         try:
             response = supabase.from_('photos').select('filename').eq('is_visible', True).order('created_at', desc=True).execute()
             
             if response.data:
-                photo_files = [p['filename'] for p in response.data if p.get('filename')]
-                
-                if photo_files:
-                    # Generate Thumbnail URLs (smaller for faster initial load)
-                    thumb_paths = [f"photos/{name}" for name in photo_files]
-                    thumb_transform = {'width': 250, 'height': 250, 'resize': 'cover', 'quality': 70}
-                    thumb_urls_res = supabase.storage.from_(bucket_name).create_signed_urls(thumb_paths, 3600, options={'transform': thumb_transform})
-                    thumb_map = {os.path.basename(item['path']): item['signedURL'] for item in thumb_urls_res if not item.get('error')}
-
-                    # Generate Full-size Image URLs
-                    full_paths = [f"photos/{name}" for name in photo_files]
-                    full_transform = {'width': 1920, 'height': 1080, 'quality': 85}
-                    full_urls_res = supabase.storage.from_(bucket_name).create_signed_urls(full_paths, 3600, options={'transform': full_transform})
-                    full_map = {os.path.basename(item['path']): item['signedURL'] for item in full_urls_res if not item.get('error')}
-
-                    for filename in photo_files:
-                        if filename in thumb_map and filename in full_map:
-                            photos.append({
-                                'thumbnail': thumb_map[filename],
-                                'full': full_map[filename],
-                                'filename': filename
-                            })
+                for photo_data in response.data:
+                    filename = photo_data.get('filename')
+                    if not filename: continue
+                    
+                    thumb_transform = {'width': 250, 'height': 250, 'resize': 'cover', 'quality': 60}
+                    full_transform = {'width': 1280, 'height': 720, 'quality': 75}
+                    
+                    photos.append({
+                        'thumbnail': get_image_url(f"photos/{filename}", thumb_transform),
+                        'full': get_image_url(f"photos/{filename}", full_transform),
+                        'filename': filename
+                    })
 
         except Exception as e:
-            app.logger.error(f"Error fetching photos from Supabase: {e}")
+            app.logger.error(f"Error fetching photos: {e}")
 
         if not photos:
             fallback_urls = app.config['GALLERY_FALLBACK_URLS']

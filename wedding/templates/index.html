@@ -213,10 +213,19 @@
         const loadMoreBtn = document.getElementById('load-more-photos');
         if (loadMoreBtn) {
             loadMoreBtn.addEventListener('click', function() {
-                document.querySelectorAll('.gallery-item.hidden-initially').forEach(item => {
-                    item.classList.remove('hidden-initially');
-                });
-                this.style.display = 'none';
+                const hiddenItems = document.querySelectorAll('.gallery-item.hidden-initially');
+                if (this.textContent === 'View More') {
+                    hiddenItems.forEach(item => {
+                        item.style.display = 'block';
+                    });
+                    this.textContent = 'View Less';
+                } else {
+                    hiddenItems.forEach(item => {
+                        item.style.display = 'none';
+                    });
+                    this.textContent = 'View More';
+                    document.getElementById('photo-gallery').scrollIntoView({ behavior: 'smooth' });
+                }
             });
         }
     });
