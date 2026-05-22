@@ -68,7 +68,7 @@ def index():
             invited_guest = rsvp.get('invited_guest') if isinstance(rsvp.get('invited_guest'), dict) else {}
             rsvp_answers.append({**rsvp, 'invite_name': invited_guest.get('guest_name') or 'N/A'})
 
-        photo_response = supabase.from_('photos').select('id, filename, is_visible, is_featured').order('position').order('id', desc=True).execute()
+        photo_response = supabase.from_('photos').select('id, filename, is_visible, is_featured').order('is_featured', desc=True).order('position').execute()
         if photo_response.data:
             photo_paths = [f"photos/{p['filename']}" for p in photo_response.data]
             transform_options = {'width': 200, 'height': 200, 'resize': 'cover', 'quality': 60}

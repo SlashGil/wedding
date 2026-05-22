@@ -553,10 +553,10 @@ hr {
     display: flex;
     flex-direction: column;
     position: relative;
+    cursor: grab;
 }
-.photo-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+.photo-card:active {
+    cursor: grabbing;
 }
 .photo-card.hidden-photo { opacity: 0.6; }
 
