@@ -547,11 +547,12 @@ hr {
 .photo-card {
     background: var(--white);
     border-radius: 12px;
-    overflow: hidden;
+    overflow: visible; /* Allow star to pop out */
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 .photo-card:hover {
     transform: translateY(-4px);
@@ -571,31 +572,43 @@ hr {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 12px 12px 0 0;
 }
 
 .star-btn {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(0,0,0,0.3);
+    top: -10px;
+    right: -5px;
+    background: white;
+    border: 1px solid #ddd;
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: #ccc;
     transition: all 0.2s ease;
+    z-index: 2;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 .star-btn svg {
-    width: 18px;
-    height: 18px;
-    stroke: white;
+    width: 20px;
+    height: 20px;
+    stroke: #999;
     fill: none;
+    transition: all 0.2s ease;
+}
+.star-btn:hover {
+    transform: scale(1.1);
+}
+.star-btn.featured {
+    background: #ffc107;
+    border-color: #e6a700;
 }
 .star-btn.featured svg {
-    fill: #ffc107;
-    stroke: #ffc107;
+    stroke: white;
+    fill: white;
 }
 
 .photo-card-actions {
@@ -604,6 +617,7 @@ hr {
     padding: 8px;
     background: #f9f9f9;
     border-top: 1px solid #eee;
+    border-radius: 0 0 12px 12px;
 }
 .photo-card-actions .btn-icon {
     color: #666;
@@ -612,7 +626,7 @@ hr {
 .photo-card-actions .btn-icon:hover {
     color: var(--brand);
 }
-.photo-card-actions .btn-icon[type="submit"]:hover {
+.photo-card-actions form .btn-icon:hover {
     color: var(--danger);
 }
 .photo-card-actions .btn-icon svg {
