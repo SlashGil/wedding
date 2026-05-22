@@ -60,12 +60,6 @@ def index():
             set_setting('pinterest_men', request.form.get('pinterest_men', '').strip())
             flash('Pinterest links updated successfully.', 'success')
             return redirect(url_for('admin.index'))
-        
-        if 'update_gallery_settings' in request.form:
-            initial_photos = request.form.get('gallery_initial_photos', '6')
-            set_setting('gallery_initial_photos', initial_photos)
-            flash('Gallery display settings updated.', 'success')
-            return redirect(url_for('admin.index'))
 
     rsvp_answers, uploaded_photos = [], []
     try:
@@ -74,7 +68,7 @@ def index():
             invited_guest = rsvp.get('invited_guest') if isinstance(rsvp.get('invited_guest'), dict) else {}
             rsvp_answers.append({**rsvp, 'invite_name': invited_guest.get('guest_name') or 'N/A'})
 
-        photo_response = supabase.from_('photos').select('id, filename, is_visible, is_featured').order('id', desc=True).execute()
+        photo_response = supabase.from_('photos').select('id, filename, is_visible, is_featured').order('position').order('id', desc=True).execute()
         if photo_response.data:
             photo_paths = [f"photos/{p['filename']}" for p in photo_response.data]
             transform_options = {'width': 200, 'height': 200, 'resize': 'cover', 'quality': 60}
@@ -105,6 +99,23 @@ def index():
                            dress_code_en=get_setting('dress_code_en', 'Formal / Black-Tie Optional'), 
                            pinterest_links={'women': get_setting('pinterest_women', ''), 'men': get_setting('pinterest_men', '')}, 
                            whatsapp_message=get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}'))
+
+@bp.route('/photos/reorder', methods=['POST'])
+@login_required
+def reorder_photos():
+    supabase = get_supabase_client()
+    ordered_ids = request.json.get('order', [])
+    
+    if not ordered_ids:
+        return jsonify({'status': 'error', 'message': 'No order provided.'}), 400
+
+    try:
+        updates = [{'id': photo_id, 'position': index} for index, photo_id in enumerate(ordered_ids)]
+        supabase.from_('photos').upsert(updates).execute()
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        current_app.logger.error(f"Error reordering photos: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @bp.route('/rsvps/export')
 @login_required

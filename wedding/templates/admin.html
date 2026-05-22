@@ -7,6 +7,7 @@
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 </head>
 <body>
 <div class="container">
@@ -76,7 +77,7 @@
         <hr>
 
         <h2>Manage Photos</h2>
-        <p>Use the star (⭐) to feature photos in the initial gallery view on the main page.</p>
+        <p>Use the star (⭐) to feature photos in the initial gallery view on the main page. Drag and drop to reorder.</p>
         <div class="upload-zone-wrapper">
             <label for="file-input">Upload Photos or ZIP</label>
             <div id="upload-zone" class="upload-zone">
@@ -94,9 +95,9 @@
             </div>
             <div id="photo-gallery" class="photo-grid-container hidden">
                 {% if uploaded_photos %}
-                <div class="photo-grid">
+                <div class="photo-grid" id="sortable-photo-grid">
                     {% for photo in uploaded_photos %}
-                    <div class="photo-card {% if not photo.is_visible %}hidden-photo{% endif %}" id="photo-card-{{ photo.id }}">
+                    <div class="photo-card {% if not photo.is_visible %}hidden-photo{% endif %}" id="photo-card-{{ photo.id }}" data-id="{{ photo.id }}">
                         <div class="photo-card-img">
                             <img src="{{ photo.url }}" alt="{{ photo.filename }}">
                             <button class="btn-icon star-btn {% if photo.is_featured %}featured{% endif %}" type="button" onclick="toggleFeatured({{ photo.id }}, this)">
@@ -144,9 +145,28 @@
 </div>
 
 <script>
-    // Photo Gallery Toggle
-    document.getElementById('toggle-photos-btn').addEventListener('click', function() {
-        document.getElementById('photo-gallery').classList.toggle('hidden');
+    document.addEventListener('DOMContentLoaded', function() {
+        // Photo Gallery Toggle
+        document.getElementById('toggle-photos-btn').addEventListener('click', function() {
+            document.getElementById('photo-gallery').classList.toggle('hidden');
+        });
+
+        // Sortable Photo Grid
+        const grid = document.getElementById('sortable-photo-grid');
+        if (grid) {
+            new Sortable(grid, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function (evt) {
+                    const order = Array.from(grid.children).map(item => item.dataset.id);
+                    fetch("{{ url_for('admin.reorder_photos') }}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ order: order })
+                    }).catch(err => console.error('Failed to save order:', err));
+                }
+            });
+        }
     });
 
     // AJAX Photo Visibility & Featured Toggle

@@ -634,6 +634,11 @@ hr {
     height: 20px;
 }
 
+.sortable-ghost {
+  opacity: 0.4;
+  background: #c8ebfb;
+}
+
 .stats-bar {
     background-color: #f0f0f0;
     border-radius: 8px;

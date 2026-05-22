@@ -87,11 +87,11 @@ def create_app(test_config=None):
         
         photos = []
         try:
-            response = supabase.from_('photos').select('filename, is_featured').eq('is_visible', True).order('created_at', desc=True).execute()
+            response = supabase.from_('photos').select('filename, is_featured').eq('is_visible', True).order('position').order('created_at', desc=True).execute()
             
             if response.data:
-                # Sort photos to show featured ones first
-                sorted_photos_data = sorted(response.data, key=lambda p: p.get('is_featured', False), reverse=True)
+                # Sort photos to show featured ones first, then by the new position
+                sorted_photos_data = sorted(response.data, key=lambda p: (not p.get('is_featured', False), p.get('position', 0)))
                 
                 photo_files = [{'filename': p['filename'], 'is_featured': p.get('is_featured', False)} for p in sorted_photos_data if p.get('filename')]
                 
