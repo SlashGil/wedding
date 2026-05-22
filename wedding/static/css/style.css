@@ -259,6 +259,27 @@ body {
     display: block;
 }
 
+.gallery-item.hidden-initially {
+    display: none;
+}
+
+.btn-load-more {
+    margin-top: 30px;
+    padding: 12px 30px;
+    background-color: var(--brand);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.btn-load-more:hover {
+    background-color: #006a6b;
+}
+
 .gift-table a {
     display: inline-block;
     margin: 10px;

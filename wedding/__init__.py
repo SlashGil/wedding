@@ -53,10 +53,8 @@ def create_app(test_config=None):
     def format_datetime(value, format='%Y-%m-%d %H:%M'):
         if value is None:
             return ""
-        # Supabase returns ISO 8601 format with TZ info
         if isinstance(value, str):
             try:
-                # Handle the +00:00 timezone format
                 if '+' in value:
                     value = value.split('+')[0]
                 dt = datetime.fromisoformat(value)
@@ -74,7 +72,6 @@ def create_app(test_config=None):
         hero_image_url = 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1920&q=80'
         if hero_filename:
             try:
-                # Use signed URL with transformation for public hero image
                 transform_options = {'width': 1920, 'height': 1080, 'quality': 80, 'resize': 'cover'}
                 signed_url_response = supabase.storage.from_(bucket_name).create_signed_url(f"uploads/{hero_filename}", 3600, options={'transform': transform_options})
                 hero_image_url = signed_url_response['signedURL']
@@ -96,9 +93,9 @@ def create_app(test_config=None):
                 photo_files = [p['filename'] for p in response.data if p.get('filename')]
                 
                 if photo_files:
-                    # Generate Thumbnail URLs
+                    # Generate Thumbnail URLs (smaller for faster initial load)
                     thumb_paths = [f"photos/{name}" for name in photo_files]
-                    thumb_transform = {'width': 400, 'height': 400, 'resize': 'cover', 'quality': 75}
+                    thumb_transform = {'width': 250, 'height': 250, 'resize': 'cover', 'quality': 70}
                     thumb_urls_res = supabase.storage.from_(bucket_name).create_signed_urls(thumb_paths, 3600, options={'transform': thumb_transform})
                     thumb_map = {os.path.basename(item['path']): item['signedURL'] for item in thumb_urls_res if not item.get('error')}
 

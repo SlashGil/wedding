@@ -131,11 +131,14 @@
     <h2 data-i18n="photos">Our Photos</h2>
     <div id="photo-gallery" class="photo-grid">
         {% for photo in photos %}
-            <a href="{{ photo.full }}" class="gallery-item" data-sub-html="<h4>{{ photo.filename }}</h4>">
+            <a href="{{ photo.full }}" class="gallery-item {% if loop.index > 9 %}hidden-initially{% endif %}" data-sub-html="<h4>{{ photo.filename }}</h4>">
                 <img src="{{ photo.thumbnail }}" alt="{{ photo.filename }}">
             </a>
         {% endfor %}
     </div>
+    {% if photos|length > 9 %}
+        <button id="load-more-photos" class="btn-load-more">View More</button>
+    {% endif %}
 </div>
 
 <div class="section section-dark">
@@ -206,6 +209,16 @@
             download: false,
             getCaptionFromTitleOrAlt: false
         });
+
+        const loadMoreBtn = document.getElementById('load-more-photos');
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', function() {
+                document.querySelectorAll('.gallery-item.hidden-initially').forEach(item => {
+                    item.classList.remove('hidden-initially');
+                });
+                this.style.display = 'none';
+            });
+        }
     });
 
     // --- Internationalization (i18n) ---
