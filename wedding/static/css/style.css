@@ -103,7 +103,7 @@ body {
 
 .section h2 {
     font-size: 2.5rem;
-    font-weight: 300;
+    font-weight: 700;
     letter-spacing: 2px;
     margin-bottom: 1em;
     text-transform: uppercase;
@@ -292,6 +292,7 @@ body {
     font-size: 1.1rem;
     letter-spacing: 1px;
     transition: opacity 0.3s;
+    font-weight: 700;
 }
 
 .gift-table a:hover {

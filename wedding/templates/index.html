@@ -89,7 +89,7 @@
 
 <div class="section section-dark">
     <h2 data-i18n="dress_code">Dress Code</h2>
-    <div class="icon-title"><span>🕊️</span><strong data-i18n="formal">Formal / Black-Tie Optional</strong></div>
+    <div class="icon-title"><span>👗👔</span><strong data-i18n="formal">Formal / Black-Tie Optional</strong></div>
     <div class="dress-grid">
         <div class="dress-card">
             <h3 data-i18n="women">👗 Women</h3>
@@ -113,7 +113,7 @@
             {% endif %}
         </div>
         <div class="dress-card">
-            <h3 data-i18n="men">🤵 Men</h3>
+            <h3 data-i18n="men">👔 Men</h3>
             {% if pinterest_links.men %}
                 <a data-pin-do="embedBoard" href="{{ pinterest_links.men }}" data-pin-scale-height="450" data-pin-board-width="320"></a>
             {% else %}
@@ -137,7 +137,7 @@
         {% endfor %}
     </div>
     {% if photos | selectattr('is_featured', 'equalto', false) | list | length > 0 %}
-        <button id="load-more-photos" class="btn-load-more">View More</button>
+        <button id="load-more-photos" class="btn-load-more"><span data-i18n="view_more">View More</span></button>
     {% endif %}
 </div>
 
@@ -213,20 +213,22 @@
 
         const loadMoreBtn = document.getElementById('load-more-photos');
         if (loadMoreBtn) {
+            const buttonText = loadMoreBtn.querySelector('span');
             loadMoreBtn.addEventListener('click', function() {
                 const hiddenItems = document.querySelectorAll('.gallery-item.hidden-initially');
-                if (this.textContent === 'View More') {
+                if (buttonText.getAttribute('data-i18n') === 'view_more') {
                     hiddenItems.forEach(item => {
                         item.style.display = 'block';
                     });
-                    this.textContent = 'View Less';
+                    buttonText.setAttribute('data-i18n', 'view_less');
                 } else {
                     hiddenItems.forEach(item => {
                         item.style.display = 'none';
                     });
-                    this.textContent = 'View More';
+                    buttonText.setAttribute('data-i18n', 'view_more');
                     document.getElementById('photo-gallery').scrollIntoView({ behavior: 'smooth' });
                 }
+                setLang(currentLang);
             });
         }
     });
@@ -250,7 +252,7 @@
             days: "Days", hours: "Hours", minutes: "Minutes", seconds: "Seconds",
             dress_code: "Dress Code",
             formal: "{{ dress_code_en }}",
-            women: "👗 Women", men: "🤵 Men",
+            women: "👗 Women", men: "👔 Men",
             w_rule1: "Long evening gowns, elegant midi dresses, or elevated cocktail dresses.",
             w_rule2: "Recommended palette: champagne, dusty rose, muted gold, and soft green.",
             w_rule3: "Please avoid white or ivory tones reserved for the bride.",
@@ -285,7 +287,9 @@
             m_rule2: "Recommended colors: black, navy, charcoal, and deep green.",
             m_rule3: "Polished dress shoes are preferred for the ceremony and reception.",
             music_play: "Play Music",
-            music_pause: "Pause Music"
+            music_pause: "Pause Music",
+            view_more: "View More",
+            view_less: "View Less"
         },
         es: {
             subtitle: "¡Nos casamos!",
@@ -304,7 +308,7 @@
             days: "Días", hours: "Horas", minutes: "Minutos", seconds: "Segundos",
             dress_code: "Código de Vestimenta",
             formal: "{{ dress_code_es }}",
-            women: "👗 Mujeres", men: "🤵 Hombres",
+            women: "👗 Mujeres", men: "👔 Hombres",
             w_rule1: "Vestidos largos de noche, vestidos midi elegantes o de cóctel de gala.",
             w_rule2: "Colores recomendados: champagne, rosa viejo, dorado opaco y verde suave.",
             w_rule3: "Por favor evitar colores blancos o marfil reservados para la novia.",
@@ -339,7 +343,9 @@
             form_diet: "Restricciones Alimenticias",
             form_submit: "Enviar RSVP",
             music_play: "Reproducir Música",
-            music_pause: "Pausar Música"
+            music_pause: "Pausar Música",
+            view_more: "Ver Más",
+            view_less: "Ver Menos"
         }
     };
 
@@ -347,8 +353,10 @@
 
     function setLang(lang, buttonElement) {
         currentLang = lang;
-        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-        buttonElement.classList.add('active');
+        if (buttonElement) {
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            buttonElement.classList.add('active');
+        }
 
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
