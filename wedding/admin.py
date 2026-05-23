@@ -199,8 +199,59 @@ def mark_sent(guest_id):
 @bp.route('/guests/new', methods=('GET', 'POST'))
 @login_required
 def new_guest():
-    # ... (code remains the same)
-    pass
+    supabase = get_supabase_client()
+    new_invite_info = None
+    
+    if request.method == 'POST':
+        guest_name = request.form.get('guest_name', '').strip()
+        phone_number = request.form.get('phone_number', '').strip()
+        max_guests = request.form.get('max_guests', 1, type=int)
+        max_kids = request.form.get('max_kids', 0, type=int)
+        kids_allowed = 'kids_allowed' in request.form
+        
+        if not guest_name:
+            flash('Guest name is required.', 'danger')
+            return render_template('new_guest.html', new_invite_info=None)
+        
+        try:
+            # Sanitize phone number
+            normalized_phone = sanitize_and_normalize_phone(phone_number) if phone_number else None
+            
+            # Generate unique token
+            token = secrets.token_urlsafe(32)
+            
+            # Create guest record
+            guest_data = {
+                'guest_name': guest_name,
+                'token': token,
+                'max_guests': max_guests,
+                'kids_allowed': kids_allowed,
+                'max_kids': max_kids if kids_allowed else 0,
+                'phone_number': normalized_phone,
+                'sent_by_admin_id': session.get('user_id')
+            }
+            
+            response = supabase.from_('guests').insert(guest_data).execute()
+            
+            if response.data:
+                # Generate invite link
+                invite_link = f"{request.url_root}rsvp/{token}"
+                
+                new_invite_info = {
+                    'guest_name': guest_name,
+                    'invite_link': invite_link,
+                    'phone_number': normalized_phone
+                }
+                
+                flash(f'Invitation created successfully for {guest_name}!', 'success')
+            else:
+                flash('Error creating invitation.', 'danger')
+                
+        except Exception as e:
+            current_app.logger.error(f"Error creating guest invitation: {e}")
+            flash(f'Error creating invitation: {str(e)}', 'danger')
+    
+    return render_template('new_guest.html', new_invite_info=new_invite_info)
 
 @bp.route('/upload_excel', methods=['POST'])
 @login_required
