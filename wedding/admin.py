@@ -2,7 +2,7 @@ import os
 import secrets
 import pandas as pd
 from io import BytesIO
-from urllib.parse import quote_plus
+from urllib.parse import quote
 from datetime import datetime, timezone
 import zipfile
 from flask import (
@@ -38,9 +38,10 @@ def format_phone_for_display(phone_digits_str):
 
 def generate_whatsapp_link(message, guest_name, invite_link, phone_number=None):
     final_message = message.replace('{guest_name}', guest_name).replace('{invite_link}', invite_link)
+    encoded_message = quote(final_message, encoding='utf-8')
     if phone_number:
-        return f"https://wa.me/{phone_number}?text={quote_plus(final_message)}"
-    return f"https://wa.me/?text={quote_plus(final_message)}"
+        return f"https://wa.me/{phone_number}?text={encoded_message}"
+    return f"https://wa.me/?text={encoded_message}"
 
 
 @bp.route('/', methods=('GET', 'POST'))
