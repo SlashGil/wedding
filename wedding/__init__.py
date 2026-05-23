@@ -93,26 +93,18 @@ def create_app(test_config=None):
                 photo_files = [{'filename': p['filename'], 'is_featured': p.get('is_featured', False)} for p in response.data if p.get('filename')]
                 
                 if photo_files:
-                    filenames = [p['filename'] for p in photo_files]
-                    thumb_paths = [f"photos/{name}" for name in filenames]
-                    thumb_transform = {'width': 250, 'height': 250, 'resize': 'cover', 'quality': 80}
-                    thumb_urls_res = supabase.storage.from_(bucket_name).create_signed_urls(thumb_paths, 3600, options={'transform': thumb_transform})
-                    thumb_map = {os.path.basename(item['path']): item['signedURL'] for item in thumb_urls_res if not item.get('error')}
-
-                    full_paths = [f"photos/{name}" for name in filenames]
-                    full_transform = {'width': 1280, 'height': 720, 'quality': 90, 'resize': 'contain'}
-                    full_urls_res = supabase.storage.from_(bucket_name).create_signed_urls(full_paths, 3600, options={'transform': full_transform})
-                    full_map = {os.path.basename(item['path']): item['signedURL'] for item in full_urls_res if not item.get('error')}
-
                     for photo_info in photo_files:
                         filename = photo_info['filename']
-                        if filename in thumb_map and filename in full_map:
-                            photos.append({
-                                'thumbnail': thumb_map[filename],
-                                'full': full_map[filename],
-                                'filename': filename,
-                                'is_featured': photo_info['is_featured']
-                            })
+                        
+                        thumb_transform = {'width': 250, 'height': 250, 'resize': 'cover', 'quality': 80}
+                        full_transform = {'width': 1280, 'height': 720, 'quality': 90, 'resize': 'contain'}
+                        
+                        photos.append({
+                            'thumbnail': supabase.storage.from_(bucket_name).get_public_url(f"photos/{filename}", options={'transform': thumb_transform}),
+                            'full': supabase.storage.from_(bucket_name).get_public_url(f"photos/{filename}", options={'transform': full_transform}),
+                            'filename': filename,
+                            'is_featured': photo_info['is_featured']
+                        })
 
         except Exception as e:
             app.logger.error(f"Error fetching photos: {e}")

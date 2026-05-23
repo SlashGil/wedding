@@ -195,8 +195,18 @@ def update_whatsapp_templates():
 @bp.route('/guest/<int:guest_id>/mark_sent', methods=['POST'])
 @login_required
 def mark_sent(guest_id):
-    # ... (code remains the same)
-    pass
+    supabase = get_supabase_client()
+    admin_id = session.get('user_id')
+    
+    try:
+        supabase.from_('guests').update({
+            'sent_at': datetime.now(timezone.utc).isoformat(),
+            'sent_by_admin_id': admin_id
+        }).eq('id', guest_id).execute()
+        return jsonify({'status': 'success', 'message': 'Marked as sent.'})
+    except Exception as e:
+        current_app.logger.error(f"Error marking guest as sent: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @bp.route('/guests/new', methods=('GET', 'POST'))
 @login_required
