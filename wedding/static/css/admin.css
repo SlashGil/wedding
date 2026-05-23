@@ -795,6 +795,34 @@ progress::-webkit-progress-value {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230c5460'%3E%3Cpath d='M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z'/%3E%3C/svg%3E");
 }
 
+.whatsapp-template-editor {
+    margin-bottom: 2rem;
+}
+.tab-container {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+}
+.tab-btn {
+    padding: 10px 20px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+}
+.tab-btn.active {
+    border-bottom-color: var(--brand);
+    font-weight: 600;
+}
+.tab-content {
+    display: none;
+}
+.tab-content.active {
+    display: block;
+}
+
 
 /* Responsive Adjustments */
 @media (max-width: 900px) {

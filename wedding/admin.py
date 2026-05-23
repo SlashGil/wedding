@@ -149,7 +149,12 @@ def manage_guests():
     total_invitations = 0
     total_guests = 0
     total_kids = 0
-    whatsapp_message = get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}')
+    
+    default_es = 'Hola {guest_name}, te invitamos a nuestra boda! Confirma tu asistencia aquí: {invite_link}'
+    default_en = 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}'
+    
+    whatsapp_message_es = get_setting('whatsapp_message_es', default_es)
+    whatsapp_message_en = get_setting('whatsapp_message_en', default_en)
     
     try:
         guest_response = supabase.from_('guests').select('*, sent_by_admin:admins(username)').order('id', desc=True).execute()
@@ -170,10 +175,21 @@ def manage_guests():
         
     return render_template('guests.html', 
                            guest_links=guest_links, 
-                           whatsapp_message=whatsapp_message,
+                           whatsapp_message_es=whatsapp_message_es,
+                           whatsapp_message_en=whatsapp_message_en,
                            total_invitations=total_invitations,
                            total_guests=total_guests,
                            total_kids=total_kids)
+
+@bp.route('/guests/update_whatsapp', methods=['POST'])
+@login_required
+def update_whatsapp_templates():
+    message_es = request.form.get('whatsapp_message_es', '')
+    message_en = request.form.get('whatsapp_message_en', '')
+    set_setting('whatsapp_message_es', message_es)
+    set_setting('whatsapp_message_en', message_en)
+    flash('WhatsApp message templates have been updated.', 'success')
+    return redirect(url_for('admin.manage_guests'))
 
 @bp.route('/guest/<int:guest_id>/mark_sent', methods=['POST'])
 @login_required
