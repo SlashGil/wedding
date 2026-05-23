@@ -53,7 +53,7 @@ body {
 .hero h1 {
     font-size: 4rem;
     margin: 0;
-    font-weight: 300;
+    font-weight: 500;
     letter-spacing: 5px;
 }
 
@@ -247,6 +247,8 @@ body {
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     break-inside: avoid;
+    background-size: cover;
+    background-position: center;
 }
 
 .gallery-item:hover {
@@ -258,6 +260,12 @@ body {
     width: 100%;
     height: auto;
     display: block;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.gallery-item img.lazyloaded {
+    opacity: 1;
 }
 
 .gallery-item.hidden-initially {
@@ -284,19 +292,20 @@ body {
 .gift-table a {
     display: inline-block;
     margin: 10px;
-    padding: 14px 24px;
+    padding: 14px 28px;
     background-color: var(--brand);
     color: white;
     text-decoration: none;
-    border-radius: 6px;
-    font-size: 1.1rem;
+    border-radius: 8px;
+    font-size: 1.4rem;
     letter-spacing: 1px;
-    transition: opacity 0.3s;
     font-weight: 700;
+    transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .gift-table a:hover {
-    opacity: 0.9;
+    transform: translateY(-3px);
+    background-color: #007a7b;
 }
 
 .rsvp-form {
@@ -469,7 +478,7 @@ audio {
     }
 
     .gift-table a {
-        font-size: 1.1em;
+        font-size: 1.2em;
     }
 
     .rsvp-form label {
@@ -546,7 +555,7 @@ audio {
     }
 
     .gift-table a {
-        font-size: 1em;
+        font-size: 1.1em;
     }
 
     .rsvp-form label {
