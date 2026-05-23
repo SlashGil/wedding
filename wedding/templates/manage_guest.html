@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Your Invitation</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+<div class="container">
+    <div class="card card-dark">
+        <h1 class="elegant-header">Manage Your Invitation</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('main.manage_guest', token=guest.token) }}" method="post">
+            <div class="field">
+                <label for="guest_name">Your Name</label>
+                <input type="text" name="guest_name" id="guest_name" value="{{ guest.guest_name }}" required>
+            </div>
+            <div class="field">
+                <label for="max_guests">Number of Guests</label>
+                <input type="number" name="max_guests" id="max_guests" value="{{ guest.max_guests }}" min="1" max="{{ guest.max_guests }}">
+            </div>
+            {% if guest.kids_allowed %}
+            <div class="field">
+                <label for="max_kids">Number of Kids</label>
+                <input type="number" name="max_kids" id="max_kids" value="{{ guest.max_kids }}" min="0" max="{{ guest.max_kids }}">
+            </div>
+            {% endif %}
+            <button class="btn" type="submit">Update My Invitation</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

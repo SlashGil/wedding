@@ -62,13 +62,8 @@ def index():
             flash('Pinterest links updated successfully.', 'success')
             return redirect(url_for('admin.index'))
 
-    rsvp_answers, uploaded_photos = [], []
+    uploaded_photos = []
     try:
-        rsvp_response = supabase.from_('rsvps').select('id,name,attending,guests,kids,dietary_restrictions,created_at,invited_guest:guests(guest_name)').order('id', desc=True).execute()
-        for rsvp in rsvp_response.data:
-            invited_guest = rsvp.get('invited_guest') if isinstance(rsvp.get('invited_guest'), dict) else {}
-            rsvp_answers.append({**rsvp, 'invite_name': invited_guest.get('guest_name') or 'N/A'})
-
         photo_response = supabase.from_('photos').select('id, filename, is_visible, is_featured').order('is_featured', desc=True).order('position').execute()
         if photo_response.data:
             photo_paths = [f"photos/{p['filename']}" for p in photo_response.data]
@@ -93,7 +88,6 @@ def index():
             current_app.logger.error(f"Error fetching hero image URL: {e}")
 
     return render_template('admin.html', 
-                           rsvp_answers=rsvp_answers, 
                            uploaded_photos=uploaded_photos, 
                            current_hero_url=current_hero_url, 
                            dress_code_es=get_setting('dress_code_es', 'Formal / Etiqueta Opcional'), 
@@ -117,12 +111,6 @@ def reorder_photos():
     except Exception as e:
         current_app.logger.error(f"Error reordering photos: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
-
-@bp.route('/rsvps/export')
-@login_required
-def export_rsvps():
-    # ... (code remains the same)
-    pass
 
 @bp.route('/users')
 @login_required

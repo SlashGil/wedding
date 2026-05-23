@@ -107,7 +107,7 @@ def rsvp():
     dietary = request.form.get('dietary_restrictions', '').strip()
 
     try:
-        supabase.from_('rsvps').insert({
+        supabase.from_('rsvps').upsert({
             'name': name,
             'attending': attending,
             'guests': guests,
@@ -119,6 +119,14 @@ def rsvp():
         current_app.logger.error(f"Error inserting RSVP into Supabase: {e}")
         flash('There was an error submitting your RSVP. Please try again.')
         return redirect(request.referrer or url_for('main.index'))
+
+    if token:
+        try:
+            supabase.from_('guests').update({'is_attending': attending}).eq('token', token).execute()
+            if guest_data:
+                guest_data['is_attending'] = attending
+        except Exception as e:
+            current_app.logger.error(f"Error updating guest is_attending status: {e}")
 
     if guest_data:
         submitted_data = {
@@ -141,3 +149,58 @@ def rsvp():
 
     flash('Thank you for your RSVP!')
     return redirect(url_for('main.index', name=name, guests=guests))
+
+@bp.route('/guest/manage', methods=('GET', 'POST'))
+def manage_guest():
+    token = request.args.get('token')
+    if not token:
+        flash('No invitation token provided.')
+        return redirect(url_for('main.index'))
+
+    supabase = get_supabase_client()
+    try:
+        response = supabase.from_('guests').select('*').eq('token', token).execute()
+        guest_data = response.data[0] if response.data else None
+    except Exception as e:
+        current_app.logger.error(f"Error fetching guest from Supabase: {e}")
+        guest_data = None
+
+    if not guest_data:
+        flash('This invite link is invalid. Please contact the couple.')
+        return redirect(url_for('main.index'))
+
+    if request.method == 'POST':
+        guest_name = request.form.get('guest_name', '').strip()
+        max_guests = int(request.form.get('max_guests', 1))
+        max_kids = int(request.form.get('max_kids', 0))
+
+        try:
+            supabase.from_('guests').update({
+                'guest_name': guest_name,
+                'max_guests': max_guests,
+                'max_kids': max_kids
+            }).eq('token', token).execute()
+            flash('Your invitation details have been updated.', 'success')
+        except Exception as e:
+            current_app.logger.error(f"Error updating guest details: {e}")
+            flash('There was an error updating your invitation. Please try again.', 'danger')
+        return redirect(url_for('main.manage_guest', token=token))
+
+    return render_template('manage_guest.html', guest=guest_data)
+
+@bp.route('/guest/responses')
+def guest_responses():
+    token = request.args.get('token')
+    if not token:
+        flash('No invitation token provided.')
+        return redirect(url_for('main.index'))
+
+    supabase = get_supabase_client()
+    try:
+        response = supabase.from_('rsvps').select('*').eq('guest_token', token).execute()
+        rsvp_answers = response.data
+    except Exception as e:
+        current_app.logger.error(f"Error fetching rsvps from Supabase: {e}")
+        rsvp_answers = []
+
+    return render_template('guest_responses.html', rsvp_answers=rsvp_answers)
