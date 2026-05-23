@@ -131,7 +131,10 @@
     <h2 data-i18n="photos">Our Photos</h2>
     <div id="photo-gallery" class="photo-grid">
         {% for photo in photos %}
-            <a href="{{ photo.full }}" class="gallery-item {% if not photo.is_featured %}hidden-initially{% endif %}" data-sub-html="<h4>{{ photo.filename }}</h4>">
+            <a href="{{ photo.full }}"
+               class="gallery-item {% if not photo.is_featured %}hidden-initially{% endif %}"
+               data-sub-html="<h4>{{ photo.filename }}</h4>"
+               style="background-image: url('{{ photo.blur }}');">
                 <img data-src="{{ photo.thumbnail }}" alt="{{ photo.filename }}" class="lazyload">
             </a>
         {% endfor %}
