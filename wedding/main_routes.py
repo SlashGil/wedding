@@ -107,16 +107,31 @@ def rsvp():
     dietary = request.form.get('dietary_restrictions', '').strip()
 
     try:
-        supabase.from_('rsvps').upsert({
+        # Check if an RSVP already exists for this token
+        existing_rsvp = None
+        if token:
+            rsvp_response = supabase.from_('rsvps').select('id').eq('guest_token', token).execute()
+            if rsvp_response.data:
+                existing_rsvp = rsvp_response.data[0]
+
+        rsvp_data = {
             'name': name,
             'attending': attending,
             'guests': guests,
             'kids': kids,
             'dietary_restrictions': dietary,
             'guest_token': token if token else None
-        }).execute()
+        }
+
+        if existing_rsvp:
+            # Update existing RSVP
+            supabase.from_('rsvps').update(rsvp_data).eq('id', existing_rsvp['id']).execute()
+        else:
+            # Insert new RSVP
+            supabase.from_('rsvps').insert(rsvp_data).execute()
+
     except Exception as e:
-        current_app.logger.error(f"Error inserting RSVP into Supabase: {e}")
+        current_app.logger.error(f"Error inserting/updating RSVP into Supabase: {e}")
         flash('There was an error submitting your RSVP. Please try again.')
         return redirect(request.referrer or url_for('main.index'))
 

@@ -12,7 +12,10 @@
     <div class="card card-dark">
         <div class="header-flex">
             <h1 class="elegant-header">RSVP Dashboard</h1>
-            <a href="{{ url_for('admin.export_rsvps') }}" class="btn">Export to Excel</a>
+            <div>
+                <a href="{{ url_for('admin.index') }}" class="btn">Admin Home</a>
+                <a href="{{ url_for('admin.export_rsvps') }}" class="btn">Export to Excel</a>
+            </div>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -36,10 +39,10 @@
                 <h3>Total Adults Attending</h3>
                 <p>{{ total_adults }}</p>
             </div>
-            <div class="stat-card">
+            <_div class="stat-card">
                 <h3>Total Children Attending</h3>
                 <p>{{ total_children }}</p>
-            </div>
+            </_div>
         </div>
 
         <hr>

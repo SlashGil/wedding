@@ -115,20 +115,58 @@ def reorder_photos():
 @bp.route('/users')
 @login_required
 def manage_users():
-    # ... (code remains the same)
-    pass
+    supabase = get_supabase_client()
+    try:
+        users_response = supabase.from_('admins').select('id, username').execute()
+        users = users_response.data
+    except Exception as e:
+        current_app.logger.error(f"Error fetching users: {e}")
+        flash(f"Error loading users: {str(e)}", 'danger')
+        users = []
+    return render_template('users.html', users=users)
 
 @bp.route('/users/new', methods=('GET', 'POST'))
 @login_required
 def new_user():
-    # ... (code remains the same)
-    pass
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        
+        if not username or not password:
+            flash('Username and password are required.', 'danger')
+            return render_template('new_user.html')
+            
+        try:
+            supabase = get_supabase_client()
+            hashed_password = generate_password_hash(password)
+            supabase.from_('admins').insert({
+                'username': username,
+                'password_hash': hashed_password
+            }).execute()
+            flash(f'User "{username}" created successfully.', 'success')
+            return redirect(url_for('admin.manage_users'))
+        except Exception as e:
+            current_app.logger.error(f"Error creating user: {e}")
+            flash(f'Error creating user: {str(e)}', 'danger')
+            
+    return render_template('new_user.html')
 
 @bp.route('/users/<int:user_id>/delete', methods=['POST'])
 @login_required
 def delete_user(user_id):
-    # ... (code remains the same)
-    pass
+    if user_id == session.get('user_id'):
+        flash("You cannot delete your own account.", 'danger')
+        return redirect(url_for('admin.manage_users'))
+        
+    try:
+        supabase = get_supabase_client()
+        supabase.from_('admins').delete().eq('id', user_id).execute()
+        flash('User deleted successfully.', 'success')
+    except Exception as e:
+        current_app.logger.error(f"Error deleting user: {e}")
+        flash(f'Error deleting user: {str(e)}', 'danger')
+        
+    return redirect(url_for('admin.manage_users'))
 
 @bp.route('/guests')
 @login_required
@@ -256,20 +294,112 @@ def new_guest():
 @bp.route('/upload_excel', methods=['POST'])
 @login_required
 def upload_excel():
-    # ... (code remains the same)
-    pass
+    if 'excel_file' not in request.files:
+        flash('No file part', 'danger')
+        return redirect(url_for('admin.manage_guests'))
+    
+    file = request.files['excel_file']
+    if file.filename == '':
+        flash('No selected file', 'danger')
+        return redirect(url_for('admin.manage_guests'))
+        
+    if file and file.filename.endswith('.xlsx'):
+        try:
+            df = pd.read_excel(file)
+            supabase = get_supabase_client()
+            
+            for _, row in df.iterrows():
+                guest_name = row.get('Guest Name')
+                if not guest_name:
+                    continue
+
+                phone_number = row.get('Phone Number')
+                normalized_phone = sanitize_and_normalize_phone(phone_number) if pd.notna(phone_number) else None
+                
+                max_guests = int(row.get('Max Guests', 1))
+                kids_allowed = str(row.get('Kids Allowed', 'no')).lower() in ['true', '1', 'yes', 'si']
+                max_kids = int(row.get('Max Kids', 0)) if kids_allowed else 0
+                
+                guest_data = {
+                    'guest_name': guest_name,
+                    'token': secrets.token_urlsafe(32),
+                    'max_guests': max_guests,
+                    'kids_allowed': kids_allowed,
+                    'max_kids': max_kids,
+                    'phone_number': normalized_phone,
+                    'sent_by_admin_id': session.get('user_id')
+                }
+                supabase.from_('guests').insert(guest_data).execute()
+
+            flash('Guests imported successfully from Excel file.', 'success')
+        except Exception as e:
+            current_app.logger.error(f"Error processing Excel file: {e}")
+            flash(f'Error processing Excel file: {str(e)}', 'danger')
+            
+        return redirect(url_for('admin.manage_guests'))
+    else:
+        flash('Invalid file type. Please upload a .xlsx file.', 'danger')
+        return redirect(url_for('admin.manage_guests'))
 
 @bp.route('/guest/<int:guest_id>/update', methods=['POST'])
 @login_required
 def update_guest(guest_id):
-    # ... (code remains the same)
-    pass
+    supabase = get_supabase_client()
+    
+    # Extract data from form
+    guest_name = request.form.get('guest_name', '').strip()
+    phone_number = request.form.get('phone_number', '').strip()
+    max_guests = request.form.get('max_guests', 1, type=int)
+    max_kids = request.form.get('max_kids', 0, type=int)
+    kids_allowed = 'kids_allowed' in request.form
+    
+    if not guest_name:
+        flash('Guest name cannot be empty.', 'danger')
+        return redirect(url_for('admin.manage_guests'))
+        
+    try:
+        # Sanitize phone number
+        normalized_phone = sanitize_and_normalize_phone(phone_number) if phone_number else None
+        
+        # Prepare data for update
+        update_data = {
+            'guest_name': guest_name,
+            'max_guests': max_guests,
+            'kids_allowed': kids_allowed,
+            'max_kids': max_kids if kids_allowed else 0,
+            'phone_number': normalized_phone
+        }
+        
+        # Execute update
+        supabase.from_('guests').update(update_data).eq('id', guest_id).execute()
+        
+        flash(f'Guest "{guest_name}" has been updated successfully.', 'success')
+        
+    except Exception as e:
+        current_app.logger.error(f"Error updating guest {guest_id}: {e}")
+        flash(f'An error occurred while updating the guest: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin.manage_guests'))
 
 @bp.route('/guest/<int:guest_id>/delete', methods=['POST'])
 @login_required
 def delete_guest(guest_id):
-    # ... (code remains the same)
-    pass
+    supabase = get_supabase_client()
+    try:
+        # Optional: First, find the guest to get their name for the flash message
+        guest_response = supabase.from_('guests').select('guest_name').eq('id', guest_id).execute()
+        guest_name = guest_response.data[0]['guest_name'] if guest_response.data else f"ID {guest_id}"
+
+        # Delete the guest
+        supabase.from_('guests').delete().eq('id', guest_id).execute()
+        
+        flash(f'Guest "{guest_name}" has been deleted successfully.', 'success')
+        
+    except Exception as e:
+        current_app.logger.error(f"Error deleting guest {guest_id}: {e}")
+        flash(f'An error occurred while deleting the guest: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin.manage_guests'))
 
 @bp.route('/upload_single_photo_ajax', methods=['POST'])
 @login_required
