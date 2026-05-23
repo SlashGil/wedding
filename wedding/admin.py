@@ -324,3 +324,99 @@ def toggle_featured(photo_id):
 def upload_hero():
     # ... (code remains the same)
     pass
+
+@bp.route('/rsvp_dashboard')
+@login_required
+def rsvp_dashboard():
+    supabase = get_supabase_client()
+    
+    total_invitations = 0
+    answered_invitations = 0
+    total_adults = 0
+    total_children = 0
+    
+    try:
+        # Get total number of invitations
+        guest_response = supabase.from_('guests').select('id', count='exact').execute()
+        total_invitations = guest_response.count
+        
+        # Get answered invitations
+        rsvp_response = supabase.from_('rsvps').select('attending,guests,kids,guest_token').execute()
+        
+        answered_invitations = len(rsvp_response.data)
+        
+        # Calculate total adults and children from answered RSVPs
+        for rsvp in rsvp_response.data:
+            if rsvp['attending']:
+                total_adults += rsvp['guests']
+                total_children += rsvp['kids']
+                
+    except Exception as e:
+        current_app.logger.error(f"Error fetching RSVP data: {e}")
+        flash(f"Error loading RSVP data: {str(e)}", 'danger')
+
+    # Fetch guest details for answered RSVPs
+    answered_guests = []
+    if rsvp_response and rsvp_response.data:
+        guest_tokens = [rsvp['guest_token'] for rsvp in rsvp_response.data if rsvp['guest_token']]
+        if guest_tokens:
+            try:
+                guest_details_response = supabase.from_('guests').select('*').in_('token', guest_tokens).execute()
+                guest_details_map = {guest['token']: guest for guest in guest_details_response.data}
+                
+                for rsvp in rsvp_response.data:
+                    guest_info = guest_details_map.get(rsvp['guest_token'])
+                    if guest_info:
+                        answered_guests.append({
+                            'guest_name': guest_info['guest_name'],
+                            'attending': rsvp['attending'],
+                            'adults': rsvp['guests'],
+                            'children': rsvp['kids']
+                        })
+            except Exception as e:
+                current_app.logger.error(f"Error fetching guest details for answered RSVPs: {e}")
+
+    return render_template('rsvp_dashboard.html',
+                           total_invitations=total_invitations,
+                           answered_invitations=answered_invitations,
+                           total_adults=total_adults,
+                           total_children=total_children,
+                           answered_guests=answered_guests)
+
+@bp.route('/rsvps/export')
+@login_required
+def export_rsvps():
+    supabase = get_supabase_client()
+    try:
+        rsvp_response = supabase.from_('rsvps').select('*, guest:guests(guest_name)').execute()
+        
+        if not rsvp_response.data:
+            flash('No RSVP data to export.', 'info')
+            return redirect(url_for('admin.rsvp_dashboard'))
+
+        df_data = []
+        for rsvp in rsvp_response.data:
+            guest_name = rsvp.get('guest', {}).get('guest_name', 'N/A') if rsvp.get('guest') else 'N/A'
+            df_data.append({
+                'Guest Name': guest_name,
+                'Attending': 'Yes' if rsvp['attending'] else 'No',
+                'Adults': rsvp['guests'],
+                'Children': rsvp['kids'],
+                'Dietary Restrictions': rsvp['dietary_restrictions'],
+                'Submitted At': rsvp['created_at']
+            })
+        
+        df = pd.DataFrame(df_data)
+        
+        output = BytesIO()
+        writer = pd.ExcelWriter(output, engine='xlsxwriter')
+        df.to_excel(writer, index=False, sheet_name='RSVPs')
+        writer.close()
+        output.seek(0)
+        
+        return send_file(output, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', as_attachment=True, download_name='rsvp_export.xlsx')
+
+    except Exception as e:
+        current_app.logger.error(f"Error exporting RSVPs: {e}")
+        flash(f"Error exporting data: {str(e)}", 'danger')
+        return redirect(url_for('admin.rsvp_dashboard'))

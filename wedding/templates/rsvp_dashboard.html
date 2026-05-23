@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSVP Dashboard</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+<div class="container">
+    <div class="card card-dark">
+        <div class="header-flex">
+            <h1 class="elegant-header">RSVP Dashboard</h1>
+            <a href="{{ url_for('admin.export_rsvps') }}" class="btn">Export to Excel</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Invitations</h3>
+                <p>{{ total_invitations }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Answered Invitations</h3>
+                <p>{{ answered_invitations }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Adults Attending</h3>
+                <p>{{ total_adults }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Total Children Attending</h3>
+                <p>{{ total_children }}</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <h2>Answered Guests</h2>
+        <div class="table-container">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Guest Name</th>
+                        <th>Attending</th>
+                        <th>Adults</th>
+                        <th>Children</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for guest in answered_guests %}
+                    <tr>
+                        <td>{{ guest.guest_name }}</td>
+                        <td>{{ 'Yes' if guest.attending else 'No' }}</td>
+                        <td>{{ guest.adults }}</td>
+                        <td>{{ guest.children }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
