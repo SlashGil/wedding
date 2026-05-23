@@ -144,8 +144,36 @@ def delete_user(user_id):
 @bp.route('/guests')
 @login_required
 def manage_guests():
-    # ... (code remains the same)
-    pass
+    supabase = get_supabase_client()
+    guest_links = []
+    total_invitations = 0
+    total_guests = 0
+    total_kids = 0
+    whatsapp_message = get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}')
+    
+    try:
+        guest_response = supabase.from_('guests').select('*, sent_by_admin:admins(username)').order('id', desc=True).execute()
+        guest_links = guest_response.data
+        
+        total_invitations = len(guest_links)
+        total_guests = sum(g.get('max_guests', 0) for g in guest_links)
+        total_kids = sum(g.get('max_kids', 0) for g in guest_links if g.get('kids_allowed'))
+
+        for guest in guest_links:
+            guest['phone_number_display'] = format_phone_for_display(guest.get('phone_number'))
+            admin = guest.get('sent_by_admin')
+            guest['sent_by_username'] = admin['username'] if isinstance(admin, dict) else None
+
+    except Exception as e:
+        current_app.logger.error(f"Error fetching guests from Supabase: {e}")
+        flash(f"Error loading guests: {str(e)}", 'danger')
+        
+    return render_template('guests.html', 
+                           guest_links=guest_links, 
+                           whatsapp_message=whatsapp_message,
+                           total_invitations=total_invitations,
+                           total_guests=total_guests,
+                           total_kids=total_kids)
 
 @bp.route('/guest/<int:guest_id>/mark_sent', methods=['POST'])
 @login_required
