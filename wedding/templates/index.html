@@ -32,7 +32,9 @@
         <p data-i18n="subtitle">Are getting married!</p>
         {% if guest and guest.guest_name %}
             <h2 style="margin-top: 1em; font-weight: 300;"><span data-i18n="welcome">Welcome</span>, {{ guest.guest_name }}!</h2>
-            <p style="font-size: 1em; margin-top: 0;"><span data-i18n="reserved">We've reserved</span> {{ guest.max_guests }} <span data-i18n="seats">seat(s) in your honor.</span></p>
+            <p style="font-size: 1em; margin-top: 0;">
+                <span data-i18n="reserved">We've reserved</span> {{ guest.max_guests }} <span data-i18n="seats">seat(s) in your honor</span>{% if guest.max_kids > 0 %}, <span data-i18n="and">and</span> {{ guest.max_kids }} <span data-i18n="kids_seats">seat(s) for kids</span>{% endif %}.
+            </p>
         {% endif %}
     </div>
 </header>
@@ -264,7 +266,9 @@
             subtitle: "Are getting married!",
             welcome: "Welcome",
             reserved: "We've reserved",
-            seats: "seat(s) in your honor.",
+            seats: "seat(s) in your honor",
+            and: "and",
+            kids_seats: "seat(s) for kids",
             when_where: "When & Where",
             ceremony: "Church Ceremony",
             ceremony_date: "July 11, 2026 at 1:45 PM",
@@ -320,7 +324,9 @@
             subtitle: "¡Nos casamos!",
             welcome: "¡Bienvenido/a",
             reserved: "Hemos reservado",
-            seats: "lugar(es) en tu honor.",
+            seats: "lugar(es) en tu honor",
+            and: "y",
+            kids_seats: "lugar(es) para niños",
             when_where: "Cuándo y Dónde",
             ceremony: "Ceremonia Religiosa",
             ceremony_date: "11 de Julio de 2026 a las 1:45 PM",
