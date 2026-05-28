@@ -515,6 +515,8 @@ def rsvp_dashboard():
     answered_invitations = 0
     total_adults = 0
     total_children = 0
+    not_attending_adults = 0
+    not_attending_kids = 0
     
     try:
         # Get total number of invitations
@@ -531,6 +533,9 @@ def rsvp_dashboard():
             if rsvp['attending']:
                 total_adults += rsvp['guests']
                 total_children += rsvp['kids']
+            else:
+                not_attending_adults += rsvp['guests']
+                not_attending_kids += rsvp['kids']
                 
     except Exception as e:
         current_app.logger.error(f"Error fetching RSVP data: {e}")
@@ -562,6 +567,8 @@ def rsvp_dashboard():
                            answered_invitations=answered_invitations,
                            total_adults=total_adults,
                            total_children=total_children,
+                           not_attending_adults=not_attending_adults,
+                           not_attending_kids=not_attending_kids,
                            answered_guests=answered_guests)
 
 @bp.route('/rsvps/export')
