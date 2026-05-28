@@ -26,22 +26,34 @@
         {% endif %}
         {% endwith %}
 
-        <div class="stats-grid">
+        <div class="stats-container">
             <div class="stat-card">
-                <h3>Total Invitations</h3>
-                <p>{{ total_invitations }}</p>
+                <div class="stat-icon">💌</div>
+                <div class="stat-info">
+                    <span class="stat-title">Total Invitations</span>
+                    <span class="stat-value">{{ total_invitations }}</span>
+                </div>
             </div>
             <div class="stat-card">
-                <h3>Answered Invitations</h3>
-                <p>{{ answered_invitations }}</p>
+                <div class="stat-icon">📝</div>
+                <div class="stat-info">
+                    <span class="stat-title">Answered</span>
+                    <span class="stat-value">{{ answered_invitations }}</span>
+                </div>
             </div>
             <div class="stat-card">
-                <h3>Total Adults Attending</h3>
-                <p>{{ total_adults }}</p>
+                <div class="stat-icon">👩‍❤️‍👨</div>
+                <div class="stat-info">
+                    <span class="stat-title">Adults Attending</span>
+                    <span class="stat-value">{{ total_adults }}</span>
+                </div>
             </div>
             <div class="stat-card">
-                <h3>Total Children Attending</h3>
-                <p>{{ total_children }}</p>
+                <div class="stat-icon">👶</div>
+                <div class="stat-info">
+                    <span class="stat-title">Kids Attending</span>
+                    <span class="stat-value">{{ total_children }}</span>
+                </div>
             </div>
         </div>
 
