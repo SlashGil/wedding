@@ -116,4 +116,18 @@ def create_app(test_config=None):
 
         return dict(photos=photos)
 
+    @app.context_processor
+    def inject_gift_settings():
+        from .db import get_setting
+        gift_bank_enabled = get_setting('gift_bank_enabled', 'false') == 'true'
+        gift_bank_clabe = get_setting('gift_bank_clabe', '')
+        gift_bank_details_es = get_setting('gift_bank_details_es', '')
+        gift_bank_details_en = get_setting('gift_bank_details_en', '')
+        return dict(
+            gift_bank_enabled=gift_bank_enabled,
+            gift_bank_clabe=gift_bank_clabe,
+            gift_bank_details_es=gift_bank_details_es,
+            gift_bank_details_en=gift_bank_details_en
+        )
+
     return app

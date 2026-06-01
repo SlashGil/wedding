@@ -153,7 +153,39 @@
         </div>
     </div>
 
-    <!-- Other cards remain here -->
+    <div class="card card-dark" style="margin-top: 30px;">
+        <h2>Gift Registry & Bank Transfer Details</h2>
+        <p>Configure the bank transfer/deposit option that will show in the gift registry section on the landing page.</p>
+        <form action="{{ url_for('admin.update_gift_registry') }}" method="post">
+            <div class="field switch-field" style="margin-bottom: 1.5rem; text-align: left;">
+                <label style="font-weight: 500; margin-bottom: 10px; display: block;">Enable Bank Transfer Registry Option</label>
+                <label class="switch">
+                    <input type="checkbox" name="gift_bank_enabled" id="gift_bank_enabled" value="1" {% if gift_bank_enabled %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="field" style="margin-bottom: 1.5rem;">
+                <label for="gift_bank_clabe">Domestic CLABE Number (18 Digits)</label>
+                <p style="margin: -5px 0 8px 0; font-size: 0.85rem; opacity: 0.7;">This is the CLABE number that will be copied to clipboard when domestic guests click "Copiar CLABE".</p>
+                <input type="text" name="gift_bank_clabe" id="gift_bank_clabe" value="{{ gift_bank_clabe or '' }}" maxlength="18" placeholder="e.g. 012345678901234567">
+            </div>
+
+            <div class="field" style="margin-bottom: 1.5rem;">
+                <label for="gift_bank_details_es">Domestic Bank Details (Spanish)</label>
+                <p style="margin: -5px 0 8px 0; font-size: 0.85rem; opacity: 0.7;">This will be displayed in the modal when guests view the invitation in <strong>Spanish (ES)</strong>.</p>
+                <textarea name="gift_bank_details_es" id="gift_bank_details_es" rows="4" placeholder="e.g. Banco: BBVA&#10;Beneficiario: Juan Perez&#10;CLABE: 012345678901234567" required>{{ gift_bank_details_es or '' }}</textarea>
+            </div>
+
+            <div class="field" style="margin-bottom: 1.5rem;">
+                <label for="gift_bank_details_en">International Bank Details (English)</label>
+                <p style="margin: -5px 0 8px 0; font-size: 0.85rem; opacity: 0.7;">This will be displayed in the modal when guests view the invitation in <strong>English (EN)</strong>. Make sure to include SWIFT/BIC, Bank Address, and Country codes.</p>
+                <textarea name="gift_bank_details_en" id="gift_bank_details_en" rows="4" placeholder="e.g. Bank: BBVA Mexico&#10;Beneficiario: Juan Perez&#10;SWIFT/BIC Code: ...&#10;Country: Mexico" required>{{ gift_bank_details_en or '' }}</textarea>
+            </div>
+
+            <button class="btn" type="submit">Save Gift Registry Settings</button>
+        </form>
+    </div>
 </div>
 
 <!-- Upload Progress Modal -->

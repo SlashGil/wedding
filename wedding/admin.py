@@ -95,6 +95,22 @@ def index():
                            pinterest_links={'women': get_setting('pinterest_women', ''), 'men': get_setting('pinterest_men', '')}, 
                            whatsapp_message=get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}'))
 
+@bp.route('/gift_registry/update', methods=['POST'])
+@login_required
+def update_gift_registry():
+    enabled = 'gift_bank_enabled' in request.form
+    clabe = request.form.get('gift_bank_clabe', '').strip()
+    details_es = request.form.get('gift_bank_details_es', '').strip()
+    details_en = request.form.get('gift_bank_details_en', '').strip()
+    
+    set_setting('gift_bank_enabled', 'true' if enabled else 'false')
+    set_setting('gift_bank_clabe', clabe)
+    set_setting('gift_bank_details_es', details_es)
+    set_setting('gift_bank_details_en', details_en)
+    
+    flash('Gift registry bank settings updated successfully.', 'success')
+    return redirect(url_for('admin.index'))
+
 @bp.route('/photos/reorder', methods=['POST'])
 @login_required
 def reorder_photos():
