@@ -156,14 +156,18 @@
     <div class="card card-dark" style="margin-top: 30px;">
         <h2>Gift Registry & Bank Transfer Details</h2>
         <p>Configure the bank transfer/deposit option that will show in the gift registry section on the landing page.</p>
+        
+        <!-- Sliding toggle switch (independent of the manual text fields form) -->
+        <div class="field switch-field" style="margin-bottom: 2rem; display: flex; align-items: center; gap: 15px; justify-content: flex-start; text-align: left;">
+            <label style="font-weight: 500; margin: 0; cursor: pointer;" for="gift_bank_enabled_toggle">Enable Bank Transfer Registry Option</label>
+            <label class="switch">
+                <input type="checkbox" id="gift_bank_enabled_toggle" {% if gift_bank_enabled %}checked{% endif %} onchange="toggleRegistryState(this)">
+                <span class="slider"></span>
+            </label>
+            <span id="toggle-status-indicator" style="font-size: 0.85rem; color: #888; transition: opacity 0.3s; opacity: 0;">Saving...</span>
+        </div>
+
         <form action="{{ url_for('admin.update_gift_registry') }}" method="post">
-            <div class="field switch-field" style="margin-bottom: 1.5rem; text-align: left;">
-                <label style="font-weight: 500; margin-bottom: 10px; display: block;">Enable Bank Transfer Registry Option</label>
-                <label class="switch">
-                    <input type="checkbox" name="gift_bank_enabled" id="gift_bank_enabled" value="1" {% if gift_bank_enabled %}checked{% endif %}>
-                    <span class="slider"></span>
-                </label>
-            </div>
             
             <div class="field" style="margin-bottom: 1.5rem;">
                 <label for="gift_bank_clabe">Domestic CLABE Number (18 Digits)</label>
@@ -200,52 +204,12 @@
         </div>
     </div>
 </div>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Photo Gallery Toggle
-        document.getElementById('toggle-photos-btn').addEventListener('click', function() {
-            document.getElementById('photo-gallery').classList.toggle('hidden');
-        });
-
-        // Sortable Photo Grids
-        const featuredGrid = document.getElementById('featured-photos');
-        const otherGrid = document.getElementById('other-photos');
-
-        const saveOrder = () => {
-            const featuredIds = Array.from(featuredGrid.children).map(item => item.dataset.id);
-            const otherIds = Array.from(otherGrid.children).map(item => item.dataset.id);
-            const order = featuredIds.concat(otherIds);
-
-            fetch("{{ url_for('admin.reorder_photos') }}", {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ order: order })
-            }).catch(err => console.error('Failed to save order:', err));
-        };
-
-        if (featuredGrid) new Sortable(featuredGrid, { animation: 150, group: 'shared', ghostClass: 'sortable-ghost', onEnd: saveOrder });
-        if (otherGrid) new Sortable(otherGrid, { animation: 150, group: 'shared', ghostClass: 'sortable-ghost', onEnd: saveOrder });
-    });
-
-    // AJAX Photo Visibility & Featured Toggle
-    async function toggleVisibility(photoId, button) {
-        // ... same as before
-    }
-
-    async function toggleFeatured(photoId, button) {
-        try {
-            const response = await fetch(`/admin/photo/${photoId}/toggle_featured`, { method: 'POST' });
-            const data = await response.json();
-            if (data.status === 'success') {
-                // Instead of just toggling class, we reload to re-render the sections
-                window.location.reload();
-            } else { alert('Error: ' + data.message); }
-        } catch (error) { console.error('Failed to toggle featured state:', error); alert('An unexpected error occurred.'); }
-    }
-
-    // Multi-upload and ZIP handling
-    // ... same as before
+    window.adminConfig = {
+        reorderPhotosUrl: "{{ url_for('admin.reorder_photos') }}",
+        toggleGiftRegistryUrl: "{{ url_for('admin.toggle_gift_registry') }}"
+    };
 </script>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
 </body>
 </html>

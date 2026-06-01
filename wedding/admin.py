@@ -98,18 +98,28 @@ def index():
 @bp.route('/gift_registry/update', methods=['POST'])
 @login_required
 def update_gift_registry():
-    enabled = 'gift_bank_enabled' in request.form
     clabe = request.form.get('gift_bank_clabe', '').strip()
     details_es = request.form.get('gift_bank_details_es', '').strip()
     details_en = request.form.get('gift_bank_details_en', '').strip()
     
-    set_setting('gift_bank_enabled', 'true' if enabled else 'false')
     set_setting('gift_bank_clabe', clabe)
     set_setting('gift_bank_details_es', details_es)
     set_setting('gift_bank_details_en', details_en)
     
     flash('Gift registry bank settings updated successfully.', 'success')
     return redirect(url_for('admin.index'))
+
+@bp.route('/gift_registry/toggle', methods=['POST'])
+@login_required
+def toggle_gift_registry():
+    try:
+        data = request.get_json() or {}
+        enabled = data.get('enabled', False)
+        set_setting('gift_bank_enabled', 'true' if enabled else 'false')
+        return jsonify({'status': 'success', 'enabled': enabled})
+    except Exception as e:
+        current_app.logger.error(f"Error toggling gift registry: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @bp.route('/photos/reorder', methods=['POST'])
 @login_required
