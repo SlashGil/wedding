@@ -70,6 +70,13 @@
         </div>
         <hr>
 
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">All Invites ({{ total_invitations }})</button>
+            <button class="filter-tab" data-filter="attending">Attending ({{ total_attending }})</button>
+            <button class="filter-tab" data-filter="declined">Declined ({{ total_declined }})</button>
+            <button class="filter-tab" data-filter="unanswered">Unanswered ({{ total_unanswered }})</button>
+        </div>
+
         <div class="search-bar-container">
             <input type="text" id="guest-search-input" placeholder="Search by guest name...">
         </div>
@@ -92,12 +99,21 @@
                 </thead>
                 <tbody id="guest-list-body">
                 {% for item in guest_links %}
-                    <tr class="guest-row">
+                    <tr class="guest-row" data-rsvp-status="{{ item.rsvp_status }}">
                         <td>
                             <form action="{{ url_for('admin.update_guest', guest_id=item.id) }}" method="POST">
                                 <div class="inline-fields" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
                                     <div class="field" style="flex: 1.5; min-width: 150px;">
-                                        <label for="guest_name-{{item.id}}">Name</label>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <label for="guest_name-{{item.id}}">Name</label>
+                                            {% if item.rsvp_status == 'attending' %}
+                                                <span class="status-badge badge-attending">Attending</span>
+                                            {% elif item.rsvp_status == 'declined' %}
+                                                <span class="status-badge badge-declined">Declined</span>
+                                            {% else %}
+                                                <span class="status-badge badge-unanswered">Unanswered</span>
+                                            {% endif %}
+                                        </div>
                                         <input type="text" id="guest_name-{{item.id}}" name="guest_name" value="{{ item.guest_name }}" required>
                                     </div>
                                     <div class="field" style="flex: 1; min-width: 180px;">
@@ -187,15 +203,38 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Search Filter
+        // Search & Tab Filter
         const searchInput = document.getElementById('guest-search-input');
+        const filterTabs = document.querySelectorAll('.filter-tab');
         const guestRows = document.querySelectorAll('#guest-list-body .guest-row');
-        searchInput.addEventListener('keyup', function() {
+        let currentFilter = 'all';
+
+        function filterGuests() {
             const searchTerm = searchInput.value.toLowerCase();
             guestRows.forEach(row => {
                 const nameInput = row.querySelector('input[name="guest_name"]');
                 const guestName = nameInput.value.toLowerCase();
-                row.style.display = guestName.includes(searchTerm) ? '' : 'none';
+                const rsvpStatus = row.dataset.rsvpStatus;
+
+                const matchesSearch = guestName.includes(searchTerm);
+                const matchesFilter = (currentFilter === 'all') || (rsvpStatus === currentFilter);
+
+                if (matchesSearch && matchesFilter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        searchInput.addEventListener('keyup', filterGuests);
+
+        filterTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                filterTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.filter;
+                filterGuests();
             });
         });
 

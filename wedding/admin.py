@@ -209,6 +209,10 @@ def manage_guests():
     whatsapp_message_es = get_setting('whatsapp_message_es', default_es)
     whatsapp_message_en = get_setting('whatsapp_message_en', default_en)
     
+    total_attending = 0
+    total_declined = 0
+    total_unanswered = 0
+
     try:
         guest_response = supabase.from_('guests').select('*, sent_by_admin:admins(username)').order('id', desc=True).execute()
         guest_links = guest_response.data
@@ -217,10 +221,35 @@ def manage_guests():
         total_guests = sum(g.get('max_guests', 0) for g in guest_links)
         total_kids = sum(g.get('max_kids', 0) for g in guest_links if g.get('kids_allowed'))
 
+        # Fetch RSVPs to correlate guest status
+        try:
+            rsvps_response = supabase.from_('rsvps').select('guest_token, attending').execute()
+            rsvps_map = {r['guest_token']: r for r in rsvps_response.data if r['guest_token']}
+        except Exception as e:
+            current_app.logger.error(f"Error fetching RSVPs: {e}")
+            rsvps_map = {}
+
         for guest in guest_links:
             guest['phone_number_display'] = format_phone_for_display(guest.get('phone_number'))
             admin = guest.get('sent_by_admin')
             guest['sent_by_username'] = admin['username'] if isinstance(admin, dict) else None
+
+            token = guest.get('token')
+            if token in rsvps_map:
+                is_att = rsvps_map[token]['attending']
+                guest['rsvp_status'] = 'attending' if is_att else 'declined'
+                if is_att:
+                    total_attending += 1
+                else:
+                    total_declined += 1
+            else:
+                # If no RSVP is submitted, but marked as attending by admin
+                if guest.get('is_attending'):
+                    guest['rsvp_status'] = 'attending'
+                    total_attending += 1
+                else:
+                    guest['rsvp_status'] = 'unanswered'
+                    total_unanswered += 1
 
     except Exception as e:
         current_app.logger.error(f"Error fetching guests from Supabase: {e}")
@@ -232,7 +261,10 @@ def manage_guests():
                            whatsapp_message_en=whatsapp_message_en,
                            total_invitations=total_invitations,
                            total_guests=total_guests,
-                           total_kids=total_kids)
+                           total_kids=total_kids,
+                           total_attending=total_attending,
+                           total_declined=total_declined,
+                           total_unanswered=total_unanswered)
 
 @bp.route('/guests/update_whatsapp', methods=['POST'])
 @login_required
@@ -378,6 +410,7 @@ def update_guest(guest_id):
     max_guests = request.form.get('max_guests', 1, type=int)
     max_kids = request.form.get('max_kids', 0, type=int)
     kids_allowed = 'kids_allowed' in request.form
+    is_attending = 'is_attending' in request.form
     
     if not guest_name:
         flash('Guest name cannot be empty.', 'danger')
@@ -393,7 +426,8 @@ def update_guest(guest_id):
             'max_guests': max_guests,
             'kids_allowed': kids_allowed,
             'max_kids': max_kids if kids_allowed else 0,
-            'phone_number': normalized_phone
+            'phone_number': normalized_phone,
+            'is_attending': is_attending
         }
         
         # Execute update
