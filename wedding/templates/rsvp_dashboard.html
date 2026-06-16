@@ -5,7 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RSVP Dashboard</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <style>
+        /* Style for the DataTable sorting icons */
+        table.dataTable thead .sorting,
+        table.dataTable thead .sorting_asc,
+        table.dataTable thead .sorting_desc {
+            background-repeat: no-repeat;
+            background-position: center right;
+        }
+        table.dataTable thead .sorting { background-image: url(https://cdn.datatables.net/1.11.5/images/sort_both.png); }
+        table.dataTable thead .sorting_asc { background-image: url(https://cdn.datatables.net/1.11.5/images/sort_asc.png); }
+        table.dataTable thead .sorting_desc { background-image: url(https://cdn.datatables.net/1.11.5/images/sort_desc.png); }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -75,19 +88,19 @@
 
         <h2>Answered Guests</h2>
         <div class="filter-tabs">
-            <a href="{{ url_for('admin.rsvp_dashboard', attending='all', order_by=order_by, order_dir=order_dir) }}" class="filter-tab {% if attending_filter == 'all' %}active{% endif %}">All</a>
-            <a href="{{ url_for('admin.rsvp_dashboard', attending='yes', order_by=order_by, order_dir=order_dir) }}" class="filter-tab {% if attending_filter == 'yes' %}active{% endif %}">Attending</a>
-            <a href="{{ url_for('admin.rsvp_dashboard', attending='no', order_by=order_by, order_dir=order_dir) }}" class="filter-tab {% if attending_filter == 'no' %}active{% endif %}">Not Attending</a>
+            <a href="{{ url_for('admin.rsvp_dashboard', attending='all') }}" class="filter-tab {% if attending_filter == 'all' %}active{% endif %}">All</a>
+            <a href="{{ url_for('admin.rsvp_dashboard', attending='yes') }}" class="filter-tab {% if attending_filter == 'yes' %}active{% endif %}">Attending</a>
+            <a href="{{ url_for('admin.rsvp_dashboard', attending='no') }}" class="filter-tab {% if attending_filter == 'no' %}active{% endif %}">Not Attending</a>
         </div>
         <div class="table-container">
-            <table class="styled-table">
+            <table id="rsvp-table" class="styled-table">
                 <thead>
                     <tr>
-                        <th><a href="{{ url_for('admin.rsvp_dashboard', order_by='guest_name', order_dir='asc' if order_by != 'guest_name' or order_dir == 'desc' else 'desc', attending=attending_filter) }}">Guest Name {% if order_by == 'guest_name' %}{% if order_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
-                        <th><a href="{{ url_for('admin.rsvp_dashboard', order_by='attending', order_dir='asc' if order_by != 'attending' or order_dir == 'desc' else 'desc', attending=attending_filter) }}">Attending {% if order_by == 'attending' %}{% if order_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
-                        <th><a href="{{ url_for('admin.rsvp_dashboard', order_by='adults', order_dir='asc' if order_by != 'adults' or order_dir == 'desc' else 'desc', attending=attending_filter) }}">Adults {% if order_by == 'adults' %}{% if order_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
-                        <th><a href="{{ url_for('admin.rsvp_dashboard', order_by='children', order_dir='asc' if order_by != 'children' or order_dir == 'desc' else 'desc', attending=attending_filter) }}">Children {% if order_by == 'children' %}{% if order_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
-                        <th><a href="{{ url_for('admin.rsvp_dashboard', order_by='created_at', order_dir='asc' if order_by != 'created_at' or order_dir == 'desc' else 'desc', attending=attending_filter) }}">Submitted At {% if order_by == 'created_at' %}{% if order_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                        <th>Guest Name</th>
+                        <th>Attending</th>
+                        <th>Adults</th>
+                        <th>Children</th>
+                        <th>Submitted At</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -105,5 +118,14 @@
         </div>
     </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#rsvp-table').DataTable({
+            "order": [[ 4, "desc" ]] // Default sort by "Submitted At" descending
+        });
+    });
+</script>
 </body>
 </html>
