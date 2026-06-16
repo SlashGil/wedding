@@ -74,15 +74,20 @@
         <hr>
 
         <h2>Answered Guests</h2>
+        <div class="filter-pills">
+            <a href="{{ url_for('admin.rsvp_dashboard', attending='all', order_by=order_by, order_dir=order_dir) }}" class="pill {% if attending_filter == 'all' %}active{% endif %}">All</a>
+            <a href="{{ url_for('admin.rsvp_dashboard', attending='yes', order_by=order_by, order_dir=order_dir) }}" class="pill {% if attending_filter == 'yes' %}active{% endif %}">Attending</a>
+            <a href="{{ url_for('admin.rsvp_dashboard', attending='no', order_by=order_by, order_dir=order_dir) }}" class="pill {% if attending_filter == 'no' %}active{% endif %}">Not Attending</a>
+        </div>
         <div class="table-container">
             <table class="styled-table">
                 <thead>
                     <tr>
-                        <th><a href="{{ url_for('admin.rsvp_dashboard', order_by='guest_name', order_dir='asc' if order_by != 'guest_name' or order_dir == 'desc' else 'desc') }}">Guest Name</a></th>
-                        <th><a href="{{ url_for('admin.rsvp_dashboard', order_by='attending', order_dir='asc' if order_by != 'attending' or order_dir == 'desc' else 'desc') }}">Attending</a></th>
-                        <th><a href="{{ url_for('admin.rsvp_dashboard', order_by='adults', order_dir='asc' if order_by != 'adults' or order_dir == 'desc' else 'desc') }}">Adults</a></th>
-                        <th><a href="{{ url_for('admin.rsvp_dashboard', order_by='children', order_dir='asc' if order_by != 'children' or order_dir == 'desc' else 'desc') }}">Children</a></th>
-                        <th><a href="{{ url_for('admin.rsvp_dashboard', order_by='created_at', order_dir='asc' if order_by != 'created_at' or order_dir == 'desc' else 'desc') }}">Submitted At</a></th>
+                        <th><a href="{{ url_for('admin.rsvp_dashboard', order_by='guest_name', order_dir='asc' if order_by != 'guest_name' or order_dir == 'desc' else 'desc', attending=attending_filter) }}">Guest Name</a></th>
+                        <th><a href="{{ url_for('admin.rsvp_dashboard', order_by='attending', order_dir='asc' if order_by != 'attending' or order_dir == 'desc' else 'desc', attending=attending_filter) }}">Attending</a></th>
+                        <th><a href="{{ url_for('admin.rsvp_dashboard', order_by='adults', order_dir='asc' if order_by != 'adults' or order_dir == 'desc' else 'desc', attending=attending_filter) }}">Adults</a></th>
+                        <th><a href="{{ url_for('admin.rsvp_dashboard', order_by='children', order_dir='asc' if order_by != 'children' or order_dir == 'desc' else 'desc', attending=attending_filter) }}">Children</a></th>
+                        <th><a href="{{ url_for('admin.rsvp_dashboard', order_by='created_at', order_dir='asc' if order_by != 'created_at' or order_dir == 'desc' else 'desc', attending=attending_filter) }}">Submitted At</a></th>
                     </tr>
                 </thead>
                 <tbody>

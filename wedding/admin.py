@@ -36,6 +36,18 @@ def format_phone_for_display(phone_digits_str):
         return phone_digits_str
     return f"+{phone_digits_str}"
 
+def format_timestamp_es(ts_str):
+    if not ts_str:
+        return ''
+    try:
+        # Parse the timestamp string, assuming it's in ISO 8601 format with timezone
+        dt_obj = datetime.fromisoformat(ts_str.replace('Z', '+00:00'))
+        # Format to "dd/mm/yyyy hh:mm am/pm"
+        return dt_obj.strftime('%d/%m/%Y %I:%M %p')
+    except (ValueError, TypeError):
+        return ts_str # Return original string if parsing fails
+
+
 def generate_whatsapp_link(message, guest_name, invite_link, phone_number=None):
     final_message = message.replace('{guest_name}', guest_name).replace('{invite_link}', invite_link)
     encoded_message = quote(final_message, encoding='utf-8')
@@ -571,10 +583,11 @@ def upload_hero():
 def rsvp_dashboard():
     supabase = get_supabase_client()
     
-    # Sorting parameters
+    # Sorting and filtering parameters
     order_by = request.args.get('order_by', 'created_at')
     order_dir = request.args.get('order_dir', 'asc')
-    
+    attending_filter = request.args.get('attending', 'all')
+
     # Validate order_by to prevent SQL injection
     allowed_sort_columns = ['created_at', 'guest_name', 'attending', 'adults', 'children']
     if order_by not in allowed_sort_columns:
@@ -599,6 +612,12 @@ def rsvp_dashboard():
         # Get answered invitations
         query = supabase.from_('rsvps').select('attending,guests,kids,guest_token,created_at')
         
+        # Apply filtering
+        if attending_filter == 'yes':
+            query = query.eq('attending', True)
+        elif attending_filter == 'no':
+            query = query.eq('attending', False)
+
         # Apply sorting
         if order_by != 'guest_name': # guest_name is not in rsvps table
             query = query.order(order_by, desc=is_desc)
@@ -637,7 +656,7 @@ def rsvp_dashboard():
                             'attending': rsvp['attending'],
                             'adults': rsvp['guests'],
                             'children': rsvp['kids'],
-                            'created_at': rsvp['created_at']
+                            'created_at': format_timestamp_es(rsvp['created_at'])
                         })
 
                 # Sort by guest_name if requested
@@ -656,7 +675,8 @@ def rsvp_dashboard():
                            not_attending_kids=not_attending_kids,
                            answered_guests=answered_guests,
                            order_by=order_by,
-                           order_dir=order_dir)
+                           order_dir=order_dir,
+                           attending_filter=attending_filter)
 
 @bp.route('/rsvps/export')
 @login_required
