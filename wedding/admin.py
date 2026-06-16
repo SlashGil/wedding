@@ -583,8 +583,17 @@ def upload_hero():
 def rsvp_dashboard():
     supabase = get_supabase_client()
     
-    # Filtering parameter
+    # Sorting and filtering parameters
+    order_by = request.args.get('order_by', 'created_at')
+    order_dir = request.args.get('order_dir', 'desc')
     attending_filter = request.args.get('attending', 'all')
+
+    # Validate order_by to prevent potential issues
+    allowed_sort_columns = ['created_at', 'guest_name', 'attending', 'adults', 'children']
+    if order_by not in allowed_sort_columns:
+        order_by = 'created_at'
+        
+    is_desc = order_dir == 'desc'
 
     total_invitations = 0
     answered_invitations = 0
@@ -595,24 +604,24 @@ def rsvp_dashboard():
     rsvp_response = None
     
     try:
-        # Get total number of invitations
         guest_response = supabase.from_('guests').select('id', count='exact').execute()
         total_invitations = guest_response.count
         
-        # Get answered invitations
-        query = supabase.from_('rsvps').select('attending,guests,kids,guest_token,created_at').order('created_at', desc=True)
+        query = supabase.from_('rsvps').select('attending,guests,kids,guest_token,created_at')
         
-        # Apply filtering
         if attending_filter == 'yes':
             query = query.eq('attending', True)
         elif attending_filter == 'no':
             query = query.eq('attending', False)
+
+        # Apply sorting for columns in the 'rsvps' table
+        if order_by != 'guest_name':
+            query = query.order(order_by, desc=is_desc)
             
         rsvp_response = query.execute()
         
         answered_invitations = len(rsvp_response.data)
         
-        # Calculate total adults and children from answered RSVPs
         for rsvp in rsvp_response.data:
             if rsvp['attending']:
                 total_adults += rsvp['guests']
@@ -625,7 +634,6 @@ def rsvp_dashboard():
         current_app.logger.error(f"Error fetching RSVP data: {e}")
         flash(f"Error loading RSVP data: {str(e)}", 'danger')
 
-    # Fetch guest details for answered RSVPs
     answered_guests = []
     if rsvp_response and rsvp_response.data:
         guest_tokens = [rsvp['guest_token'] for rsvp in rsvp_response.data if rsvp['guest_token']]
@@ -645,6 +653,10 @@ def rsvp_dashboard():
                             'created_at': format_timestamp_es(rsvp['created_at'])
                         })
 
+                # Sort by guest_name in Python if requested
+                if order_by == 'guest_name':
+                    answered_guests.sort(key=lambda x: x['guest_name'], reverse=is_desc)
+
             except Exception as e:
                 current_app.logger.error(f"Error fetching guest details for answered RSVPs: {e}")
 
@@ -656,6 +668,8 @@ def rsvp_dashboard():
                            not_attending_adults=not_attending_adults,
                            not_attending_kids=not_attending_kids,
                            answered_guests=answered_guests,
+                           order_by=order_by,
+                           order_dir=order_dir,
                            attending_filter=attending_filter)
 
 @bp.route('/rsvps/export')
