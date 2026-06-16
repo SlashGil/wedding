@@ -571,12 +571,25 @@ def upload_hero():
 def rsvp_dashboard():
     supabase = get_supabase_client()
     
+    # Sorting parameters
+    order_by = request.args.get('order_by', 'created_at')
+    order_dir = request.args.get('order_dir', 'asc')
+    
+    # Validate order_by to prevent SQL injection
+    allowed_sort_columns = ['created_at', 'guest_name', 'attending', 'adults', 'children']
+    if order_by not in allowed_sort_columns:
+        order_by = 'created_at'
+        
+    # Validate order_dir
+    is_desc = order_dir == 'desc'
+
     total_invitations = 0
     answered_invitations = 0
     total_adults = 0
     total_children = 0
     not_attending_adults = 0
     not_attending_kids = 0
+    rsvp_response = None
     
     try:
         # Get total number of invitations
@@ -584,7 +597,13 @@ def rsvp_dashboard():
         total_invitations = guest_response.count
         
         # Get answered invitations
-        rsvp_response = supabase.from_('rsvps').select('attending,guests,kids,guest_token').execute()
+        query = supabase.from_('rsvps').select('attending,guests,kids,guest_token,created_at')
+        
+        # Apply sorting
+        if order_by != 'guest_name': # guest_name is not in rsvps table
+            query = query.order(order_by, desc=is_desc)
+            
+        rsvp_response = query.execute()
         
         answered_invitations = len(rsvp_response.data)
         
@@ -617,8 +636,14 @@ def rsvp_dashboard():
                             'guest_name': guest_info['guest_name'],
                             'attending': rsvp['attending'],
                             'adults': rsvp['guests'],
-                            'children': rsvp['kids']
+                            'children': rsvp['kids'],
+                            'created_at': rsvp['created_at']
                         })
+
+                # Sort by guest_name if requested
+                if order_by == 'guest_name':
+                    answered_guests.sort(key=lambda x: x['guest_name'], reverse=is_desc)
+
             except Exception as e:
                 current_app.logger.error(f"Error fetching guest details for answered RSVPs: {e}")
 
@@ -629,7 +654,9 @@ def rsvp_dashboard():
                            total_children=total_children,
                            not_attending_adults=not_attending_adults,
                            not_attending_kids=not_attending_kids,
-                           answered_guests=answered_guests)
+                           answered_guests=answered_guests,
+                           order_by=order_by,
+                           order_dir=order_dir)
 
 @bp.route('/rsvps/export')
 @login_required
