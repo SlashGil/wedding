@@ -915,36 +915,53 @@ progress::-webkit-progress-value {
     flex-wrap: wrap;
     gap: 12px;
     margin-bottom: 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 16px;
     margin-top: 20px;
 }
+.card-dark .filter-tabs {
+    border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
 .filter-tab {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 8px 18px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #f1f3f5;
+    border: 1px solid #dee2e6;
     border-radius: 20px;
     font-size: 0.9rem;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.8);
+    color: #495057;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     outline: none;
     text-decoration: none;
 }
 .filter-tab:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.3);
+    background: #e9ecef;
+    border-color: #ced4da;
     transform: translateY(-1px);
-    color: var(--white);
-}
-.filter-tab:active {
-    transform: translateY(0);
 }
 .filter-tab.active {
+    background: var(--brand);
+    color: var(--white);
+    border-color: var(--brand);
+    box-shadow: 0 4px 10px rgba(0, 140, 141, 0.25);
+}
+
+.card-dark .filter-tab {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+}
+.card-dark .filter-tab:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--white);
+}
+.card-dark .filter-tab.active {
     background: var(--white);
     color: var(--brand);
     border-color: var(--white);
