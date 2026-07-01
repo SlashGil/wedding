@@ -19,6 +19,7 @@ bp = Blueprint('admin', __name__, url_prefix='/admin')
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
 
+
 def sanitize_and_normalize_phone(phone_number_str):
     if not phone_number_str:
         return ""
@@ -31,10 +32,12 @@ def sanitize_and_normalize_phone(phone_number_str):
         return '52' + digits
     return digits
 
+
 def format_phone_for_display(phone_digits_str):
     if not phone_digits_str or not str(phone_digits_str).isdigit():
         return phone_digits_str
     return f"+{phone_digits_str}"
+
 
 def format_timestamp_es(ts_str):
     if not ts_str:
@@ -45,7 +48,7 @@ def format_timestamp_es(ts_str):
         # Format to "dd/mm/yyyy hh:mm am/pm"
         return dt_obj.strftime('%d/%m/%Y %I:%M %p')
     except (ValueError, TypeError):
-        return ts_str # Return original string if parsing fails
+        return ts_str  # Return original string if parsing fails
 
 
 def generate_whatsapp_link(message, guest_name, invite_link, phone_number=None):
@@ -76,12 +79,18 @@ def index():
 
     uploaded_photos = []
     try:
-        photo_response = supabase.from_('photos').select('id, filename, is_visible, is_featured').order('is_featured', desc=True).order('position').execute()
+        photo_response = supabase.from_('photos').select('id, filename, is_visible, is_featured') \
+            .order('is_featured', desc=True).order('position').execute()
         if photo_response.data:
             photo_paths = [f"photos/{p['filename']}" for p in photo_response.data]
             transform_options = {'width': 200, 'height': 200, 'resize': 'cover', 'quality': 60}
-            signed_urls_response = supabase.storage.from_(bucket_name).create_signed_urls(photo_paths, 3600, options={'transform': transform_options})
-            url_map = {os.path.basename(item['path']): item['signedURL'] for item in signed_urls_response if not item.get('error')}
+            signed_urls_response = supabase.storage.from_(bucket_name).create_signed_urls(
+                photo_paths, 3600, options={'transform': transform_options}
+            )
+            url_map = {
+                os.path.basename(item['path']): item['signedURL']
+                for item in signed_urls_response if not item.get('error')
+            }
             for photo_data in photo_response.data:
                 if photo_data['filename'] in url_map:
                     uploaded_photos.append({**photo_data, 'url': url_map[photo_data['filename']]})
@@ -94,18 +103,27 @@ def index():
     if current_hero_filename:
         try:
             transform_options = {'width': 800, 'resize': 'contain', 'quality': 75}
-            signed_url_response = supabase.storage.from_(bucket_name).create_signed_url(f"uploads/{current_hero_filename}", 3600, options={'transform': transform_options})
+            signed_url_response = supabase.storage.from_(bucket_name).create_signed_url(
+                f"uploads/{current_hero_filename}", 3600, options={'transform': transform_options}
+            )
             current_hero_url = signed_url_response['signedURL']
         except Exception as e:
             current_app.logger.error(f"Error fetching hero image URL: {e}")
 
-    return render_template('admin.html', 
-                           uploaded_photos=uploaded_photos, 
-                           current_hero_url=current_hero_url, 
-                           dress_code_es=get_setting('dress_code_es', 'Formal / Etiqueta Opcional'), 
-                           dress_code_en=get_setting('dress_code_en', 'Formal / Black-Tie Optional'), 
-                           pinterest_links={'women': get_setting('pinterest_women', ''), 'men': get_setting('pinterest_men', '')}, 
-                           whatsapp_message=get_setting('whatsapp_message', 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}'))
+    whatsapp_message = get_setting(
+        'whatsapp_message',
+        'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}'
+    )
+    return render_template(
+        'admin.html',
+        uploaded_photos=uploaded_photos,
+        current_hero_url=current_hero_url,
+        dress_code_es=get_setting('dress_code_es', 'Formal / Etiqueta Opcional'),
+        dress_code_en=get_setting('dress_code_en', 'Formal / Black-Tie Optional'),
+        pinterest_links={'women': get_setting('pinterest_women', ''), 'men': get_setting('pinterest_men', '')},
+        whatsapp_message=whatsapp_message
+    )
+
 
 @bp.route('/gift_registry/update', methods=['POST'])
 @login_required
@@ -121,6 +139,7 @@ def update_gift_registry():
     flash('Gift registry bank settings updated successfully.', 'success')
     return redirect(url_for('admin.index'))
 
+
 @bp.route('/gift_registry/toggle', methods=['POST'])
 @login_required
 def toggle_gift_registry():
@@ -132,6 +151,7 @@ def toggle_gift_registry():
     except Exception as e:
         current_app.logger.error(f"Error toggling gift registry: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 @bp.route('/photos/reorder', methods=['POST'])
 @login_required
@@ -150,6 +170,7 @@ def reorder_photos():
         current_app.logger.error(f"Error reordering photos: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+
 @bp.route('/users')
 @login_required
 def manage_users():
@@ -162,6 +183,7 @@ def manage_users():
         flash(f"Error loading users: {str(e)}", 'danger')
         users = []
     return render_template('users.html', users=users)
+
 
 @bp.route('/users/new', methods=('GET', 'POST'))
 @login_required
@@ -189,6 +211,7 @@ def new_user():
             
     return render_template('new_user.html')
 
+
 @bp.route('/users/<int:user_id>/delete', methods=['POST'])
 @login_required
 def delete_user(user_id):
@@ -206,6 +229,45 @@ def delete_user(user_id):
         
     return redirect(url_for('admin.manage_users'))
 
+
+@bp.route('/users/<int:user_id>/change_password', methods=('GET', 'POST'))
+@login_required
+def change_password(user_id):
+    supabase = get_supabase_client()
+
+    # Fetch user to ensure they exist
+    try:
+        user_response = supabase.from_('admins').select('id, username').eq('id', user_id).single().execute()
+        user = user_response.data
+        if not user:
+            flash('User not found.', 'danger')
+            return redirect(url_for('admin.manage_users'))
+    except Exception as e:
+        current_app.logger.error(f"Error fetching user: {e}")
+        flash(f"Error fetching user: {str(e)}", 'danger')
+        return redirect(url_for('admin.manage_users'))
+
+    if request.method == 'POST':
+        password = request.form.get('password', '').strip()
+
+        if not password:
+            flash('Password is required.', 'danger')
+            return render_template('change_password.html', user=user)
+
+        try:
+            hashed_password = generate_password_hash(password)
+            supabase.from_('admins').update({
+                'password_hash': hashed_password
+            }).eq('id', user_id).execute()
+            flash(f'Password for user "{user["username"]}" updated successfully.', 'success')
+            return redirect(url_for('admin.manage_users'))
+        except Exception as e:
+            current_app.logger.error(f"Error updating password: {e}")
+            flash(f'Error updating password: {str(e)}', 'danger')
+
+    return render_template('change_password.html', user=user)
+
+
 @bp.route('/guests')
 @login_required
 def manage_guests():
@@ -216,7 +278,10 @@ def manage_guests():
     total_kids = 0
     
     default_es = 'Hola {guest_name}, te invitamos a nuestra boda! Confirma tu asistencia aquí: {invite_link}'
-    default_en = 'Hello {guest_name}, you are invited to our wedding! You can confirm your attendance here: {invite_link}'
+    default_en = (
+        'Hello {guest_name}, you are invited to our wedding! '
+        'You can confirm your attendance here: {invite_link}'
+    )
     
     whatsapp_message_es = get_setting('whatsapp_message_es', default_es)
     whatsapp_message_en = get_setting('whatsapp_message_en', default_en)
@@ -226,7 +291,8 @@ def manage_guests():
     total_unanswered = 0
 
     try:
-        guest_response = supabase.from_('guests').select('*, sent_by_admin:admins(username)').order('id', desc=True).execute()
+        guest_response = supabase.from_('guests').select('*, sent_by_admin:admins(username)') \
+            .order('id', desc=True).execute()
         guest_links = guest_response.data
         
         total_invitations = len(guest_links)
@@ -278,6 +344,7 @@ def manage_guests():
                            total_declined=total_declined,
                            total_unanswered=total_unanswered)
 
+
 @bp.route('/guests/update_whatsapp', methods=['POST'])
 @login_required
 def update_whatsapp_templates():
@@ -287,6 +354,7 @@ def update_whatsapp_templates():
     set_setting('whatsapp_message_en', message_en)
     flash('WhatsApp message templates have been updated.', 'success')
     return redirect(url_for('admin.manage_guests'))
+
 
 @bp.route('/guest/<int:guest_id>/mark_sent', methods=['POST'])
 @login_required
@@ -303,6 +371,7 @@ def mark_sent(guest_id):
     except Exception as e:
         current_app.logger.error(f"Error marking guest as sent: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 @bp.route('/guests/new', methods=('GET', 'POST'))
 @login_required
@@ -361,6 +430,7 @@ def new_guest():
     
     return render_template('new_guest.html', new_invite_info=new_invite_info)
 
+
 @bp.route('/upload_excel', methods=['POST'])
 @login_required
 def upload_excel():
@@ -411,6 +481,7 @@ def upload_excel():
         flash('Invalid file type. Please upload a .xlsx file.', 'danger')
         return redirect(url_for('admin.manage_guests'))
 
+
 @bp.route('/guest/<int:guest_id>/update', methods=['POST'])
 @login_required
 def update_guest(guest_id):
@@ -453,6 +524,7 @@ def update_guest(guest_id):
     
     return redirect(url_for('admin.manage_guests'))
 
+
 @bp.route('/guest/<int:guest_id>/delete', methods=['POST'])
 @login_required
 def delete_guest(guest_id):
@@ -472,6 +544,7 @@ def delete_guest(guest_id):
         flash(f'An error occurred while deleting the guest: {str(e)}', 'danger')
     
     return redirect(url_for('admin.manage_guests'))
+
 
 @bp.route('/upload_single_photo_ajax', methods=['POST'])
 @login_required
@@ -500,14 +573,18 @@ def upload_single_photo_ajax():
         try:
             supabase.storage.from_(bucket_name).remove([path_on_storage])
         except Exception as cleanup_e:
-            current_app.logger.error(f"CRITICAL: Failed to clean up orphaned file '{path_on_storage}' after a failed DB insert. Error: {cleanup_e}")
+            current_app.logger.error(
+                f"CRITICAL: Failed to clean up orphaned file '{path_on_storage}' "
+                f"after a failed DB insert. Error: {cleanup_e}"
+            )
         return jsonify({'status': 'error', 'message': str(e), 'filename': filename}), 500
+
 
 @bp.route('/photo/<int:photo_id>/delete', methods=['POST'])
 @login_required
 def delete_photo(photo_id):
     supabase = get_supabase_client()
-    bucket_name = current_app.config['SUPABASE_BUCKET']
+    bucket_.name = current_app.config['SUPABASE_BUCKET']
 
     try:
         photo_response = supabase.from_('photos').select('filename').eq('id', photo_id).execute()
@@ -524,7 +601,10 @@ def delete_photo(photo_id):
                 supabase.storage.from_(bucket_name).remove([path_on_storage])
                 flash(f"Photo '{filename}' deleted successfully.", 'success')
             except Exception as storage_e:
-                current_app.logger.warning(f"Photo '{filename}' deleted from DB, but couldn't be removed from storage. Error: {storage_e}")
+                current_app.logger.warning(
+                    f"Photo '{filename}' deleted from DB, but couldn't be removed from storage. "
+                    f"Error: {storage_e}"
+                )
                 flash(f"Photo '{filename}' deleted from database.", 'info')
 
     except Exception as e:
@@ -532,6 +612,7 @@ def delete_photo(photo_id):
         flash(f"An error occurred while deleting the photo: {str(e)}", 'danger')
         
     return redirect(url_for('admin.index'))
+
 
 @bp.route('/photo/<int:photo_id>/toggle_visibility', methods=['POST'])
 @login_required
@@ -553,6 +634,7 @@ def toggle_photo_visibility(photo_id):
         current_app.logger.error(f"Error toggling photo visibility: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+
 @bp.route('/photo/<int:photo_id>/toggle_featured', methods=['POST'])
 @login_required
 def toggle_featured(photo_id):
@@ -572,11 +654,13 @@ def toggle_featured(photo_id):
         current_app.logger.error(f"Error toggling featured state for photo {photo_id}: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+
 @bp.route('/upload_hero', methods=['POST'])
 @login_required
 def upload_hero():
     # ... (code remains the same)
     pass
+
 
 @bp.route('/rsvp_dashboard')
 @login_required
@@ -672,6 +756,7 @@ def rsvp_dashboard():
                            order_dir=order_dir,
                            attending_filter=attending_filter)
 
+
 @bp.route('/rsvps/export')
 @login_required
 def export_rsvps():
@@ -703,7 +788,12 @@ def export_rsvps():
         writer.close()
         output.seek(0)
         
-        return send_file(output, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', as_attachment=True, download_name='rsvp_export.xlsx')
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name='rsvp_export.xlsx'
+        )
 
     except Exception as e:
         current_app.logger.error(f"Error exporting RSVPs: {e}")
